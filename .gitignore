@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Obsidian local workspace state
+obsidian/.obsidian/workspace.json
+obsidian/.obsidian/workspace-mobile.json
+obsidian/.obsidian/cache/
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# App/build caches
+.cache/
+node_modules/
+dist/
+build/
+
+# Large exported media can be managed separately if needed
+*.mov
+*.mp4
