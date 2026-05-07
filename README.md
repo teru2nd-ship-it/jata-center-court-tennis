@@ -11,6 +11,7 @@
 
 ```text
 handover/                  過去チャットからの引き継ぎデータ
+game-dev-room/             ゲーム開発まわりの共通作業室
 obsidian/                  Obsidian vault
 daily-reports/             日報Markdown
 infographics/              インフォグラフィック関連
@@ -32,11 +33,13 @@ git pull
 
 3. 新しい作業を始める前に `handover/README.md` と該当する引き継ぎデータを確認します。
 
-4. 日報は `daily-reports/YYYY-MM-DD.md` に作成します。
+4. ゲーム開発作業は `game-dev-room/README.md` を入口にします。
 
-5. インフォグラフィック関連ファイルは `infographics/` 配下に保存します。
+5. 日報は `daily-reports/YYYY-MM-DD.md` に作成します。
 
-6. 作業後に変更を共有します。
+6. インフォグラフィック関連ファイルは `infographics/` 配下に保存します。
+
+7. 作業後に変更を共有します。
 
 ```bash
 git status
