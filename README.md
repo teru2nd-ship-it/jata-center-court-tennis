@@ -10,6 +10,7 @@
 ## フォルダ構成
 
 ```text
+handover/                  過去チャットからの引き継ぎデータ
 obsidian/                  Obsidian vault
 daily-reports/             日報Markdown
 infographics/              インフォグラフィック関連
@@ -29,11 +30,13 @@ git pull
 
 2. Obsidianで `obsidian/` フォルダをVaultとして開きます。
 
-3. 日報は `daily-reports/YYYY-MM-DD.md` に作成します。
+3. 新しい作業を始める前に `handover/README.md` と該当する引き継ぎデータを確認します。
 
-4. インフォグラフィック関連ファイルは `infographics/` 配下に保存します。
+4. 日報は `daily-reports/YYYY-MM-DD.md` に作成します。
 
-5. 作業後に変更を共有します。
+5. インフォグラフィック関連ファイルは `infographics/` 配下に保存します。
+
+6. 作業後に変更を共有します。
 
 ```bash
 git status
@@ -47,3 +50,4 @@ git push
 - PCごとの一時ファイル、キャッシュ、Obsidianのローカル状態はGit管理から外します。
 - 大きな画像や動画が増える場合は、Git LFSやクラウドストレージ併用を検討してください。
 - 同じファイルを複数PCで同時編集すると競合が起きることがあります。作業前の `git pull` を習慣にしてください。
+- GitHub push、Issue作成、Vercel本番反映、公開記事の確定、Drive共有設定変更など、外部変更が出る作業は実行前にTERUさんへ確認します。
