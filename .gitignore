@@ -16,6 +16,7 @@ obsidian/.obsidian/cache/
 node_modules/
 dist/
 build/
+deploy-work/
 
 # Large exported media can be managed separately if needed
 *.mov
