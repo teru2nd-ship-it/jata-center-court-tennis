@@ -61,6 +61,34 @@
 - 縦横固定設定
 - シェアボタン
 
+## 音まわり
+
+2026-05-08 iCloud側Viteコピーに追加済み:
+
+```text
+/Users/teru44/Library/Mobile Documents/com~apple~CloudDocs/TERU_WORK/jata/spider-solitaire
+```
+
+- `src/audio.js`
+- BGM ON/OFF
+- SFX ON/OFF
+- `localStorage` 保存
+- ゲーム開始音
+- カード移動音
+- 山札配り音
+- 完成セット音
+- 勝利音
+- メニュー/ゲーム/勝利画面の `BGM` / `SFX` トグル
+
+確認:
+
+- `npm run build` 成功
+
+注意:
+
+- 公開実体候補はMacBook Pro側 `/Users/hayashidaakiraki/Desktop/spider-solitaire`
+- 公開版へ反映する場合は、この変更をMacBook Pro側repoへ移植する
+
 ## 共通UIとの関係
 
 - 設定UIは他ゲームと揃える

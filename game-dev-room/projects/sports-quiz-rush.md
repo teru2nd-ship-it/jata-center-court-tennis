@@ -58,6 +58,26 @@ src/data/teams.js
 - iMac側引き継ぎにある `study.js`, `entertain.js`, `kids.js`, `nba-favorites.js`, `storage.js` は見つからなかった
 - MacBook Pro側の実体は、iMac側引き継ぎより古い/狭い可能性がある
 
+## 音まわり
+
+2026-05-08 iMac側ローカル実体に追加済み:
+
+- `src/audio.js`
+- BGM ON/OFF
+- SFX ON/OFF
+- `localStorage` 保存
+- 正解音
+- 不正解音
+- ラウンド開始音
+- 結果音
+- 画面右上の `BGM` / `SFX` トグル
+
+確認:
+
+- `node --check src/audio.js`
+- `node --check src/main.js`
+- `curl -I http://localhost:4173/`
+
 ## 現在の状態
 
 もともとは `SPORTS QUIZ RUSH` のNBAクイズプロトタイプだったが、現在は4ブランド体制のクイズ基盤に拡張済み。

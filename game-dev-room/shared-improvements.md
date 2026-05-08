@@ -36,6 +36,20 @@
 - 初回操作後に音が出るようにする
 - スマホでも不自然に大きくならない音量にする
 
+## 音まわり実装状況
+
+確認日: 2026-05-08
+
+- JATA DROP: SFX/BGMの独立トグル実装済み
+- SPORTS QUIZ RUSH: iMac側ローカル実体に `src/audio.js`、BGM/SFXトグル、正解/不正解/開始/結果音を追加
+- Spider Solitaire: iCloud側Viteコピーに `src/audio.js`、BGM/SFXトグル、開始/移動/山札/完成/勝利音を追加
+- 国旗神経衰弱: iCloud側 `FlagMemoryGame.jsx` に自己完結型BGM/SFXトグルとカード/マッチ/ミス/勝利音を追加
+
+注意:
+
+- Spider Solitaireと国旗神経衰弱の公開実体はMacBook Pro側repoが本命候補
+- 公開反映する場合は、MacBook Pro側repoへ移植してローカル確認後、TERUさん確認を挟む
+
 ## モバイル対応
 
 - 指で押しやすいボタンサイズ

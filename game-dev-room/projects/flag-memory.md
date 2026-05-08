@@ -41,6 +41,34 @@
 - 縦横固定設定
 - 他ゲームと設定UIを揃える
 
+## 音まわり
+
+2026-05-08 iCloud側単体JSXに追加済み:
+
+```text
+/Users/teru44/Library/Mobile Documents/com~apple~CloudDocs/TERU_WORK/jata/FlagMemoryGame.jsx
+```
+
+- 自己完結型のWeb Audio実装
+- BGM ON/OFF
+- SFX ON/OFF
+- `localStorage` 保存
+- スタート音
+- カードめくり音
+- マッチ音
+- ミス音
+- 勝利音
+- メニュー/ゲーム/勝利画面の `BGM` / `SFX` トグル
+
+確認:
+
+- esbuildでJSXバンドルチェック成功
+
+注意:
+
+- 公開実体候補はMacBook Pro側 `/Users/hayashidaakiraki/Desktop/flag-memory-game`
+- 公開版へ反映する場合は、この変更をMacBook Pro側repoへ移植する
+
 ## 共通UIとの関係
 
 - 設定UIは他ゲームと揃える
