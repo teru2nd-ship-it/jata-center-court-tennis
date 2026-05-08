@@ -28,6 +28,7 @@ TERUさんのゲーム開発まわりの共通作業室です。
 - [公開前チェックリスト](release-checklist.md)
 - [新規ゲーム案](new-game-ideas.md)
 - [JATA DROP](projects/jata-drop.md)
+- [SPORTS QUIZ RUSH / 4ブランドクイズ基盤](projects/sports-quiz-rush.md)
 - [スパイダーソリティア](projects/spider-solitaire.md)
 - [国旗神経衰弱](projects/flag-memory.md)
 
@@ -38,3 +39,8 @@ TERUさんのゲーム開発まわりの共通作業室です。
 3. ゲームをまたぐ改善は `shared-improvements.md` に追記する。
 4. 新規ゲーム案は `new-game-ideas.md` に追記する。
 5. push、Issue作成、本番反映などはTERUさん確認後に実行する。
+
+## 情報整理メモ
+
+別チャットや別PCからの引き継ぎは、最新情報の時系列が前後することがある。
+ローカルで確認した内容は「現在確認済み」、貼り付け引き継ぎだけの内容は「引き継ぎ情報」として分けて扱う。

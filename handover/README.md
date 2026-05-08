@@ -5,6 +5,7 @@
 ## 現在の引き継ぎデータ
 
 - [2026-05-08_project_handover.md](2026-05-08_project_handover.md)
+- [2026-05-08_game-dev-room_startup.md](2026-05-08_game-dev-room_startup.md)
 
 ## 使い方
 

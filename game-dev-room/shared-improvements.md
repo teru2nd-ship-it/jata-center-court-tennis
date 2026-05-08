@@ -2,6 +2,7 @@
 
 ## 全ゲーム共通で揃えたいこと
 
+- 公開先ベース導線: `https://www.teru44.net/games`
 - BGM ON/OFF
 - 効果音 ON/OFF
 - 音量調整
@@ -42,3 +43,29 @@
 - 縦横固定設定
 - ゲーム画面を隠さない設定パネル
 - 片手操作でも主要操作が届く配置
+
+## 作業場所メモ
+
+iCloud 作業本体:
+
+```text
+/Users/teru44/Library/Mobile Documents/com~apple~CloudDocs/TERU_WORK/jata/
+```
+
+ローカル作業コピーでよく使った場所:
+
+```text
+/Users/teru44/Desktop/jata_work/
+```
+
+Codex作業ワークスペースで使っていた場所:
+
+```text
+/Users/teru44/Documents/Codex/2026-04-21-icloud-jata-drop-imac-icloud-drive/
+```
+
+運用メモ:
+
+- iCloud直編集は競合しやすい
+- 加工中はローカルコピーで作業し、完成版のみ戻す運用が安全
+- 実装や画像処理、バッチ修正はCodex向き
