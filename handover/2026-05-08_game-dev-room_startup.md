@@ -370,6 +370,7 @@ Codex作業ワークスペースで使っていた場所:
 
 - 上記フォルダはこのiMacに存在する
 - `index.html` と `src/` がある
+- 2026-05-08 iMac確認時点では `package.json` は見つからなかった
 - このフォルダ自体はGit repoではない
 - ローカル確認URLの引き継ぎ: `http://localhost:4173/`
 
@@ -397,6 +398,9 @@ src/data/teams.js
 - 引き継ぎ記載の主要ファイルに加えて、ローカルには `src/data/champions.js` と `src/data/players.js` も存在する
 - 作業開始時はファイル内容を読んで、引き継ぎ情報との差分を確認する
 - MacBook Pro側では `study.js`, `entertain.js`, `kids.js`, `nba-favorites.js`, `storage.js` が見つかっていないため、iMac側の方が新しい/広い可能性がある
+- Neo側情報では `npm run dev` / `npm run check`、音量設定、30秒制限、離脱失格、称号メダル、音設定キー `teruyoshi-games:audio-settings:v1` がある
+- クイズ側は既存のWeb Audio API仮音源が実装済みで、新しい効果音データは別作業で作成中
+- iMacで追加した仮実装の保存キーは `quiz-playground-bgm-enabled` / `quiz-playground-sfx-enabled` のため、Neo側キーと統一するかは実体確認後に決める
 
 ### 現在の状態
 
@@ -418,6 +422,10 @@ src/data/teams.js
 - 正解 / 不正解フィードバック
 - 結果画面
 - 称号表示
+- 30秒制限
+- 離脱失格
+- 音量設定
+- 称号メダル
 - `localStorage` によるハイスコア保存
 - モード別ハイスコア
 - ハイスコアリセット機能

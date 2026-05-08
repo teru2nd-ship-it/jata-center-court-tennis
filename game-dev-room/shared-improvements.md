@@ -41,13 +41,14 @@
 確認日: 2026-05-08
 
 - JATA DROP: SFX/BGMの独立トグル実装済み
-- SPORTS QUIZ RUSH: iMac側ローカル実体に `src/audio.js`、BGM/SFXトグル、正解/不正解/開始/結果音を追加
+- SPORTS QUIZ RUSH: iMac側ローカル実体に `src/audio.js`、BGM/SFXトグル、正解/不正解/開始/結果音を追加。Neo側情報では既存Web Audio API仮音源は実装済みで、新しい効果音データは別作業で作成中
 - Spider Solitaire: iCloud側Viteコピーに `src/audio.js`、BGM/SFXトグル、開始/移動/山札/完成/勝利音を追加
 - 国旗神経衰弱: iCloud側 `FlagMemoryGame.jsx` に自己完結型BGM/SFXトグルとカード/マッチ/ミス/勝利音を追加
 
 注意:
 
 - Spider Solitaireと国旗神経衰弱の公開実体はMacBook Pro側repoが本命候補
+- SPORTS QUIZ RUSHはiMac側実体、MacBook Pro側実体、Neo側情報で差分があるため、効果音素材を受け取る前に `src/audio.js` と保存キーを再確認する
 - 公開反映する場合は、MacBook Pro側repoへ移植してローカル確認後、TERUさん確認を挟む
 
 ## モバイル対応

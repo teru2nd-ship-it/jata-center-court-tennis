@@ -17,6 +17,7 @@
 
 - 上記フォルダはこのMacに存在する
 - `index.html` と `src/` がある
+- 2026-05-08 iMac確認時点では `package.json` は見つからなかった
 - このフォルダ自体はGit repoではない
 - ローカル確認URLの引き継ぎ: `http://localhost:4173/`
 
@@ -72,6 +73,20 @@ src/data/teams.js
 - 結果音
 - 画面右上の `BGM` / `SFX` トグル
 
+Neo側からの最新メモ:
+
+- クイズ側は既存のWeb Audio API仮音源が実装済み
+- 新しい効果音データは別作業で作成中
+- Neo側情報では音設定キーは `teruyoshi-games:audio-settings:v1`
+- Neo側情報では、音量設定、30秒制限、離脱失格、称号メダルも実装済み扱い
+- 後で効果音データを受け取ったら、`src/audio.js` を実ファイル再生へ差し替えるか、仮音と素材音を併用する
+
+差分注意:
+
+- iMacで追加した仮実装の保存キーは `quiz-playground-bgm-enabled` / `quiz-playground-sfx-enabled`
+- Neo側情報の保存キー `teruyoshi-games:audio-settings:v1` と統一するかは、実体ファイル確認後に決める
+- iMac確認時点の作業フォルダには `package.json` がなく、Neo側の `npm run dev` / `npm run check` 情報とは差分がある
+
 確認:
 
 - `node --check src/audio.js`
@@ -104,6 +119,10 @@ QUIZ PLAYGROUND
 - 正解 / 不正解フィードバック
 - 結果画面
 - 称号表示
+- 30秒制限
+- 離脱失格
+- 音量設定
+- 称号メダル
 - `localStorage` によるハイスコア保存
 - モード別ハイスコア
 - ハイスコアリセット機能
