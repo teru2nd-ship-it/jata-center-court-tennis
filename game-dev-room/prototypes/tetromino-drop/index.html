@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tetromino Drop Sample</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-label="Tetromino Drop Sample">
+      <section class="top-bar">
+        <div>
+          <p class="eyebrow">Prototype</p>
+          <h1>TETROMINO DROP</h1>
+        </div>
+        <div class="top-actions">
+          <button id="pauseBtn" type="button">Pause</button>
+          <button id="restartBtn" type="button">Restart</button>
+        </div>
+      </section>
+
+      <section class="game-layout">
+        <aside class="panel">
+          <div class="stat">
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div class="stat">
+            <span>Lines</span>
+            <strong id="lines">0</strong>
+          </div>
+          <div class="stat">
+            <span>Level</span>
+            <strong id="level">1</strong>
+          </div>
+          <div class="stat">
+            <span>Best</span>
+            <strong id="best">0</strong>
+          </div>
+        </aside>
+
+        <section class="board-wrap">
+          <canvas id="board" width="300" height="600" aria-label="Game board"></canvas>
+          <div id="overlay" class="overlay hidden">
+            <strong id="overlayTitle">Paused</strong>
+            <span id="overlayText">Press pause to resume.</span>
+          </div>
+        </section>
+
+        <aside class="panel next-panel">
+          <span class="label">Next</span>
+          <canvas id="next" width="120" height="120" aria-label="Next piece"></canvas>
+          <p class="help">Keys: Arrow / Z / X / Space</p>
+        </aside>
+      </section>
+
+      <section class="touch-controls" aria-label="Touch controls">
+        <button type="button" data-action="left">Left</button>
+        <button type="button" data-action="rotate">Rotate</button>
+        <button type="button" data-action="right">Right</button>
+        <button type="button" data-action="drop">Drop</button>
+      </section>
+    </main>
+
+    <script src="./game.js"></script>
+  </body>
+</html>

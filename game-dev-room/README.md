@@ -27,6 +27,7 @@ TERUさんのゲーム開発まわりの共通作業室です。
 - [共通改善メモ](shared-improvements.md)
 - [公開前チェックリスト](release-checklist.md)
 - [新規ゲーム案](new-game-ideas.md)
+- [Tetromino Drop Sample](prototypes/tetromino-drop/)
 - [JATA DROP](projects/jata-drop.md)
 - [SPORTS QUIZ RUSH / 4ブランドクイズ基盤](projects/sports-quiz-rush.md)
 - [スパイダーソリティア](projects/spider-solitaire.md)
