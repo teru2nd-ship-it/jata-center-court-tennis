@@ -1,12 +1,12 @@
 :root {
   color-scheme: dark;
   --bg: #10131b;
-  --panel: #191e2b;
-  --panel-2: #202738;
-  --line: #35405c;
+  --panel: rgba(14, 25, 35, 0.88);
+  --panel-2: rgba(29, 45, 59, 0.94);
+  --line: rgba(144, 196, 214, 0.28);
   --text: #edf2ff;
-  --muted: #99a6c5;
-  --accent: #6dd3ff;
+  --muted: #b0c4d6;
+  --accent: #7de2c5;
   --danger: #ff6d8f;
 }
 
@@ -27,10 +27,19 @@ body {
   display: grid;
   place-items: center;
   padding: 18px;
+  background:
+    linear-gradient(rgba(3, 12, 22, 0.84), rgba(3, 12, 22, 0.9)),
+    url("./assets/jata-drop-wallpaper.png") center / cover fixed;
 }
 
 .app {
   width: min(100%, 860px);
+  padding: 18px;
+  border: 1px solid rgba(144, 196, 214, 0.18);
+  border-radius: 8px;
+  background: rgba(5, 13, 22, 0.56);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
 }
 
 .top-bar {
@@ -72,13 +81,54 @@ button:active {
 }
 
 .top-actions,
+.audio-actions,
 .touch-controls {
   display: flex;
   gap: 8px;
 }
 
-.top-actions button {
+.top-actions button,
+.audio-actions button {
   padding: 0 14px;
+}
+
+.settings-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(9, 18, 29, 0.72);
+}
+
+.theme-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+select {
+  min-height: 42px;
+  min-width: 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+}
+
+button[aria-pressed="false"] {
+  color: var(--muted);
+  background: rgba(20, 28, 40, 0.84);
 }
 
 .game-layout {
@@ -128,7 +178,7 @@ button:active {
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
-  background: #0a0d13;
+  background: rgba(6, 12, 20, 0.94);
 }
 
 canvas {
@@ -173,7 +223,7 @@ canvas {
   width: 120px;
   height: 120px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .help {
@@ -202,6 +252,20 @@ canvas {
     align-items: start;
   }
 
+  .settings-bar {
+    display: grid;
+  }
+
+  .theme-picker,
+  .audio-actions {
+    justify-content: space-between;
+  }
+
+  select {
+    flex: 1;
+    min-width: 0;
+  }
+
   .game-layout {
     grid-template-columns: 1fr minmax(220px, 62vw);
     gap: 10px;
@@ -224,8 +288,17 @@ canvas {
 }
 
 @media (max-width: 520px) {
+  .app {
+    padding: 12px;
+  }
+
   .top-bar {
     display: grid;
+  }
+
+  .audio-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .game-layout {

@@ -3,6 +3,13 @@ const ROWS = 20;
 const BLOCK = 30;
 const NEXT_BLOCK = 24;
 const BEST_KEY = "tetromino-drop-best";
+const AUDIO_KEY = "tetromino-drop-audio:v1";
+const THEME_KEY = "tetromino-drop-theme:v1";
+
+const AUDIO_DEFAULTS = {
+  bgm: true,
+  sfx: true,
+};
 
 const COLORS = {
   I: "#64d8ff",
@@ -55,6 +62,9 @@ const overlayTitle = document.querySelector("#overlayTitle");
 const overlayText = document.querySelector("#overlayText");
 const pauseBtn = document.querySelector("#pauseBtn");
 const restartBtn = document.querySelector("#restartBtn");
+const bgmToggle = document.querySelector("#bgmToggle");
+const sfxToggle = document.querySelector("#sfxToggle");
+const themeSelect = document.querySelector("#themeSelect");
 
 function readBestScore() {
   try {
@@ -72,6 +82,34 @@ function writeBestScore(value) {
   }
 }
 
+function readStoredValue(key, fallback) {
+  try {
+    return window.localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStoredValue(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Some file:// browser contexts block localStorage. The game should still run.
+  }
+}
+
+function readAudioSettings() {
+  try {
+    const stored = JSON.parse(readStoredValue(AUDIO_KEY, "{}"));
+    return {
+      bgm: stored.bgm ?? AUDIO_DEFAULTS.bgm,
+      sfx: stored.sfx ?? AUDIO_DEFAULTS.sfx,
+    };
+  } catch {
+    return { ...AUDIO_DEFAULTS };
+  }
+}
+
 let board;
 let current;
 let nextPiece;
@@ -80,10 +118,156 @@ let score = 0;
 let lines = 0;
 let level = 1;
 let best = readBestScore();
+let audioSettings = readAudioSettings();
+let themeId = readStoredValue(THEME_KEY, "classic");
 let paused = false;
 let gameOver = false;
 let dropTimer = 0;
 let lastTime = 0;
+let audioContext = null;
+let bgmTimer = null;
+let bgmStep = 0;
+
+function ensureAudioContext() {
+  if (!audioContext) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    audioContext = new AudioContextClass();
+  }
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+  return audioContext;
+}
+
+function playTone({
+  frequency,
+  duration = 0.12,
+  type = "sine",
+  gain = 0.08,
+  endFrequency = frequency,
+  delay = 0,
+}) {
+  const context = ensureAudioContext();
+  if (!context) return;
+
+  const startAt = context.currentTime + delay;
+  const oscillator = context.createOscillator();
+  const volume = context.createGain();
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, startAt);
+  oscillator.frequency.exponentialRampToValueAtTime(Math.max(24, endFrequency), startAt + duration);
+  volume.gain.setValueAtTime(0.0001, startAt);
+  volume.gain.exponentialRampToValueAtTime(gain, startAt + 0.02);
+  volume.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+  oscillator.connect(volume);
+  volume.connect(context.destination);
+  oscillator.start(startAt);
+  oscillator.stop(startAt + duration + 0.03);
+}
+
+function playSfx(name) {
+  if (!audioSettings.sfx) return;
+
+  if (name === "move") {
+    playTone({ frequency: 360, endFrequency: 430, duration: 0.07, gain: 0.035, type: "triangle" });
+  }
+  if (name === "rotate") {
+    playTone({ frequency: 520, endFrequency: 760, duration: 0.08, gain: 0.045, type: "triangle" });
+  }
+  if (name === "soft-drop") {
+    playTone({ frequency: 220, endFrequency: 180, duration: 0.06, gain: 0.03, type: "square" });
+  }
+  if (name === "hard-drop") {
+    playTone({ frequency: 160, endFrequency: 70, duration: 0.16, gain: 0.08, type: "sawtooth" });
+  }
+  if (name === "lock") {
+    playTone({ frequency: 120, endFrequency: 88, duration: 0.12, gain: 0.055, type: "triangle" });
+  }
+  if (name === "clear") {
+    [0, 0.08, 0.16].forEach((delay, index) => {
+      playTone({
+        frequency: [420, 560, 760][index],
+        endFrequency: [520, 690, 980][index],
+        duration: 0.16,
+        gain: 0.055,
+        type: "triangle",
+        delay,
+      });
+    });
+  }
+  if (name === "game-over") {
+    [0, 0.12, 0.24].forEach((delay, index) => {
+      playTone({
+        frequency: [320, 240, 160][index],
+        endFrequency: [250, 180, 90][index],
+        duration: 0.22,
+        gain: 0.07,
+        type: "sawtooth",
+        delay,
+      });
+    });
+  }
+}
+
+function playBgmPulse() {
+  if (!audioSettings.bgm || paused || gameOver) return;
+  const melody = [196, 247, 294, 247, 220, 262, 330, 262];
+  const bass = [98, 98, 110, 110];
+  playTone({
+    frequency: melody[bgmStep % melody.length],
+    endFrequency: melody[bgmStep % melody.length] * 1.015,
+    duration: 0.34,
+    gain: 0.024,
+    type: "triangle",
+  });
+  if (bgmStep % 2 === 0) {
+    playTone({
+      frequency: bass[Math.floor(bgmStep / 2) % bass.length],
+      duration: 0.38,
+      gain: 0.018,
+      type: "sine",
+    });
+  }
+  bgmStep += 1;
+}
+
+function syncBgm() {
+  if (audioSettings.bgm && !bgmTimer) {
+    playBgmPulse();
+    bgmTimer = window.setInterval(playBgmPulse, 560);
+  }
+  if (!audioSettings.bgm && bgmTimer) {
+    window.clearInterval(bgmTimer);
+    bgmTimer = null;
+  }
+}
+
+function refreshAudioButtons() {
+  bgmToggle.textContent = audioSettings.bgm ? "BGM ON" : "BGM OFF";
+  bgmToggle.setAttribute("aria-pressed", String(audioSettings.bgm));
+  sfxToggle.textContent = audioSettings.sfx ? "SFX ON" : "SFX OFF";
+  sfxToggle.setAttribute("aria-pressed", String(audioSettings.sfx));
+}
+
+function saveAudioSettings() {
+  writeStoredValue(AUDIO_KEY, JSON.stringify(audioSettings));
+}
+
+function useTheme(nextThemeId) {
+  themeId = nextThemeId === "meteor" ? "meteor" : "classic";
+  themeSelect.value = themeId;
+  document.body.dataset.theme = themeId;
+  writeStoredValue(THEME_KEY, themeId);
+  if (board && current && nextPiece) {
+    draw();
+  }
+}
+
+function wakeAudio() {
+  ensureAudioContext();
+  syncBgm();
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -164,6 +348,8 @@ function clearLines() {
     lines += cleared;
     level = Math.floor(lines / 10) + 1;
   }
+
+  return cleared;
 }
 
 function spawnPiece() {
@@ -173,6 +359,7 @@ function spawnPiece() {
     gameOver = true;
     paused = false;
     saveBest();
+    playSfx("game-over");
     showOverlay("Game Over", "Press Restart to play again.");
   }
 }
@@ -188,15 +375,19 @@ function move(dx) {
   if (paused || gameOver) return;
   if (!collides(current, dx, 0)) {
     current.x += dx;
+    playSfx("move");
     draw();
   }
 }
 
-function softDrop() {
+function softDrop(manual = false) {
   if (paused || gameOver) return;
   if (!collides(current, 0, 1)) {
     current.y += 1;
     score += 1;
+    if (manual) {
+      playSfx("soft-drop");
+    }
   } else {
     lockPiece();
   }
@@ -211,6 +402,7 @@ function hardDrop() {
     distance += 1;
   }
   score += distance * 2;
+  playSfx("hard-drop");
   lockPiece();
   draw();
 }
@@ -223,13 +415,19 @@ function rotateCurrent(direction = 1) {
   if (kick !== undefined) {
     current.x += kick;
     current.shape = rotated;
+    playSfx("rotate");
     draw();
   }
 }
 
 function lockPiece() {
   mergePiece();
-  clearLines();
+  const cleared = clearLines();
+  if (cleared > 0) {
+    playSfx("clear");
+  } else {
+    playSfx("lock");
+  }
   spawnPiece();
 }
 
@@ -244,7 +442,7 @@ function update(time = 0) {
   if (!paused && !gameOver) {
     dropTimer += delta;
     if (dropTimer >= dropInterval()) {
-      softDrop();
+      softDrop(false);
       dropTimer = 0;
     }
   }
@@ -265,17 +463,54 @@ function ghostPiece() {
 
 function drawCell(context, x, y, size, color, alpha = 1) {
   context.globalAlpha = alpha;
-  context.fillStyle = color;
+  context.fillStyle = themeId === "meteor" ? "rgba(9, 18, 30, 0.92)" : color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  context.fillStyle = "rgba(255,255,255,.16)";
-  context.fillRect(x * size + 3, y * size + 3, size - 6, 3);
+
+  if (themeId === "meteor") {
+    const cellX = x * size;
+    const cellY = y * size;
+    const glow = context.createRadialGradient(
+      cellX + size * 0.58,
+      cellY + size * 0.42,
+      2,
+      cellX + size * 0.58,
+      cellY + size * 0.42,
+      size * 0.48
+    );
+    glow.addColorStop(0, color);
+    glow.addColorStop(1, "rgba(255,255,255,0)");
+    context.fillStyle = glow;
+    context.fillRect(cellX + 3, cellY + 3, size - 6, size - 6);
+    context.strokeStyle = color;
+    context.lineWidth = Math.max(1.4, size * 0.06);
+    context.beginPath();
+    context.moveTo(cellX + size * 0.24, cellY + size * 0.7);
+    context.lineTo(cellX + size * 0.68, cellY + size * 0.34);
+    context.stroke();
+    context.fillStyle = color;
+    context.beginPath();
+    context.moveTo(cellX + size * 0.68, cellY + size * 0.18);
+    context.lineTo(cellX + size * 0.75, cellY + size * 0.34);
+    context.lineTo(cellX + size * 0.92, cellY + size * 0.4);
+    context.lineTo(cellX + size * 0.75, cellY + size * 0.47);
+    context.lineTo(cellX + size * 0.68, cellY + size * 0.64);
+    context.lineTo(cellX + size * 0.61, cellY + size * 0.47);
+    context.lineTo(cellX + size * 0.44, cellY + size * 0.4);
+    context.lineTo(cellX + size * 0.61, cellY + size * 0.34);
+    context.closePath();
+    context.fill();
+  } else {
+    context.fillStyle = "rgba(255,255,255,.16)";
+    context.fillRect(x * size + 3, y * size + 3, size - 6, 3);
+  }
+
   context.globalAlpha = 1;
 }
 
 function drawGrid() {
-  ctx.fillStyle = "#0a0d13";
+  ctx.fillStyle = themeId === "meteor" ? "rgba(3, 11, 20, 0.92)" : "#0a0d13";
   ctx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
-  ctx.strokeStyle = "rgba(255,255,255,.055)";
+  ctx.strokeStyle = themeId === "meteor" ? "rgba(157, 219, 255, 0.08)" : "rgba(255,255,255,.055)";
   ctx.lineWidth = 1;
   for (let x = 0; x <= COLS; x += 1) {
     ctx.beginPath();
@@ -356,6 +591,7 @@ function togglePause() {
     showOverlay("Paused", "Press Resume to continue.");
   } else {
     hideOverlay();
+    playBgmPulse();
   }
 }
 
@@ -383,9 +619,10 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
   }
 
+  wakeAudio();
   if (key === "ArrowLeft") move(-1);
   if (key === "ArrowRight") move(1);
-  if (key === "ArrowDown") softDrop();
+  if (key === "ArrowDown") softDrop(true);
   if (key === " ") hardDrop();
   if (key === "z" || key === "Z") rotateCurrent(-1);
   if (key === "x" || key === "X" || key === "ArrowUp") rotateCurrent(1);
@@ -394,6 +631,7 @@ document.addEventListener("keydown", (event) => {
 
 document.querySelectorAll("[data-action]").forEach((button) => {
   button.addEventListener("click", () => {
+    wakeAudio();
     const action = button.dataset.action;
     if (action === "left") move(-1);
     if (action === "right") move(1);
@@ -402,8 +640,38 @@ document.querySelectorAll("[data-action]").forEach((button) => {
   });
 });
 
-pauseBtn.addEventListener("click", togglePause);
-restartBtn.addEventListener("click", restart);
+pauseBtn.addEventListener("click", () => {
+  wakeAudio();
+  togglePause();
+});
+restartBtn.addEventListener("click", () => {
+  wakeAudio();
+  restart();
+});
+bgmToggle.addEventListener("click", () => {
+  wakeAudio();
+  audioSettings.bgm = !audioSettings.bgm;
+  saveAudioSettings();
+  refreshAudioButtons();
+  syncBgm();
+  if (audioSettings.bgm) {
+    playBgmPulse();
+  }
+});
+sfxToggle.addEventListener("click", () => {
+  wakeAudio();
+  audioSettings.sfx = !audioSettings.sfx;
+  saveAudioSettings();
+  refreshAudioButtons();
+  if (audioSettings.sfx) {
+    playSfx("rotate");
+  }
+});
+themeSelect.addEventListener("change", (event) => {
+  useTheme(event.target.value);
+});
 
+refreshAudioButtons();
+useTheme(themeId);
 restart();
 requestAnimationFrame(update);
