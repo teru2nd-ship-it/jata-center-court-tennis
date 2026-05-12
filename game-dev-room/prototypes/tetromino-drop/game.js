@@ -56,6 +56,22 @@ const overlayText = document.querySelector("#overlayText");
 const pauseBtn = document.querySelector("#pauseBtn");
 const restartBtn = document.querySelector("#restartBtn");
 
+function readBestScore() {
+  try {
+    return Number(window.localStorage.getItem(BEST_KEY) || 0);
+  } catch {
+    return 0;
+  }
+}
+
+function writeBestScore(value) {
+  try {
+    window.localStorage.setItem(BEST_KEY, String(value));
+  } catch {
+    // Some file:// browser contexts block localStorage. The game should still run.
+  }
+}
+
 let board;
 let current;
 let nextPiece;
@@ -63,7 +79,7 @@ let bag = [];
 let score = 0;
 let lines = 0;
 let level = 1;
-let best = Number(localStorage.getItem(BEST_KEY) || 0);
+let best = readBestScore();
 let paused = false;
 let gameOver = false;
 let dropTimer = 0;
@@ -164,7 +180,7 @@ function spawnPiece() {
 function saveBest() {
   if (score > best) {
     best = score;
-    localStorage.setItem(BEST_KEY, String(best));
+    writeBestScore(best);
   }
 }
 
@@ -354,6 +370,7 @@ function restart() {
   paused = false;
   gameOver = false;
   dropTimer = 0;
+  lastTime = 0;
   pauseBtn.textContent = "Pause";
   hideOverlay();
   spawnPiece();
