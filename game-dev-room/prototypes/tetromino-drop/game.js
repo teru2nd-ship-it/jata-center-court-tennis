@@ -33,7 +33,15 @@ const JATA_ASSETS = {
   Z: "./assets/jata-reptiles/dragon.png",
 };
 
-const POOP_FACE_ASSET = "./assets/poop-face/poop-face.png";
+const POOP_FACE_ASSETS = {
+  I: "./assets/poop-face/poop-panda.png",
+  J: "./assets/poop-face/poop-dog.png",
+  L: "./assets/poop-face/poop-blue.png",
+  O: "./assets/poop-face/poop-panda.png",
+  S: "./assets/poop-face/poop-dog.png",
+  T: "./assets/poop-face/poop-blue.png",
+  Z: "./assets/poop-face/poop-panda.png",
+};
 
 const BACKGROUND_ASSETS = [
   "./assets/backgrounds/176A9D6E-991C-41E1-B97B-8B2BD438CF0B.png",
@@ -95,13 +103,18 @@ boardBackdrop.addEventListener("load", () => {
     draw();
   }
 });
-const poopFaceImage = new Image();
-poopFaceImage.src = POOP_FACE_ASSET;
-poopFaceImage.addEventListener("load", () => {
-  if (board && current && nextPiece && themeId === "poop") {
-    draw();
-  }
-});
+const poopFaceImages = Object.fromEntries(
+  Object.entries(POOP_FACE_ASSETS).map(([type, src]) => {
+    const image = new Image();
+    image.src = src;
+    image.addEventListener("load", () => {
+      if (board && current && nextPiece && themeId === "poop") {
+        draw();
+      }
+    });
+    return [type, image];
+  })
+);
 const jataImages = Object.fromEntries(
   Object.entries(JATA_ASSETS).map(([type, src]) => {
     const image = new Image();
@@ -624,14 +637,15 @@ function drawCell(context, x, y, size, color, alpha = 1, tileType = null) {
     context.lineWidth = Math.max(1, size * 0.04);
     context.strokeRect(cellX + 3.5, cellY + 3.5, size - 7, size - 7);
 
-    if (poopFaceImage.complete && poopFaceImage.naturalWidth > 0) {
+    const image = poopFaceImages[tileType] ?? poopFaceImages.I;
+    if (image?.complete && image.naturalWidth > 0) {
       const inset = size * 0.12;
       const imageSize = size - inset * 2;
       context.save();
       context.beginPath();
       context.roundRect(cellX + inset, cellY + inset, imageSize, imageSize, size * 0.18);
       context.clip();
-      context.drawImage(poopFaceImage, cellX + inset, cellY + inset, imageSize, imageSize);
+      context.drawImage(image, cellX + inset, cellY + inset, imageSize, imageSize);
       context.restore();
     } else {
       context.fillStyle = "#ffe0a0";

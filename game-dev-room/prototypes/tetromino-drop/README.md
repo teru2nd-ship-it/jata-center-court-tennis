@@ -26,7 +26,7 @@
 - ページ外側と盤面内で同じ背景イラストを共有
 - `Classic` / `🌠 Shooting Star` / `JATA Reptile` / `Poop Face` のデザイン切替
 - `JATA Reptile` はJATA DROPの爬虫類系素材をブロック内に反映
-- `Poop Face` はユーザー指定イラストから切り出した顔をブロック内に反映
+- `Poop Face` はユーザー指定イラストから切り出した複数の顔をブロック内に反映
 - ヘッダーとテーマ色をTERU GAMES系の共通見た目へ寄せる土台を追加
 - Web Audio APIのBGM、効果音
 - BGM / SFX のON/OFF保存
