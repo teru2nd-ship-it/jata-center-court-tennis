@@ -65,6 +65,13 @@ const restartBtn = document.querySelector("#restartBtn");
 const bgmToggle = document.querySelector("#bgmToggle");
 const sfxToggle = document.querySelector("#sfxToggle");
 const themeSelect = document.querySelector("#themeSelect");
+const boardBackdrop = new Image();
+boardBackdrop.src = "./assets/jata-drop-wallpaper.png";
+boardBackdrop.addEventListener("load", () => {
+  if (board && current && nextPiece) {
+    draw();
+  }
+});
 
 function readBestScore() {
   try {
@@ -526,7 +533,25 @@ function drawCell(context, x, y, size, color, alpha = 1) {
 }
 
 function drawGrid() {
-  ctx.fillStyle = themeId === "meteor" ? "rgba(3, 11, 20, 0.92)" : "#0a0d13";
+  ctx.fillStyle = "#08111d";
+  ctx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
+
+  if (boardBackdrop.complete && boardBackdrop.naturalWidth > 0) {
+    const scale = Math.max(
+      boardCanvas.width / boardBackdrop.naturalWidth,
+      boardCanvas.height / boardBackdrop.naturalHeight
+    );
+    const drawWidth = boardBackdrop.naturalWidth * scale;
+    const drawHeight = boardBackdrop.naturalHeight * scale;
+    const drawX = (boardCanvas.width - drawWidth) / 2;
+    const drawY = (boardCanvas.height - drawHeight) / 2;
+    ctx.save();
+    ctx.globalAlpha = themeId === "meteor" ? 0.22 : 0.18;
+    ctx.drawImage(boardBackdrop, drawX, drawY, drawWidth, drawHeight);
+    ctx.restore();
+  }
+
+  ctx.fillStyle = themeId === "meteor" ? "rgba(3, 11, 20, 0.68)" : "rgba(3, 11, 20, 0.74)";
   ctx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
   ctx.strokeStyle = themeId === "meteor" ? "rgba(157, 219, 255, 0.08)" : "rgba(255,255,255,.055)";
   ctx.lineWidth = 1;
