@@ -33,6 +33,8 @@ const JATA_ASSETS = {
   Z: "./assets/jata-reptiles/dragon.png",
 };
 
+const POOP_FACE_ASSET = "./assets/poop-face/poop-face.png";
+
 const BACKGROUND_ASSETS = [
   "./assets/backgrounds/176A9D6E-991C-41E1-B97B-8B2BD438CF0B.png",
   "./assets/backgrounds/29E325E7-F351-489C-AAE5-55DD29342D9B.png",
@@ -90,6 +92,13 @@ boardBackdrop.src = activeBackground;
 document.body.style.setProperty("--page-wallpaper", `url("${activeBackground}")`);
 boardBackdrop.addEventListener("load", () => {
   if (board && current && nextPiece) {
+    draw();
+  }
+});
+const poopFaceImage = new Image();
+poopFaceImage.src = POOP_FACE_ASSET;
+poopFaceImage.addEventListener("load", () => {
+  if (board && current && nextPiece && themeId === "poop") {
     draw();
   }
 });
@@ -297,7 +306,7 @@ function saveAudioSettings() {
 }
 
 function useTheme(nextThemeId) {
-  themeId = ["classic", "meteor", "jata"].includes(nextThemeId) ? nextThemeId : "classic";
+  themeId = ["classic", "meteor", "jata", "poop"].includes(nextThemeId) ? nextThemeId : "classic";
   themeSelect.value = themeId;
   document.body.dataset.theme = themeId;
   writeStoredValue(THEME_KEY, themeId);
@@ -544,6 +553,8 @@ function drawCell(context, x, y, size, color, alpha = 1, tileType = null) {
       ? "rgba(9, 18, 30, 0.92)"
       : themeId === "jata"
         ? "rgba(10, 30, 20, 0.95)"
+        : themeId === "poop"
+          ? "rgba(52, 32, 16, 0.95)"
         : color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
 
@@ -598,6 +609,36 @@ function drawCell(context, x, y, size, color, alpha = 1, tileType = null) {
       context.lineTo(cellX + size * 0.3, cellY + size * 0.7);
       context.stroke();
     }
+  } else if (themeId === "poop") {
+    const cellX = x * size;
+    const cellY = y * size;
+    const centerX = cellX + size * 0.5;
+    const centerY = cellY + size * 0.5;
+    const gradient = context.createRadialGradient(centerX, centerY, 1, centerX, centerY, size * 0.55);
+    gradient.addColorStop(0, "#ffcf78");
+    gradient.addColorStop(0.62, color);
+    gradient.addColorStop(1, "rgba(52, 32, 16, 0.94)");
+    context.fillStyle = gradient;
+    context.fillRect(cellX + 3, cellY + 3, size - 6, size - 6);
+    context.strokeStyle = "rgba(255, 228, 166, 0.44)";
+    context.lineWidth = Math.max(1, size * 0.04);
+    context.strokeRect(cellX + 3.5, cellY + 3.5, size - 7, size - 7);
+
+    if (poopFaceImage.complete && poopFaceImage.naturalWidth > 0) {
+      const inset = size * 0.12;
+      const imageSize = size - inset * 2;
+      context.save();
+      context.beginPath();
+      context.roundRect(cellX + inset, cellY + inset, imageSize, imageSize, size * 0.18);
+      context.clip();
+      context.drawImage(poopFaceImage, cellX + inset, cellY + inset, imageSize, imageSize);
+      context.restore();
+    } else {
+      context.fillStyle = "#ffe0a0";
+      context.beginPath();
+      context.arc(centerX, centerY, size * 0.16, 0, Math.PI * 2);
+      context.fill();
+    }
   } else if (themeId === "jata") {
     const cellX = x * size;
     const cellY = y * size;
@@ -650,6 +691,8 @@ function drawGrid() {
       ? "rgba(3, 11, 20, 0.68)"
       : themeId === "jata"
         ? "rgba(5, 19, 12, 0.64)"
+        : themeId === "poop"
+          ? "rgba(31, 17, 8, 0.62)"
         : "rgba(3, 11, 20, 0.74)";
   ctx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
   ctx.strokeStyle =
@@ -657,6 +700,8 @@ function drawGrid() {
       ? "rgba(157, 219, 255, 0.08)"
       : themeId === "jata"
         ? "rgba(154, 230, 110, 0.1)"
+        : themeId === "poop"
+          ? "rgba(255, 195, 100, 0.11)"
         : "rgba(255,255,255,.055)";
   ctx.lineWidth = 1;
   for (let x = 0; x <= COLS; x += 1) {
@@ -686,7 +731,7 @@ function drawPiece(piece, alpha = 1) {
 
 function drawNext() {
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-  nextCtx.fillStyle = themeId === "jata" ? "#0d2117" : "#111722";
+  nextCtx.fillStyle = themeId === "jata" ? "#0d2117" : themeId === "poop" ? "#25150b" : "#111722";
   nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
   const shape = nextPiece.shape;
   const offsetX = Math.floor((5 - shape[0].length) / 2);
