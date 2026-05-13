@@ -37,7 +37,7 @@ body {
   padding: 18px;
   background:
     linear-gradient(rgba(3, 12, 22, 0.72), rgba(3, 12, 22, 0.82)),
-    url("./assets/jata-drop-wallpaper.png") center / cover fixed;
+    var(--page-wallpaper, url("./assets/jata-drop-wallpaper.png")) center / cover fixed;
 }
 
 .app {

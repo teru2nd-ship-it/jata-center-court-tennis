@@ -33,6 +33,13 @@ const JATA_ASSETS = {
   Z: "./assets/jata-reptiles/dragon.png",
 };
 
+const BACKGROUND_ASSETS = [
+  "./assets/backgrounds/176A9D6E-991C-41E1-B97B-8B2BD438CF0B.png",
+  "./assets/backgrounds/29E325E7-F351-489C-AAE5-55DD29342D9B.png",
+  "./assets/backgrounds/4A29E1AA-1B68-4A29-8A2B-FA93D6710C09.png",
+  "./assets/backgrounds/99F40B8D-8B0D-4ED8-BE73-68C8AA42800F.png",
+];
+
 const SHAPES = {
   I: [[1, 1, 1, 1]],
   J: [
@@ -77,8 +84,10 @@ const restartBtn = document.querySelector("#restartBtn");
 const bgmToggle = document.querySelector("#bgmToggle");
 const sfxToggle = document.querySelector("#sfxToggle");
 const themeSelect = document.querySelector("#themeSelect");
+const activeBackground = BACKGROUND_ASSETS[Math.floor(Math.random() * BACKGROUND_ASSETS.length)];
 const boardBackdrop = new Image();
-boardBackdrop.src = "./assets/jata-drop-wallpaper.png";
+boardBackdrop.src = activeBackground;
+document.body.style.setProperty("--page-wallpaper", `url("${activeBackground}")`);
 boardBackdrop.addEventListener("load", () => {
   if (board && current && nextPiece) {
     draw();
