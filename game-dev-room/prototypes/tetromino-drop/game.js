@@ -469,36 +469,54 @@ function drawCell(context, x, y, size, color, alpha = 1) {
   if (themeId === "meteor") {
     const cellX = x * size;
     const cellY = y * size;
+    const centerX = cellX + size * 0.5;
+    const centerY = cellY + size * 0.5;
     const glow = context.createRadialGradient(
-      cellX + size * 0.58,
-      cellY + size * 0.42,
+      centerX,
+      centerY,
       2,
-      cellX + size * 0.58,
-      cellY + size * 0.42,
+      centerX,
+      centerY,
       size * 0.48
     );
     glow.addColorStop(0, color);
     glow.addColorStop(1, "rgba(255,255,255,0)");
     context.fillStyle = glow;
     context.fillRect(cellX + 3, cellY + 3, size - 6, size - 6);
-    context.strokeStyle = color;
-    context.lineWidth = Math.max(1.4, size * 0.06);
-    context.beginPath();
-    context.moveTo(cellX + size * 0.24, cellY + size * 0.7);
-    context.lineTo(cellX + size * 0.68, cellY + size * 0.34);
-    context.stroke();
+
     context.fillStyle = color;
-    context.beginPath();
-    context.moveTo(cellX + size * 0.68, cellY + size * 0.18);
-    context.lineTo(cellX + size * 0.75, cellY + size * 0.34);
-    context.lineTo(cellX + size * 0.92, cellY + size * 0.4);
-    context.lineTo(cellX + size * 0.75, cellY + size * 0.47);
-    context.lineTo(cellX + size * 0.68, cellY + size * 0.64);
-    context.lineTo(cellX + size * 0.61, cellY + size * 0.47);
-    context.lineTo(cellX + size * 0.44, cellY + size * 0.4);
-    context.lineTo(cellX + size * 0.61, cellY + size * 0.34);
-    context.closePath();
-    context.fill();
+    if ((x + y) % 2 === 0) {
+      const outer = size * 0.25;
+      const inner = size * 0.11;
+      context.beginPath();
+      for (let point = 0; point < 10; point += 1) {
+        const angle = -Math.PI / 2 + point * (Math.PI / 5);
+        const radius = point % 2 === 0 ? outer : inner;
+        const pointX = centerX + Math.cos(angle) * radius;
+        const pointY = centerY + Math.sin(angle) * radius;
+        if (point === 0) {
+          context.moveTo(pointX, pointY);
+        } else {
+          context.lineTo(pointX, pointY);
+        }
+      }
+      context.closePath();
+      context.fill();
+    } else {
+      context.lineWidth = Math.max(1.6, size * 0.07);
+      context.lineCap = "round";
+      context.strokeStyle = color;
+      context.beginPath();
+      context.moveTo(centerX, cellY + size * 0.22);
+      context.lineTo(centerX, cellY + size * 0.78);
+      context.moveTo(cellX + size * 0.22, centerY);
+      context.lineTo(cellX + size * 0.78, centerY);
+      context.moveTo(cellX + size * 0.3, cellY + size * 0.3);
+      context.lineTo(cellX + size * 0.7, cellY + size * 0.7);
+      context.moveTo(cellX + size * 0.7, cellY + size * 0.3);
+      context.lineTo(cellX + size * 0.3, cellY + size * 0.7);
+      context.stroke();
+    }
   } else {
     context.fillStyle = "rgba(255,255,255,.16)";
     context.fillRect(x * size + 3, y * size + 3, size - 6, 3);

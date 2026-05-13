@@ -28,7 +28,7 @@ body {
   place-items: center;
   padding: 18px;
   background:
-    linear-gradient(rgba(3, 12, 22, 0.84), rgba(3, 12, 22, 0.9)),
+    linear-gradient(rgba(3, 12, 22, 0.72), rgba(3, 12, 22, 0.82)),
     url("./assets/jata-drop-wallpaper.png") center / cover fixed;
 }
 
