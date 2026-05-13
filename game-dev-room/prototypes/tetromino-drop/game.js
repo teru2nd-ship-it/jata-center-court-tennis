@@ -21,6 +21,16 @@ const COLORS = {
   Z: "#ff6f91",
 };
 
+const JATA_ASSETS = {
+  I: "./assets/jata-reptiles/snake.png",
+  J: "./assets/jata-reptiles/cobra.png",
+  L: "./assets/jata-reptiles/lizard.png",
+  O: "./assets/jata-reptiles/monitor.png",
+  S: "./assets/jata-reptiles/trex.png",
+  T: "./assets/jata-reptiles/spino.png",
+  Z: "./assets/jata-reptiles/dragon.png",
+};
+
 const SHAPES = {
   I: [[1, 1, 1, 1]],
   J: [
@@ -72,6 +82,18 @@ boardBackdrop.addEventListener("load", () => {
     draw();
   }
 });
+const jataImages = Object.fromEntries(
+  Object.entries(JATA_ASSETS).map(([type, src]) => {
+    const image = new Image();
+    image.src = src;
+    image.addEventListener("load", () => {
+      if (board && current && nextPiece && themeId === "jata") {
+        draw();
+      }
+    });
+    return [type, image];
+  })
+);
 
 function readBestScore() {
   try {
@@ -262,7 +284,7 @@ function saveAudioSettings() {
 }
 
 function useTheme(nextThemeId) {
-  themeId = nextThemeId === "meteor" ? "meteor" : "classic";
+  themeId = ["classic", "meteor", "jata"].includes(nextThemeId) ? nextThemeId : "classic";
   themeSelect.value = themeId;
   document.body.dataset.theme = themeId;
   writeStoredValue(THEME_KEY, themeId);
@@ -468,9 +490,14 @@ function ghostPiece() {
   return ghost;
 }
 
-function drawCell(context, x, y, size, color, alpha = 1) {
+function drawCell(context, x, y, size, color, alpha = 1, tileType = null) {
   context.globalAlpha = alpha;
-  context.fillStyle = themeId === "meteor" ? "rgba(9, 18, 30, 0.92)" : color;
+  context.fillStyle =
+    themeId === "meteor"
+      ? "rgba(9, 18, 30, 0.92)"
+      : themeId === "jata"
+        ? "rgba(10, 30, 20, 0.95)"
+        : color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
 
   if (themeId === "meteor") {
@@ -524,6 +551,26 @@ function drawCell(context, x, y, size, color, alpha = 1) {
       context.lineTo(cellX + size * 0.3, cellY + size * 0.7);
       context.stroke();
     }
+  } else if (themeId === "jata") {
+    const cellX = x * size;
+    const cellY = y * size;
+    const image = jataImages[tileType] ?? jataImages.T;
+    context.strokeStyle = color;
+    context.lineWidth = Math.max(1.2, size * 0.05);
+    context.strokeRect(cellX + 2, cellY + 2, size - 4, size - 4);
+
+    context.fillStyle = "rgba(154, 230, 110, 0.08)";
+    context.fillRect(cellX + 5, cellY + 5, size - 10, size - 10);
+
+    if (image?.complete && image.naturalWidth > 0) {
+      const inset = size * 0.15;
+      context.drawImage(image, cellX + inset, cellY + inset, size - inset * 2, size - inset * 2);
+    } else {
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(cellX + size * 0.5, cellY + size * 0.5, size * 0.18, 0, Math.PI * 2);
+      context.fill();
+    }
   } else {
     context.fillStyle = "rgba(255,255,255,.16)";
     context.fillRect(x * size + 3, y * size + 3, size - 6, 3);
@@ -546,14 +593,24 @@ function drawGrid() {
     const drawX = (boardCanvas.width - drawWidth) / 2;
     const drawY = (boardCanvas.height - drawHeight) / 2;
     ctx.save();
-    ctx.globalAlpha = themeId === "meteor" ? 0.22 : 0.18;
+    ctx.globalAlpha = themeId === "meteor" ? 0.22 : themeId === "jata" ? 0.28 : 0.18;
     ctx.drawImage(boardBackdrop, drawX, drawY, drawWidth, drawHeight);
     ctx.restore();
   }
 
-  ctx.fillStyle = themeId === "meteor" ? "rgba(3, 11, 20, 0.68)" : "rgba(3, 11, 20, 0.74)";
+  ctx.fillStyle =
+    themeId === "meteor"
+      ? "rgba(3, 11, 20, 0.68)"
+      : themeId === "jata"
+        ? "rgba(5, 19, 12, 0.64)"
+        : "rgba(3, 11, 20, 0.74)";
   ctx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
-  ctx.strokeStyle = themeId === "meteor" ? "rgba(157, 219, 255, 0.08)" : "rgba(255,255,255,.055)";
+  ctx.strokeStyle =
+    themeId === "meteor"
+      ? "rgba(157, 219, 255, 0.08)"
+      : themeId === "jata"
+        ? "rgba(154, 230, 110, 0.1)"
+        : "rgba(255,255,255,.055)";
   ctx.lineWidth = 1;
   for (let x = 0; x <= COLS; x += 1) {
     ctx.beginPath();
@@ -575,14 +632,14 @@ function drawPiece(piece, alpha = 1) {
       if (!cell) return;
       const drawY = piece.y + y;
       if (drawY < 0) return;
-      drawCell(ctx, piece.x + x, drawY, BLOCK, COLORS[piece.type], alpha);
+      drawCell(ctx, piece.x + x, drawY, BLOCK, COLORS[piece.type], alpha, piece.type);
     });
   });
 }
 
 function drawNext() {
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-  nextCtx.fillStyle = "#111722";
+  nextCtx.fillStyle = themeId === "jata" ? "#0d2117" : "#111722";
   nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
   const shape = nextPiece.shape;
   const offsetX = Math.floor((5 - shape[0].length) / 2);
@@ -590,7 +647,7 @@ function drawNext() {
   shape.forEach((row, y) => {
     row.forEach((cell, x) => {
       if (cell) {
-        drawCell(nextCtx, offsetX + x, offsetY + y, NEXT_BLOCK, COLORS[nextPiece.type]);
+        drawCell(nextCtx, offsetX + x, offsetY + y, NEXT_BLOCK, COLORS[nextPiece.type], 1, nextPiece.type);
       }
     });
   });
@@ -600,7 +657,7 @@ function draw() {
   drawGrid();
   board.forEach((row, y) => {
     row.forEach((type, x) => {
-      if (type) drawCell(ctx, x, y, BLOCK, COLORS[type]);
+      if (type) drawCell(ctx, x, y, BLOCK, COLORS[type], 1, type);
     });
   });
 

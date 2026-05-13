@@ -10,6 +10,14 @@
   --danger: #ff6d8f;
 }
 
+body[data-theme="jata"] {
+  --panel: rgba(12, 33, 24, 0.9);
+  --panel-2: rgba(22, 66, 45, 0.94);
+  --line: rgba(132, 214, 149, 0.32);
+  --muted: #bdd7bf;
+  --accent: #9ae66e;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -40,6 +48,19 @@ body {
   background: rgba(5, 13, 22, 0.56);
   box-shadow: 0 24px 72px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(10px);
+}
+
+body[data-theme="jata"] .app {
+  border-color: rgba(154, 230, 110, 0.22);
+  background: rgba(4, 18, 12, 0.62);
+}
+
+body[data-theme="jata"] .settings-bar {
+  background: rgba(8, 28, 18, 0.76);
+}
+
+body[data-theme="jata"] .board-wrap {
+  box-shadow: inset 0 0 0 1px rgba(154, 230, 110, 0.08);
 }
 
 .top-bar {

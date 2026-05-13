@@ -22,7 +22,9 @@
 - リスタート、一時停止
 - モバイル用タッチ操作
 - JATA DROP流用壁紙
-- `Classic` / `🌠 Shooting Star` のデザイン切替
+- `Classic` / `🌠 Shooting Star` / `JATA Reptile` のデザイン切替
+- `JATA Reptile` はJATA DROPの爬虫類系素材をブロック内に反映
+- ヘッダーとテーマ色をTERU GAMES系の共通見た目へ寄せる土台を追加
 - Web Audio APIのBGM、効果音
 - BGM / SFX のON/OFF保存
 
