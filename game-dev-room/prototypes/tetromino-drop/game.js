@@ -5,6 +5,8 @@ const NEXT_BLOCK = 24;
 const BEST_KEY = "tetromino-drop-best";
 const AUDIO_KEY = "tetromino-drop-audio:v1";
 const THEME_KEY = "tetromino-drop-theme:v1";
+const LOCK_DELAY = 520;
+const LOCK_RESET_LIMIT = 12;
 
 const AUDIO_DEFAULTS = {
   bgm: true,
@@ -152,6 +154,8 @@ let themeId = readStoredValue(THEME_KEY, "classic");
 let paused = false;
 let gameOver = false;
 let dropTimer = 0;
+let lockTimer = 0;
+let lockResetCount = 0;
 let lastTime = 0;
 let audioContext = null;
 let bgmTimer = null;
@@ -384,12 +388,31 @@ function clearLines() {
 function spawnPiece() {
   current = nextPiece || drawFromBag();
   nextPiece = drawFromBag();
+  lockTimer = 0;
+  lockResetCount = 0;
   if (collides(current)) {
     gameOver = true;
     paused = false;
     saveBest();
     playSfx("game-over");
     showOverlay("Game Over", "Press Restart to play again.");
+  }
+}
+
+function grounded() {
+  return collides(current, 0, 1);
+}
+
+function refreshLockDelayAfterAdjustment() {
+  if (!grounded()) {
+    lockTimer = 0;
+    lockResetCount = 0;
+    return;
+  }
+
+  if (lockResetCount < LOCK_RESET_LIMIT) {
+    lockTimer = 0;
+    lockResetCount += 1;
   }
 }
 
@@ -404,6 +427,7 @@ function move(dx) {
   if (paused || gameOver) return;
   if (!collides(current, dx, 0)) {
     current.x += dx;
+    refreshLockDelayAfterAdjustment();
     playSfx("move");
     draw();
   }
@@ -413,12 +437,14 @@ function softDrop(manual = false) {
   if (paused || gameOver) return;
   if (!collides(current, 0, 1)) {
     current.y += 1;
+    lockTimer = 0;
     score += 1;
     if (manual) {
       playSfx("soft-drop");
     }
-  } else {
-    lockPiece();
+  } else if (manual && lockResetCount < LOCK_RESET_LIMIT) {
+    lockTimer = 0;
+    lockResetCount += 1;
   }
   draw();
 }
@@ -444,6 +470,7 @@ function rotateCurrent(direction = 1) {
   if (kick !== undefined) {
     current.x += kick;
     current.shape = rotated;
+    refreshLockDelayAfterAdjustment();
     playSfx("rotate");
     draw();
   }
@@ -473,6 +500,17 @@ function update(time = 0) {
     if (dropTimer >= dropInterval()) {
       softDrop(false);
       dropTimer = 0;
+    }
+
+    if (grounded()) {
+      lockTimer += delta;
+      if (lockTimer >= LOCK_DELAY) {
+        lockPiece();
+        draw();
+      }
+    } else {
+      lockTimer = 0;
+      lockResetCount = 0;
     }
   }
 
@@ -706,6 +744,8 @@ function restart() {
   paused = false;
   gameOver = false;
   dropTimer = 0;
+  lockTimer = 0;
+  lockResetCount = 0;
   lastTime = 0;
   pauseBtn.textContent = "Pause";
   hideOverlay();
@@ -736,7 +776,7 @@ document.querySelectorAll("[data-action]").forEach((button) => {
     if (action === "left") move(-1);
     if (action === "right") move(1);
     if (action === "rotate") rotateCurrent(1);
-    if (action === "drop") hardDrop();
+    if (action === "drop") softDrop(true);
   });
 });
 

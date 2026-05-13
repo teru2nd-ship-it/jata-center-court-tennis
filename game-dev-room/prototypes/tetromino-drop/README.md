@@ -21,6 +21,7 @@
 - ハイスコア保存
 - リスタート、一時停止
 - モバイル用タッチ操作
+- 接地後も短時間だけ左右移動・回転できるロックディレイ
 - JATA DROP流用壁紙
 - `Classic` / `🌠 Shooting Star` / `JATA Reptile` のデザイン切替
 - `JATA Reptile` はJATA DROPの爬虫類系素材をブロック内に反映
