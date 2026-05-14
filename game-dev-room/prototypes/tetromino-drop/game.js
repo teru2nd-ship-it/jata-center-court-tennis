@@ -34,16 +34,16 @@ const JATA_ASSETS = {
 };
 
 const POOP_FACE_ASSETS = {
-  I: "./assets/poop-face/poop-panda.png",
-  J: "./assets/poop-face/hand-walk.png",
-  L: "./assets/poop-face/poop-blue.png",
-  O: "./assets/poop-face/hand-stack.png",
-  S: "./assets/poop-face/poop-dog.png",
-  T: "./assets/poop-face/hand-rock.png",
-  Z: "./assets/poop-face/poop-face.png",
+  I: "./assets/poop-face/poop-rainbow-panda.png",
+  J: "./assets/poop-face/poop-panda-rock.png",
+  L: "./assets/poop-face/poop-tower.png",
+  O: "./assets/poop-face/poop-tower.png",
+  S: "./assets/poop-face/poop-panda-rock.png",
+  T: "./assets/poop-face/poop-tower.png",
+  Z: "./assets/poop-face/poop-panda-rock.png",
 };
 
-const POOP_HAND_DRAWN_TYPES = new Set(["J", "O", "T"]);
+const POOP_LUCKY_TYPE = "I";
 
 const BACKGROUND_ASSETS = [
   "./assets/backgrounds/176A9D6E-991C-41E1-B97B-8B2BD438CF0B.png",
@@ -641,19 +641,32 @@ function drawCell(context, x, y, size, color, alpha = 1, tileType = null) {
 
     const image = poopFaceImages[tileType] ?? poopFaceImages.I;
     if (image?.complete && image.naturalWidth > 0) {
-      const handDrawn = POOP_HAND_DRAWN_TYPES.has(tileType);
-      const inset = handDrawn ? size * 0.07 : size * 0.1;
+      const lucky = tileType === POOP_LUCKY_TYPE;
+      const inset = lucky ? size * 0.06 : size * 0.09;
       const imageSize = size - inset * 2;
       context.save();
       context.beginPath();
       context.roundRect(cellX + inset, cellY + inset, imageSize, imageSize, size * 0.18);
       context.clip();
-      if (handDrawn) {
-        context.filter = "contrast(1.28) sepia(0.42) saturate(1.32) brightness(1.04)";
+      if (lucky) {
+        context.filter = "saturate(1.32) brightness(1.08) contrast(1.08)";
       }
       context.drawImage(image, cellX + inset, cellY + inset, imageSize, imageSize);
       context.filter = "none";
       context.restore();
+
+      if (lucky) {
+        context.strokeStyle = "rgba(255, 255, 255, 0.72)";
+        context.lineWidth = Math.max(1, size * 0.05);
+        context.beginPath();
+        context.moveTo(cellX + size * 0.18, cellY + size * 0.22);
+        context.lineTo(cellX + size * 0.26, cellY + size * 0.34);
+        context.lineTo(cellX + size * 0.38, cellY + size * 0.18);
+        context.moveTo(cellX + size * 0.68, cellY + size * 0.24);
+        context.lineTo(cellX + size * 0.74, cellY + size * 0.34);
+        context.lineTo(cellX + size * 0.84, cellY + size * 0.2);
+        context.stroke();
+      }
     } else {
       context.fillStyle = "#ffe0a0";
       context.beginPath();
