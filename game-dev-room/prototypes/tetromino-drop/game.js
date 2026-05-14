@@ -568,8 +568,6 @@ function drawCell(context, x, y, size, color, alpha = 1, tileType = null) {
       ? "rgba(9, 18, 30, 0.92)"
       : themeId === "jata"
         ? "rgba(10, 30, 20, 0.95)"
-        : themeId === "poop"
-          ? "rgba(52, 32, 16, 0.95)"
         : color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
 
@@ -630,24 +628,25 @@ function drawCell(context, x, y, size, color, alpha = 1, tileType = null) {
     const centerX = cellX + size * 0.5;
     const centerY = cellY + size * 0.5;
     const gradient = context.createRadialGradient(centerX, centerY, 1, centerX, centerY, size * 0.55);
-    gradient.addColorStop(0, "#ffcf78");
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.48)");
     gradient.addColorStop(0.62, color);
-    gradient.addColorStop(1, "rgba(52, 32, 16, 0.94)");
+    gradient.addColorStop(1, color);
     context.fillStyle = gradient;
     context.fillRect(cellX + 3, cellY + 3, size - 6, size - 6);
-    context.strokeStyle = "rgba(255, 228, 166, 0.44)";
+    context.strokeStyle = "rgba(255, 255, 255, 0.48)";
     context.lineWidth = Math.max(1, size * 0.04);
     context.strokeRect(cellX + 3.5, cellY + 3.5, size - 7, size - 7);
 
     const image = poopFaceImages[tileType] ?? poopFaceImages.I;
     if (image?.complete && image.naturalWidth > 0) {
       const lucky = tileType === POOP_LUCKY_TYPE;
-      const inset = lucky ? size * 0.06 : size * 0.09;
+      const inset = lucky ? size * 0.11 : size * 0.14;
       const imageSize = size - inset * 2;
       context.save();
       context.beginPath();
       context.roundRect(cellX + inset, cellY + inset, imageSize, imageSize, size * 0.18);
       context.clip();
+      context.globalAlpha = alpha * (lucky ? 0.9 : 0.82);
       if (lucky) {
         context.filter = "saturate(1.32) brightness(1.08) contrast(1.08)";
       }
