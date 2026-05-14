@@ -27,6 +27,7 @@
 - `Classic` / `🌠 Shooting Star` / `JATA Reptile` / `Poop Face` のデザイン切替
 - `JATA Reptile` はJATA DROPの爬虫類系素材をブロック内に反映
 - `Poop Face` はユーザー指定イラストから切り出した複数の顔をブロック内に反映
+- 手描き原画はサインや余白を避けてスクエア化し、ゲーム内で色味を統一
 - ヘッダーとテーマ色をTERU GAMES系の共通見た目へ寄せる土台を追加
 - Web Audio APIのBGM、効果音
 - BGM / SFX のON/OFF保存
