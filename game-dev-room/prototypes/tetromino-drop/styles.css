@@ -395,23 +395,23 @@ canvas {
   }
 
   .board-wrap {
-    width: min(100%, 300px, calc((100svh - 286px) / 2));
+    width: min(100%, 304px, calc((100svh - 266px) / 2));
     min-width: 208px;
     margin: 0 auto;
   }
 
   .next-panel {
     grid-column: 1 / -1;
-    grid-template-columns: auto 52px 1fr;
+    grid-template-columns: auto 48px 1fr;
     align-items: center;
     justify-items: start;
-    padding: 6px 8px;
-    min-height: 60px;
+    padding: 4px 8px;
+    min-height: 52px;
   }
 
   #next {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
 
   .help {
@@ -421,40 +421,24 @@ canvas {
 
   .touch-controls {
     display: grid;
-    grid-template-columns: 1fr minmax(156px, 184px) 92px;
-    align-items: end;
-    gap: 8px;
+    grid-template-columns: minmax(56px, 1fr) minmax(84px, 1.25fr) minmax(56px, 1fr) minmax(82px, 1.15fr);
+    align-items: stretch;
+    gap: 6px;
     margin-top: 0;
     padding-top: 2px;
     touch-action: none;
   }
 
-  .dpad {
-    grid-column: 2;
+  .vertical-actions {
     display: grid;
-    grid-template-columns: repeat(3, 50px);
-    grid-template-rows: repeat(3, 48px);
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .dpad-center {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  .action-stack {
-    grid-column: 3;
-    display: grid;
-    grid-template-rows: 58px 94px;
+    grid-template-rows: 1fr 1fr;
     gap: 6px;
   }
 
   .touch-controls button {
-    min-height: 48px;
+    min-height: 70px;
     border-width: 2px;
-    font-size: 22px;
+    font-size: 24px;
     line-height: 1;
     touch-action: none;
   }
@@ -464,8 +448,12 @@ canvas {
     background: linear-gradient(180deg, rgba(118, 82, 34, 0.96), rgba(76, 49, 22, 0.96));
   }
 
+  .down-action {
+    border-color: rgba(140, 205, 255, 0.58);
+    background: linear-gradient(180deg, rgba(39, 75, 106, 0.96), rgba(22, 48, 72, 0.96));
+  }
+
   .hard-drop {
-    min-height: 94px;
     border-color: rgba(255, 130, 130, 0.62);
     background: linear-gradient(180deg, rgba(148, 56, 36, 0.96), rgba(96, 38, 22, 0.96));
     font-size: 16px;
@@ -488,33 +476,23 @@ canvas {
   }
 
   .next-panel {
-    grid-template-columns: auto 64px 1fr;
+    grid-template-columns: auto 52px 1fr;
   }
 
   #next {
-    width: 64px;
-    height: 64px;
-  }
-
-  .dpad {
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(3, 46px);
-    gap: 6px;
+    width: 52px;
+    height: 52px;
   }
 
   .touch-controls {
-    grid-template-columns: 1fr 156px 88px;
+    grid-template-columns: minmax(54px, 1fr) minmax(82px, 1.22fr) minmax(54px, 1fr) minmax(80px, 1.08fr);
   }
 
   .touch-controls button {
-    min-height: 46px;
-  }
-
-  .action-stack {
-    grid-template-rows: 56px 90px;
+    min-height: 68px;
   }
 
   .hard-drop {
-    min-height: 90px;
+    min-height: 142px;
   }
 }
