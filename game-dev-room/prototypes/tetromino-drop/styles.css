@@ -305,7 +305,7 @@ canvas {
   .app {
     display: grid;
     grid-template-rows: auto auto minmax(0, 1fr) auto;
-    gap: 6px;
+    gap: 5px;
     width: min(100%, 430px);
     height: var(--app-height, 100svh);
     max-height: var(--app-height, 100svh);
@@ -395,7 +395,7 @@ canvas {
   }
 
   .board-wrap {
-    width: min(100%, 304px, calc((var(--app-height, 100svh) - 342px) / 2));
+    width: min(100%, 304px, calc((var(--app-height, 100svh) - 282px) / 2));
     min-width: 188px;
     margin: 0 auto;
   }
@@ -436,9 +436,9 @@ canvas {
   }
 
   .touch-controls button {
-    min-height: 78px;
+    min-height: 42px;
     border-width: 2px;
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1;
     touch-action: none;
   }
@@ -456,9 +456,9 @@ canvas {
   .hard-drop {
     border-color: rgba(255, 130, 130, 0.62);
     background: linear-gradient(180deg, rgba(148, 56, 36, 0.96), rgba(96, 38, 22, 0.96));
-    font-size: 16px;
+    font-size: 15px;
     letter-spacing: 0;
-    min-height: 162px;
+    min-height: 90px;
   }
 }
 
@@ -490,10 +490,10 @@ canvas {
   }
 
   .touch-controls button {
-    min-height: 76px;
+    min-height: 42px;
   }
 
   .hard-drop {
-    min-height: 158px;
+    min-height: 90px;
   }
 }
