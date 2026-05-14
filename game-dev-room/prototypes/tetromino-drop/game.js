@@ -914,13 +914,17 @@ restartBtn.addEventListener("click", () => {
 fullscreenBtn.addEventListener("click", async () => {
   wakeAudio();
   const root = document.documentElement;
+  let enteredFullscreen = false;
   try {
     if (!document.fullscreenElement && root.requestFullscreen) {
       await root.requestFullscreen();
+      enteredFullscreen = true;
     }
   } catch {
     // iPhone Safari may ignore the Fullscreen API; the mobile layout still stays locked.
   }
+  document.body.classList.toggle("focus-mode", !enteredFullscreen);
+  fullscreenBtn.textContent = document.body.classList.contains("focus-mode") ? "UI" : "Full";
 });
 bgmToggle.addEventListener("click", () => {
   wakeAudio();

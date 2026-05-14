@@ -74,14 +74,6 @@ body[data-theme="poop"] .app {
   background: rgba(24, 14, 8, 0.62);
 }
 
-body[data-theme="jata"] .settings-bar {
-  background: rgba(8, 28, 18, 0.76);
-}
-
-body[data-theme="poop"] .settings-bar {
-  background: rgba(43, 25, 12, 0.76);
-}
-
 body[data-theme="jata"] .board-wrap {
   box-shadow: inset 0 0 0 1px rgba(154, 230, 110, 0.08);
 }
@@ -96,6 +88,10 @@ body[data-theme="poop"] .board-wrap {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 14px;
+}
+
+.brand-block {
+  min-width: 0;
 }
 
 .eyebrow {
@@ -141,18 +137,6 @@ button:active {
 .top-actions button,
 .audio-actions button {
   padding: 0 14px;
-}
-
-.settings-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(9, 18, 29, 0.72);
 }
 
 .theme-picker {
@@ -317,9 +301,35 @@ canvas {
   }
 
   .top-bar {
-    align-items: start;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: auto auto minmax(112px, 1fr) auto;
+    align-items: center;
+    gap: 5px;
     margin-bottom: 0;
+    padding: 4px 5px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(9, 18, 29, 0.72);
+    transition:
+      transform 0.18s ease,
+      background 0.18s ease;
+  }
+
+  .top-bar:focus-within,
+  .top-bar:active {
+    transform: translateY(1px) scale(1.01);
+    background: rgba(20, 34, 47, 0.88);
+  }
+
+  body.focus-mode .top-bar {
+    opacity: 0.5;
+    transform: translateY(-2px) scale(0.98);
+  }
+
+  body.focus-mode .top-bar:focus-within,
+  body.focus-mode .top-bar:active {
+    opacity: 1;
+    transform: translateY(0) scale(1.01);
   }
 
   .eyebrow {
@@ -327,41 +337,48 @@ canvas {
   }
 
   h1 {
-    font-size: clamp(20px, 6.6vw, 28px);
-    line-height: 0.95;
+    max-width: 6.6em;
+    overflow: hidden;
+    font-size: clamp(15px, 4.7vw, 21px);
+    line-height: 1;
+    white-space: nowrap;
   }
 
   .top-actions {
-    flex-wrap: wrap;
-    justify-content: end;
-    gap: 6px;
+    justify-content: start;
+    gap: 4px;
   }
 
   .top-actions button,
   .audio-actions button {
-    min-height: 30px;
-    padding: 0 8px;
-    font-size: 11px;
-  }
-
-  .settings-bar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 6px;
-    margin-bottom: 0;
-    padding: 6px;
+    min-height: 28px;
+    padding: 0 7px;
+    border-radius: 7px;
+    font-size: 10px;
   }
 
   .theme-picker,
   .audio-actions {
     justify-content: space-between;
+    gap: 4px;
+  }
+
+  .theme-picker span {
+    display: none;
   }
 
   select {
     flex: 1;
     min-width: 0;
-    min-height: 30px;
-    font-size: 12px;
+    min-height: 28px;
+    padding: 0 7px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+
+  .audio-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .game-layout {
@@ -465,15 +482,6 @@ canvas {
 @media (max-width: 520px) {
   .app {
     padding-inline: 8px;
-  }
-
-  .top-bar {
-    display: grid;
-  }
-
-  .audio-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
   }
 
   .next-panel {
