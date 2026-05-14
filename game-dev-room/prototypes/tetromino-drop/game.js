@@ -132,6 +132,15 @@ const jataImages = Object.fromEntries(
   })
 );
 
+function syncViewportHeight() {
+  const height = window.visualViewport?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty("--app-height", `${height}px`);
+}
+
+syncViewportHeight();
+window.addEventListener("resize", syncViewportHeight);
+window.visualViewport?.addEventListener("resize", syncViewportHeight);
+
 function readBestScore() {
   try {
     return Number(window.localStorage.getItem(BEST_KEY) || 0);
