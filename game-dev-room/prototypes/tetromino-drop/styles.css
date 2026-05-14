@@ -298,17 +298,22 @@ canvas {
   body {
     padding: 0;
     place-items: stretch center;
+    position: fixed;
+    inset: 0;
   }
 
   .app {
     display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    gap: 8px;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 6px;
     width: min(100%, 430px);
-    min-height: 100dvh;
-    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+    height: 100svh;
+    max-height: 100svh;
+    min-height: 0;
+    padding: max(6px, env(safe-area-inset-top)) 8px max(6px, env(safe-area-inset-bottom));
     border: 0;
     border-radius: 0;
+    overflow: hidden;
   }
 
   .top-bar {
@@ -318,11 +323,11 @@ canvas {
   }
 
   .eyebrow {
-    font-size: 10px;
+    display: none;
   }
 
   h1 {
-    font-size: clamp(24px, 8vw, 34px);
+    font-size: clamp(20px, 6.6vw, 28px);
     line-height: 0.95;
   }
 
@@ -334,16 +339,17 @@ canvas {
 
   .top-actions button,
   .audio-actions button {
-    min-height: 34px;
-    padding: 0 10px;
-    font-size: 12px;
+    min-height: 30px;
+    padding: 0 8px;
+    font-size: 11px;
   }
 
   .settings-bar {
     display: grid;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
     margin-bottom: 0;
-    padding: 8px;
+    padding: 6px;
   }
 
   .theme-picker,
@@ -354,21 +360,21 @@ canvas {
   select {
     flex: 1;
     min-width: 0;
-    min-height: 36px;
-    font-size: 13px;
+    min-height: 30px;
+    font-size: 12px;
   }
 
   .game-layout {
     grid-template-columns: 1fr;
     align-content: start;
-    gap: 8px;
+    gap: 6px;
     min-height: 0;
   }
 
   .panel:first-child {
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    padding: 8px;
+    gap: 5px;
+    padding: 6px;
     order: -1;
   }
 
@@ -376,8 +382,8 @@ canvas {
     display: grid;
     justify-items: center;
     gap: 2px;
-    min-height: 36px;
-    padding: 5px;
+    min-height: 30px;
+    padding: 4px;
   }
 
   .stat span {
@@ -385,62 +391,84 @@ canvas {
   }
 
   .stat strong {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .board-wrap {
-    width: min(100%, 320px, calc((100dvh - 328px) / 2));
-    min-width: 240px;
+    width: min(100%, 300px, calc((100svh - 286px) / 2));
+    min-width: 208px;
     margin: 0 auto;
   }
 
   .next-panel {
     grid-column: 1 / -1;
-    grid-template-columns: auto 70px 1fr;
+    grid-template-columns: auto 52px 1fr;
     align-items: center;
     justify-items: start;
-    padding: 8px 10px;
+    padding: 6px 8px;
+    min-height: 60px;
   }
 
   #next {
-    width: 70px;
-    height: 70px;
+    width: 52px;
+    height: 52px;
   }
 
   .help {
-    font-size: 11px;
+    font-size: 10px;
     text-align: left;
   }
 
   .touch-controls {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 112px;
-    gap: 10px;
+    grid-template-columns: 1fr minmax(156px, 184px) 92px;
+    align-items: end;
+    gap: 8px;
     margin-top: 0;
     padding-top: 2px;
     touch-action: none;
   }
 
   .dpad {
+    grid-column: 2;
     display: grid;
-    grid-template-columns: repeat(3, minmax(58px, 1fr));
-    grid-template-rows: repeat(2, 58px);
-    gap: 8px;
+    grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(3, 48px);
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .dpad-center {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .action-stack {
+    grid-column: 3;
+    display: grid;
+    grid-template-rows: 58px 94px;
+    gap: 6px;
   }
 
   .touch-controls button {
-    min-height: 58px;
+    min-height: 48px;
     border-width: 2px;
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1;
     touch-action: none;
   }
 
+  .rotate-action {
+    border-color: rgba(255, 220, 140, 0.62);
+    background: linear-gradient(180deg, rgba(118, 82, 34, 0.96), rgba(76, 49, 22, 0.96));
+  }
+
   .hard-drop {
-    min-height: 124px;
+    min-height: 94px;
     border-color: rgba(255, 130, 130, 0.62);
     background: linear-gradient(180deg, rgba(148, 56, 36, 0.96), rgba(96, 38, 22, 0.96));
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 0;
   }
 }
@@ -469,20 +497,24 @@ canvas {
   }
 
   .dpad {
-    grid-template-columns: repeat(3, minmax(48px, 1fr));
-    grid-template-rows: repeat(2, 54px);
-    gap: 8px;
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(3, 46px);
+    gap: 6px;
   }
 
   .touch-controls {
-    grid-template-columns: minmax(0, 1fr) 104px;
+    grid-template-columns: 1fr 156px 88px;
   }
 
   .touch-controls button {
-    min-height: 54px;
+    min-height: 46px;
+  }
+
+  .action-stack {
+    grid-template-rows: 56px 90px;
   }
 
   .hard-drop {
-    min-height: 116px;
+    min-height: 90px;
   }
 }

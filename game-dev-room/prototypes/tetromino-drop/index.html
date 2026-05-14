@@ -77,13 +77,19 @@
       <section class="touch-controls" aria-label="Touch controls">
         <div class="dpad" aria-label="Move controls">
           <span aria-hidden="true"></span>
-          <button type="button" data-action="rotate" aria-label="Rotate">↻</button>
+          <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <button type="button" data-action="left" aria-label="Left">←</button>
-          <button type="button" data-action="drop" aria-label="Down">↓</button>
+          <span class="dpad-center" aria-hidden="true"></span>
           <button type="button" data-action="right" aria-label="Right">→</button>
+          <span aria-hidden="true"></span>
+          <button type="button" data-action="drop" aria-label="Down">↓</button>
+          <span aria-hidden="true"></span>
         </div>
-        <button class="hard-drop" type="button" data-action="hardDrop">DROP</button>
+        <div class="action-stack" aria-label="Action controls">
+          <button class="rotate-action" type="button" data-action="rotate" aria-label="Rotate">↻</button>
+          <button class="hard-drop" type="button" data-action="hardDrop">DROP</button>
+        </div>
       </section>
     </main>
 
