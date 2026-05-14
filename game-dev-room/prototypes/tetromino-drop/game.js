@@ -93,9 +93,11 @@ const overlayTitle = document.querySelector("#overlayTitle");
 const overlayText = document.querySelector("#overlayText");
 const pauseBtn = document.querySelector("#pauseBtn");
 const restartBtn = document.querySelector("#restartBtn");
+const fullscreenBtn = document.querySelector("#fullscreenBtn");
 const bgmToggle = document.querySelector("#bgmToggle");
 const sfxToggle = document.querySelector("#sfxToggle");
 const themeSelect = document.querySelector("#themeSelect");
+const app = document.querySelector(".app");
 const activeBackground = BACKGROUND_ASSETS[Math.floor(Math.random() * BACKGROUND_ASSETS.length)];
 const boardBackdrop = new Image();
 boardBackdrop.src = activeBackground;
@@ -856,16 +858,41 @@ document.addEventListener("keydown", (event) => {
   if (key === "p" || key === "P") togglePause();
 });
 
+function runTouchAction(action) {
+  wakeAudio();
+  if (action === "left") move(-1);
+  if (action === "right") move(1);
+  if (action === "rotate") rotateCurrent(1);
+  if (action === "drop") softDrop(true);
+  if (action === "hardDrop") hardDrop();
+}
+
 document.querySelectorAll("[data-action]").forEach((button) => {
-  button.addEventListener("click", () => {
-    wakeAudio();
-    const action = button.dataset.action;
-    if (action === "left") move(-1);
-    if (action === "right") move(1);
-    if (action === "rotate") rotateCurrent(1);
-    if (action === "drop") softDrop(true);
+  let handledByPointer = false;
+
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    handledByPointer = true;
+    runTouchAction(button.dataset.action);
+  });
+
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (handledByPointer) {
+      handledByPointer = false;
+      return;
+    }
+    runTouchAction(button.dataset.action);
   });
 });
+
+app.addEventListener(
+  "touchmove",
+  (event) => {
+    event.preventDefault();
+  },
+  { passive: false }
+);
 
 pauseBtn.addEventListener("click", () => {
   wakeAudio();
@@ -874,6 +901,17 @@ pauseBtn.addEventListener("click", () => {
 restartBtn.addEventListener("click", () => {
   wakeAudio();
   restart();
+});
+fullscreenBtn.addEventListener("click", async () => {
+  wakeAudio();
+  const root = document.documentElement;
+  try {
+    if (!document.fullscreenElement && root.requestFullscreen) {
+      await root.requestFullscreen();
+    }
+  } catch {
+    // iPhone Safari may ignore the Fullscreen API; the mobile layout still stays locked.
+  }
 });
 bgmToggle.addEventListener("click", () => {
   wakeAudio();

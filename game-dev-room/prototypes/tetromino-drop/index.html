@@ -2,7 +2,10 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <title>Tetromino Drop Sample</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -14,6 +17,7 @@
           <h1>TETROMINO DROP</h1>
         </div>
         <div class="top-actions">
+          <button id="fullscreenBtn" type="button">Full</button>
           <button id="pauseBtn" type="button">Pause</button>
           <button id="restartBtn" type="button">Restart</button>
         </div>
@@ -71,10 +75,15 @@
       </section>
 
       <section class="touch-controls" aria-label="Touch controls">
-        <button type="button" data-action="left">Left</button>
-        <button type="button" data-action="rotate">Rotate</button>
-        <button type="button" data-action="right">Right</button>
-        <button type="button" data-action="drop">Down</button>
+        <div class="dpad" aria-label="Move controls">
+          <span aria-hidden="true"></span>
+          <button type="button" data-action="rotate" aria-label="Rotate">↻</button>
+          <span aria-hidden="true"></span>
+          <button type="button" data-action="left" aria-label="Left">←</button>
+          <button type="button" data-action="drop" aria-label="Down">↓</button>
+          <button type="button" data-action="right" aria-label="Right">→</button>
+        </div>
+        <button class="hard-drop" type="button" data-action="hardDrop">DROP</button>
       </section>
     </main>
 
