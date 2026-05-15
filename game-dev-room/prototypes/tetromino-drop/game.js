@@ -838,9 +838,10 @@ function showOverlay(title, text, mode = "default") {
   overlayText.textContent = text;
   overlay.classList.toggle("game-over-overlay", mode === "game-over");
   if (mode === "game-over") {
-    overlay.style.setProperty("--game-over-art", `url("${randomGameOverArt()}")`);
+    const art = randomGameOverArt();
+    overlay.style.backgroundImage = `linear-gradient(180deg, rgba(2, 3, 5, 0.12), rgba(2, 3, 5, 0.42) 46%, rgba(2, 3, 5, 0.88)), url("${art}")`;
   } else {
-    overlay.style.removeProperty("--game-over-art");
+    overlay.style.removeProperty("background-image");
   }
   overlay.classList.remove("hidden");
 }
@@ -848,7 +849,7 @@ function showOverlay(title, text, mode = "default") {
 function hideOverlay() {
   overlay.classList.add("hidden");
   overlay.classList.remove("game-over-overlay");
-  overlay.style.removeProperty("--game-over-art");
+  overlay.style.removeProperty("background-image");
 }
 
 function togglePause() {
