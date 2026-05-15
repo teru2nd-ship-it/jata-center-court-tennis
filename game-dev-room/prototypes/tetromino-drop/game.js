@@ -63,6 +63,14 @@ const BACKGROUND_ASSETS = [
   "./assets/backgrounds/flush-11-slide-panda.jpg",
 ];
 
+const GAME_OVER_ASSETS = [
+  "./assets/game-over/game-over-01-chain.jpg",
+  "./assets/game-over/game-over-02-rocking-horse.jpg",
+  "./assets/game-over/game-over-03-hug.jpg",
+  "./assets/game-over/game-over-04-owl.jpg",
+  "./assets/game-over/game-over-05-werewolf.jpg",
+];
+
 const SHAPES = {
   I: [[1, 1, 1, 1]],
   J: [
@@ -118,6 +126,11 @@ boardBackdrop.addEventListener("load", () => {
     draw();
   }
 });
+
+function randomGameOverArt() {
+  return GAME_OVER_ASSETS[Math.floor(Math.random() * GAME_OVER_ASSETS.length)];
+}
+
 const poopFaceImages = Object.fromEntries(
   Object.entries(POOP_FACE_ASSETS).map(([type, src]) => {
     const image = new Image();
@@ -450,7 +463,7 @@ function spawnPiece() {
     paused = false;
     saveBest();
     playSfx("game-over");
-    showOverlay("Game Over", "Press Restart to play again.");
+    showOverlay("Game Over", "Press Restart to play again.", "game-over");
   }
 }
 
@@ -820,14 +833,22 @@ function draw() {
   bestEl.textContent = Math.max(best, score);
 }
 
-function showOverlay(title, text) {
+function showOverlay(title, text, mode = "default") {
   overlayTitle.textContent = title;
   overlayText.textContent = text;
+  overlay.classList.toggle("game-over-overlay", mode === "game-over");
+  if (mode === "game-over") {
+    overlay.style.setProperty("--game-over-art", `url("${randomGameOverArt()}")`);
+  } else {
+    overlay.style.removeProperty("--game-over-art");
+  }
   overlay.classList.remove("hidden");
 }
 
 function hideOverlay() {
   overlay.classList.add("hidden");
+  overlay.classList.remove("game-over-overlay");
+  overlay.style.removeProperty("--game-over-art");
 }
 
 function togglePause() {

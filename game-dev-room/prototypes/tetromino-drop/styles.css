@@ -237,6 +237,17 @@ canvas {
   text-align: center;
 }
 
+.overlay.game-over-overlay {
+  align-content: end;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(2, 3, 5, 0.12), rgba(2, 3, 5, 0.42) 46%, rgba(2, 3, 5, 0.88)),
+    var(--game-over-art),
+    rgba(8, 10, 16, 0.92);
+  background-position: center;
+  background-size: cover;
+}
+
 .overlay strong {
   font-size: 28px;
 }
@@ -244,6 +255,22 @@ canvas {
 .overlay span {
   color: var(--muted);
   font-size: 14px;
+}
+
+.overlay.game-over-overlay strong,
+.overlay.game-over-overlay span {
+  justify-self: center;
+  max-width: 240px;
+  padding: 8px 12px;
+  border: 1px solid rgba(235, 210, 166, 0.42);
+  border-radius: 8px;
+  background: rgba(5, 7, 11, 0.72);
+  color: #fff7e8;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.overlay.game-over-overlay span {
+  color: #f0d6b2;
 }
 
 .hidden {
