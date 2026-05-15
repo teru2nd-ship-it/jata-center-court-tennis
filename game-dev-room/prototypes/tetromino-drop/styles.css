@@ -110,6 +110,46 @@ h1 {
   letter-spacing: 0;
 }
 
+.logo-mark {
+  display: grid;
+  gap: 4px;
+  width: max-content;
+  max-width: 100%;
+  text-transform: uppercase;
+}
+
+.logo-main {
+  display: inline-block;
+  padding-right: 0.1em;
+  color: #fff7e8;
+  font-size: clamp(34px, 7vw, 52px);
+  font-weight: 950;
+  line-height: 0.88;
+  text-shadow:
+    0 2px 0 rgba(77, 42, 12, 0.98),
+    0 0 16px rgba(255, 191, 100, 0.28);
+}
+
+.logo-main span {
+  color: #ffc46f;
+  text-shadow:
+    0 2px 0 rgba(77, 42, 12, 0.98),
+    0 0 12px rgba(255, 196, 111, 0.45);
+}
+
+.logo-sub {
+  display: inline-flex;
+  width: fit-content;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 196, 111, 0.38);
+  border-radius: 7px;
+  background: rgba(65, 36, 14, 0.72);
+  color: #ffdca4;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
 button {
   min-height: 42px;
   border: 1px solid var(--line);
@@ -416,7 +456,7 @@ canvas {
 
   .top-bar {
     display: grid;
-    grid-template-columns: auto auto minmax(112px, 1fr) auto;
+    grid-template-columns: minmax(80px, auto) auto minmax(96px, 1fr) auto;
     align-items: center;
     gap: 5px;
     margin-bottom: 0;
@@ -458,15 +498,29 @@ canvas {
     white-space: nowrap;
   }
 
+  .logo-mark {
+    gap: 2px;
+    max-width: 86px;
+  }
+
+  .logo-main {
+    font-size: clamp(14px, 4.4vw, 17px);
+    line-height: 0.9;
+  }
+
+  .logo-sub {
+    display: none;
+  }
+
   .top-actions {
     justify-content: start;
-    gap: 4px;
+    gap: 3px;
   }
 
   .top-actions button,
   .audio-actions button {
     min-height: 28px;
-    padding: 0 7px;
+    padding: 0 6px;
     border-radius: 7px;
     font-size: 10px;
   }
@@ -485,7 +539,7 @@ canvas {
     flex: 1;
     min-width: 0;
     min-height: 28px;
-    padding: 0 7px;
+    padding: 0 6px;
     border-radius: 7px;
     font-size: 11px;
   }
