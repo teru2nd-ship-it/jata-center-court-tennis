@@ -240,10 +240,10 @@ canvas {
 .overlay.game-over-overlay {
   align-content: end;
   padding: 24px;
-  background:
+  background-color: rgba(8, 10, 16, 0.92);
+  background-image:
     linear-gradient(180deg, rgba(2, 3, 5, 0.12), rgba(2, 3, 5, 0.42) 46%, rgba(2, 3, 5, 0.88)),
-    var(--game-over-art),
-    rgba(8, 10, 16, 0.92);
+    var(--game-over-art);
   background-position: center;
   background-size: cover;
 }
