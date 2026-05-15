@@ -23,6 +23,7 @@
 - モバイル用タッチ操作
 - 接地後も短時間だけ左右移動・回転できるロックディレイ
 - JATA DROP流用壁紙を背景フォルダからランダム選択
+- 水・海・爽快感を軸にしたFlush背景セットを追加
 - ページ外側と盤面内で同じ背景イラストを共有
 - `Classic` / `🌠 Shooting Star` / `JATA Reptile` / `Poop Face` のデザイン切替
 - `JATA Reptile` はJATA DROPの爬虫類系素材をブロック内に反映
@@ -50,3 +51,4 @@
 - 背景候補は `assets/backgrounds/` に追加する。
 - 追加後は `game.js` の `BACKGROUND_ASSETS` にパスを追記する。
 - ページ外側と盤面内背景は、同じランダム選択画像を共有する。
+- 大きい原画はゲーム用にJPEG化して軽量コピーを置く。

@@ -50,6 +50,17 @@ const BACKGROUND_ASSETS = [
   "./assets/backgrounds/29E325E7-F351-489C-AAE5-55DD29342D9B.png",
   "./assets/backgrounds/4A29E1AA-1B68-4A29-8A2B-FA93D6710C09.png",
   "./assets/backgrounds/99F40B8D-8B0D-4ED8-BE73-68C8AA42800F.png",
+  "./assets/backgrounds/flush-01-orca-breach.jpg",
+  "./assets/backgrounds/flush-02-deep-sea-panda.jpg",
+  "./assets/backgrounds/flush-03-orca-sparkle.jpg",
+  "./assets/backgrounds/flush-04-whale-aquarium.jpg",
+  "./assets/backgrounds/flush-05-moon-forest.jpg",
+  "./assets/backgrounds/flush-06-manatee-panda.jpg",
+  "./assets/backgrounds/flush-07-sea-dragon.jpg",
+  "./assets/backgrounds/flush-08-dolphins.jpg",
+  "./assets/backgrounds/flush-09-orca-wave.jpg",
+  "./assets/backgrounds/flush-10-warrior-panda.jpg",
+  "./assets/backgrounds/flush-11-slide-panda.jpg",
 ];
 
 const SHAPES = {
