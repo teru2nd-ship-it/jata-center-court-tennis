@@ -7,6 +7,7 @@ const AUDIO_KEY = "tetromino-drop-audio:v1";
 const THEME_KEY = "tetromino-drop-theme:v1";
 const LOCK_DELAY = 520;
 const LOCK_RESET_LIMIT = 12;
+const GOOD_SCORE_THRESHOLD = 3000;
 
 const AUDIO_DEFAULTS = {
   bgm: true,
@@ -71,6 +72,11 @@ const GAME_OVER_ASSETS = [
   "./assets/game-over/game-over-05-werewolf.jpg",
 ];
 
+const RESULT_VIDEOS = {
+  good: "./assets/results/good-score-01.mp4",
+  best: "./assets/results/new-best-01.mp4",
+};
+
 const SHAPES = {
   I: [[1, 1, 1, 1]],
   J: [
@@ -110,6 +116,7 @@ const bestEl = document.querySelector("#best");
 const overlay = document.querySelector("#overlay");
 const overlayTitle = document.querySelector("#overlayTitle");
 const overlayText = document.querySelector("#overlayText");
+const resultVideo = document.querySelector("#resultVideo");
 const pauseBtn = document.querySelector("#pauseBtn");
 const restartBtn = document.querySelector("#restartBtn");
 const fullscreenBtn = document.querySelector("#fullscreenBtn");
@@ -459,11 +466,12 @@ function spawnPiece() {
   lockTimer = 0;
   lockResetCount = 0;
   if (collides(current)) {
+    const resultMode = resultModeForScore();
     gameOver = true;
     paused = false;
     saveBest();
     playSfx("game-over");
-    showOverlay("Game Over", "Press Restart to play again.", "game-over");
+    showResultOverlay(resultMode);
   }
 }
 
@@ -489,6 +497,12 @@ function saveBest() {
     best = score;
     writeBestScore(best);
   }
+}
+
+function resultModeForScore() {
+  if (score > best) return "best";
+  if (score >= GOOD_SCORE_THRESHOLD) return "good";
+  return "game-over";
 }
 
 function move(dx) {
@@ -837,9 +851,14 @@ function showOverlay(title, text, mode = "default") {
   overlayTitle.textContent = title;
   overlayText.textContent = text;
   overlay.classList.toggle("game-over-overlay", mode === "game-over");
+  overlay.classList.toggle("celebration-overlay", mode === "best" || mode === "good");
+  stopResultVideo();
   if (mode === "game-over") {
     const art = randomGameOverArt();
     overlay.style.backgroundImage = `linear-gradient(180deg, rgba(2, 3, 5, 0.12), rgba(2, 3, 5, 0.42) 46%, rgba(2, 3, 5, 0.88)), url("${art}")`;
+  } else if (mode === "best" || mode === "good") {
+    overlay.style.backgroundImage = "linear-gradient(180deg, rgba(2, 8, 16, 0.06), rgba(2, 8, 16, 0.24) 44%, rgba(2, 8, 16, 0.72))";
+    playResultVideo(RESULT_VIDEOS[mode]);
   } else {
     overlay.style.removeProperty("background-image");
   }
@@ -849,7 +868,37 @@ function showOverlay(title, text, mode = "default") {
 function hideOverlay() {
   overlay.classList.add("hidden");
   overlay.classList.remove("game-over-overlay");
+  overlay.classList.remove("celebration-overlay");
   overlay.style.removeProperty("background-image");
+  stopResultVideo();
+}
+
+function showResultOverlay(mode) {
+  if (mode === "best") {
+    showOverlay("New Best!", "最高記録更新！", "best");
+    return;
+  }
+  if (mode === "good") {
+    showOverlay("Great Run!", "高得点おめでとう！", "good");
+    return;
+  }
+  showOverlay("Game Over", "Press Restart to play again.", "game-over");
+}
+
+function playResultVideo(src) {
+  resultVideo.src = src;
+  resultVideo.classList.remove("hidden");
+  resultVideo.currentTime = 0;
+  resultVideo.play().catch(() => {
+    // Some browsers delay video playback until the next user gesture.
+  });
+}
+
+function stopResultVideo() {
+  resultVideo.pause();
+  resultVideo.removeAttribute("src");
+  resultVideo.load();
+  resultVideo.classList.add("hidden");
 }
 
 function togglePause() {
@@ -985,4 +1034,9 @@ themeSelect.addEventListener("change", (event) => {
 refreshAudioButtons();
 useTheme(themeId);
 restart();
+const previewResult = new URLSearchParams(window.location.search).get("previewResult");
+if (previewResult === "best" || previewResult === "good" || previewResult === "game-over") {
+  gameOver = true;
+  showResultOverlay(previewResult);
+}
 requestAnimationFrame(update);
