@@ -55,12 +55,14 @@
 - 追加後は `game.js` の `BACKGROUND_ASSETS` にパスを追記する。
 - ページ外側と盤面内背景は、同じランダム選択画像を共有する。
 - 大きい原画はゲーム用にJPEG化して軽量コピーを置く。
+- iPhone向け軽量コピーは `assets/mobile/backgrounds/` に置き、`MOBILE_BACKGROUND_ASSETS` に追記する。
 
 ## ゲームオーバー画面メモ
 
 - ゲームオーバー用アートは `assets/game-over/` に追加する。
 - 追加後は `game.js` の `GAME_OVER_ASSETS` にパスを追記する。
 - 他ゲームにも流用しやすいよう、通常背景とは別フォルダで管理する。
+- iPhone向け軽量コピーは `assets/mobile/game-over/` に置き、`MOBILE_GAME_OVER_ASSETS` に追記する。
 
 ## 結果演出メモ
 
@@ -68,3 +70,4 @@
 - `new-best-01.mp4` はハイスコア更新時に表示する。
 - `good-score-01.mp4` は高得点時に表示する。
 - 高得点のしきい値は `game.js` の `GOOD_SCORE_THRESHOLD` で調整する。
+- iPhone/省データ/低モーション環境では結果動画を読み込まず、軽いキラキラ演出だけ表示する。

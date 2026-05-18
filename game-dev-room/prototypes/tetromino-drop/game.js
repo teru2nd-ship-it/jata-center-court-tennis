@@ -8,6 +8,7 @@ const THEME_KEY = "tetromino-drop-theme:v1";
 const LOCK_DELAY = 520;
 const LOCK_RESET_LIMIT = 12;
 const GOOD_SCORE_THRESHOLD = 3000;
+const COMPACT_DEVICE_QUERY = "(max-width: 740px), (pointer: coarse)";
 
 const AUDIO_DEFAULTS = {
   bgm: true,
@@ -64,12 +65,38 @@ const BACKGROUND_ASSETS = [
   "./assets/backgrounds/flush-11-slide-panda.jpg",
 ];
 
+const MOBILE_BACKGROUND_ASSETS = [
+  "./assets/mobile/backgrounds/176A9D6E-991C-41E1-B97B-8B2BD438CF0B.jpg",
+  "./assets/mobile/backgrounds/29E325E7-F351-489C-AAE5-55DD29342D9B.jpg",
+  "./assets/mobile/backgrounds/4A29E1AA-1B68-4A29-8A2B-FA93D6710C09.jpg",
+  "./assets/mobile/backgrounds/99F40B8D-8B0D-4ED8-BE73-68C8AA42800F.jpg",
+  "./assets/mobile/backgrounds/flush-01-orca-breach.jpg",
+  "./assets/mobile/backgrounds/flush-02-deep-sea-panda.jpg",
+  "./assets/mobile/backgrounds/flush-03-orca-sparkle.jpg",
+  "./assets/mobile/backgrounds/flush-04-whale-aquarium.jpg",
+  "./assets/mobile/backgrounds/flush-05-moon-forest.jpg",
+  "./assets/mobile/backgrounds/flush-06-manatee-panda.jpg",
+  "./assets/mobile/backgrounds/flush-07-sea-dragon.jpg",
+  "./assets/mobile/backgrounds/flush-08-dolphins.jpg",
+  "./assets/mobile/backgrounds/flush-09-orca-wave.jpg",
+  "./assets/mobile/backgrounds/flush-10-warrior-panda.jpg",
+  "./assets/mobile/backgrounds/flush-11-slide-panda.jpg",
+];
+
 const GAME_OVER_ASSETS = [
   "./assets/game-over/game-over-01-chain.jpg",
   "./assets/game-over/game-over-02-rocking-horse.jpg",
   "./assets/game-over/game-over-03-hug.jpg",
   "./assets/game-over/game-over-04-owl.jpg",
   "./assets/game-over/game-over-05-werewolf.jpg",
+];
+
+const MOBILE_GAME_OVER_ASSETS = [
+  "./assets/mobile/game-over/game-over-01-chain.jpg",
+  "./assets/mobile/game-over/game-over-02-rocking-horse.jpg",
+  "./assets/mobile/game-over/game-over-03-hug.jpg",
+  "./assets/mobile/game-over/game-over-04-owl.jpg",
+  "./assets/mobile/game-over/game-over-05-werewolf.jpg",
 ];
 
 const RESULT_VIDEOS = {
@@ -124,10 +151,19 @@ const bgmToggle = document.querySelector("#bgmToggle");
 const sfxToggle = document.querySelector("#sfxToggle");
 const themeSelect = document.querySelector("#themeSelect");
 const app = document.querySelector(".app");
-const activeBackground = BACKGROUND_ASSETS[Math.floor(Math.random() * BACKGROUND_ASSETS.length)];
+const compactDevice = window.matchMedia(COMPACT_DEVICE_QUERY).matches;
+const saveData = Boolean(navigator.connection?.saveData);
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const lightweightMode = compactDevice || saveData;
+const activeBackgroundAssets = lightweightMode ? MOBILE_BACKGROUND_ASSETS : BACKGROUND_ASSETS;
+const gameOverAssets = lightweightMode ? MOBILE_GAME_OVER_ASSETS : GAME_OVER_ASSETS;
+const resultVideosEnabled = !lightweightMode && !reducedMotion;
+const activeBackground =
+  activeBackgroundAssets[Math.floor(Math.random() * activeBackgroundAssets.length)];
 const boardBackdrop = new Image();
 boardBackdrop.src = activeBackground;
 document.body.style.setProperty("--page-wallpaper", `url("${activeBackground}")`);
+document.body.classList.toggle("lightweight-mode", lightweightMode);
 boardBackdrop.addEventListener("load", () => {
   if (board && current && nextPiece) {
     draw();
@@ -135,7 +171,7 @@ boardBackdrop.addEventListener("load", () => {
 });
 
 function randomGameOverArt() {
-  return GAME_OVER_ASSETS[Math.floor(Math.random() * GAME_OVER_ASSETS.length)];
+  return gameOverAssets[Math.floor(Math.random() * gameOverAssets.length)];
 }
 
 const poopFaceImages = Object.fromEntries(
@@ -858,7 +894,9 @@ function showOverlay(title, text, mode = "default") {
     overlay.style.backgroundImage = `linear-gradient(180deg, rgba(2, 3, 5, 0.12), rgba(2, 3, 5, 0.42) 46%, rgba(2, 3, 5, 0.88)), url("${art}")`;
   } else if (mode === "best" || mode === "good") {
     overlay.style.backgroundImage = "linear-gradient(180deg, rgba(2, 8, 16, 0.06), rgba(2, 8, 16, 0.24) 44%, rgba(2, 8, 16, 0.72))";
-    playResultVideo(RESULT_VIDEOS[mode]);
+    if (resultVideosEnabled) {
+      playResultVideo(RESULT_VIDEOS[mode]);
+    }
   } else {
     overlay.style.removeProperty("background-image");
   }
