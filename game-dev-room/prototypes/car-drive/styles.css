@@ -72,6 +72,8 @@ body {
 
 .brand {
   min-width: 0;
+  display: grid;
+  gap: 4px;
 }
 
 .brand p {
@@ -93,6 +95,27 @@ h1 {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.car-picker {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.car-picker select {
+  min-width: 0;
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(22, 54, 77, 0.92);
+  color: var(--text);
+  font: inherit;
+  padding: 0 8px;
 }
 
 .actions {
@@ -245,6 +268,21 @@ canvas {
 
   h1 {
     font-size: clamp(20px, 6.4vw, 26px);
+  }
+
+  .car-picker {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+    font-size: 10px;
+  }
+
+  .car-picker span {
+    display: none;
+  }
+
+  .car-picker select {
+    min-height: 27px;
+    padding: 0 6px;
   }
 
   .actions button {

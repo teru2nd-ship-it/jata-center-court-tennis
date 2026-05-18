@@ -10,17 +10,36 @@ const startBtn = document.querySelector("#startBtn");
 const pauseBtn = document.querySelector("#pauseBtn");
 const restartBtn = document.querySelector("#restartBtn");
 const soundBtn = document.querySelector("#soundBtn");
+const carSelect = document.querySelector("#carSelect");
 const leftBtn = document.querySelector("#leftBtn");
 const rightBtn = document.querySelector("#rightBtn");
 const boostBtn = document.querySelector("#boostBtn");
 
 const BEST_KEY = "car-drive-best:v1";
 const SOUND_KEY = "car-drive-sfx:v1";
+const CAR_KEY = "car-drive-car:v1";
 const W = canvas.width;
 const H = canvas.height;
 const ROAD_LEFT = 58;
 const ROAD_RIGHT = W - 58;
 const LANES = [104, 180, 256];
+const CAR_TYPES = {
+  "arcade-red": {
+    name: "Arcade Red",
+  },
+  "toyota-hilux": {
+    name: "Toyota Hilux",
+    src: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Toyota_Hilux,_side_view.svg",
+    width: 76,
+    height: 34,
+  },
+  "porsche-959": {
+    name: "Porsche 959",
+    src: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Porsche_959.svg",
+    width: 82,
+    height: 28,
+  },
+};
 
 let car = { lane: 1, x: LANES[1], y: H - 92, targetX: LANES[1], boost: 0 };
 let objects = [];
@@ -37,6 +56,8 @@ let gameOver = false;
 let lastTime = 0;
 let audioContext = null;
 let sfxEnabled = readSound();
+let selectedCar = readCar();
+let carImages = {};
 
 function readBest() {
   try {
@@ -72,6 +93,34 @@ function saveSound() {
   } catch {
     // localStorage can be blocked in some local browser contexts.
   }
+}
+
+function readCar() {
+  try {
+    const saved = localStorage.getItem(CAR_KEY);
+    return CAR_TYPES[saved] ? saved : "arcade-red";
+  } catch {
+    return "arcade-red";
+  }
+}
+
+function saveCar() {
+  try {
+    localStorage.setItem(CAR_KEY, selectedCar);
+  } catch {
+    // localStorage can be blocked in some local browser contexts.
+  }
+}
+
+function loadCarImages() {
+  Object.entries(CAR_TYPES).forEach(([id, type]) => {
+    if (!type.src) return;
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = draw;
+    image.src = type.src;
+    carImages[id] = image;
+  });
 }
 
 function wakeAudio() {
@@ -284,6 +333,30 @@ function drawRoad() {
 }
 
 function drawCar() {
+  const type = CAR_TYPES[selectedCar];
+  const image = carImages[selectedCar];
+  if (type?.src && image?.complete && image.naturalWidth > 0) {
+    const w = type.width;
+    const h = type.height;
+    ctx.save();
+    ctx.translate(car.x, car.y + 2);
+    ctx.shadowColor = "rgba(0,0,0,.55)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 6;
+    ctx.drawImage(image, -w / 2, -h / 2, w, h);
+    ctx.restore();
+    ctx.save();
+    ctx.fillStyle = "#fff6aa";
+    ctx.globalAlpha = 0.86;
+    ctx.fillRect(car.x - 33, car.y - 24, 8, 5);
+    ctx.fillRect(car.x + 25, car.y - 24, 8, 5);
+    ctx.restore();
+    return;
+  }
+  drawArcadeCar();
+}
+
+function drawArcadeCar() {
   const x = car.x;
   const y = car.y;
   ctx.save();
@@ -426,8 +499,11 @@ document.addEventListener("keydown", (event) => {
   if (["ArrowLeft", "ArrowRight", "ArrowUp", " "].includes(event.key)) {
     event.preventDefault();
     wakeAudio();
-    keys.add(event.key);
   }
+  if (event.repeat) return;
+  if (event.key === "ArrowLeft") moveLane(-1);
+  if (event.key === "ArrowRight") moveLane(1);
+  if (event.key === "ArrowUp" || event.key === " ") keys.add(event.key);
   if (event.key === "p" || event.key === "P") togglePause();
 });
 
@@ -463,6 +539,13 @@ soundBtn.addEventListener("click", () => {
   if (sfxEnabled) playSfx("coin");
 });
 
+carSelect.addEventListener("change", () => {
+  selectedCar = carSelect.value;
+  saveCar();
+  playSfx("move");
+  draw();
+});
+
 document.body.addEventListener(
   "touchmove",
   (event) => {
@@ -473,6 +556,8 @@ document.body.addEventListener(
 
 soundBtn.textContent = sfxEnabled ? "SFX ON" : "SFX OFF";
 soundBtn.setAttribute("aria-pressed", String(sfxEnabled));
+carSelect.value = selectedCar;
+loadCarImages();
 updateStats();
 draw();
 showOverlay("Ready?", "Coins are good. Cones are bad.", "Start");
