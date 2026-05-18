@@ -4,15 +4,13 @@ Last updated: 2026-05-18
 
 ## Current Position
 
-BOTTON is close to complete as a playable tetromino-style mobile game prototype.
+BOTTON is published as a playable tetromino-style mobile game prototype.
 
 The next workflow is:
 
-1. Finish iPhone playtest checks.
-2. Fix any mobile layout, weight, or control issues.
-3. Review the Git diff for BOTTON only.
-4. Push to Git after TERU approval.
-5. Publish to Web after TERU approval.
+1. Finish any remaining iPhone playtest notes.
+2. Fix any mobile layout, weight, or control issues found after publish.
+3. Add a Git remote before Git push, because this local repository currently has no remote.
 
 ## Test URL
 
@@ -24,6 +22,14 @@ Use this while the local static server is running from:
 
 `game-dev-room/prototypes/tetromino-drop/`
 
+Production URL:
+
+`https://botton.vercel.app`
+
+Latest deployment URL:
+
+`https://botton-bim1lkq7z-teru2nd-ship-its-projects.vercel.app`
+
 ## Current State
 
 - Core gameplay is playable.
@@ -33,6 +39,8 @@ Use this while the local static server is running from:
 - Result videos are skipped in lightweight/reduced-motion environments.
 - BGM/SFX toggles and theme selection are implemented.
 - Handoff notes are in `BOTTON_HANDOFF.md`.
+- Vercel project `botton` is linked locally.
+- Production deploy completed on 2026-05-18 and returned `200 OK`.
 
 ## What TERU Should Check On Phone
 
@@ -63,4 +71,4 @@ Ask TERU before:
 
 ## Next Stop Point
 
-Stop and ask TERU before Git push or Web publish.
+Stop before changing production URL settings, adding a custom domain, or removing original source assets.

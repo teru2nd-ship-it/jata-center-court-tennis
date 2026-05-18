@@ -24,6 +24,7 @@
 ## Notes From TERU
 
 - 2026-05-18: TERU approved moving ahead with publish from this chat.
+- 2026-05-18: Git push was approved, but this local repository has no Git remote configured.
 
 ## Local Check Log
 
@@ -34,6 +35,9 @@
 - 2026-05-18: `node --check game.js` passed.
 - 2026-05-18: Verified all `./assets/...` references in `game.js` exist.
 - 2026-05-18: Mobile asset folder is about `2.8M`; original backgrounds/results/game-over groups are about `23.8M` total.
+- 2026-05-18: Committed BOTTON-only local diff as `2bd703c Add BOTTON mobile lightweight mode`.
+- 2026-05-18: Created Vercel project `botton`, linked this folder, and deployed production.
+- 2026-05-18: Confirmed `https://botton.vercel.app` returns `200 OK`.
 
 ## Bugs To Fix
 
@@ -42,6 +46,7 @@
 ## Release Readiness
 
 - [ ] iPhone playtest accepted
-- [ ] BOTTON-only Git diff reviewed
-- [x] TERU approved Git push
+- [x] BOTTON-only Git diff reviewed
+- [ ] Git push completed
 - [x] TERU approved Web publish
+- [x] Web publish completed
