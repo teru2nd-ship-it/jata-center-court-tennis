@@ -62,7 +62,8 @@
 
 ```text
 このチャットはゲーム開発室の続きです。
-まず /Users/teru44/Documents/New project/game-dev-room/working-style.md と、作業対象ゲームのページを読んでください。
+まず /Users/teru44/Documents/New project/game-dev-room/working-style.md を読んでください。
+次に、作業対象ゲームの project ページ、README、NOW.md があれば読んでください。
 チャットは軽く、実装ログやTODOは作業場ファイルに残してください。
 外部変更、push、Vercel反映、本番公開は確認してから進めてください。
 ```
