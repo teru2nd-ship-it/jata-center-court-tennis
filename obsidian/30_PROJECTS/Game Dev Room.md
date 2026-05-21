@@ -5,6 +5,7 @@
 ## 参照先
 
 - [Game Dev Room README](../../game-dev-room/README.md)
+- [Game Dev Room Handover 2026-05-22](Game%20Dev%20Room%20Handover%202026-05-22.md)
 - [ゲーム開発室 立ち上げ用データ](../../handover/2026-05-08_game-dev-room_startup.md)
 - [ロードマップ](../../game-dev-room/roadmap.md)
 - [作業スタイル / 別チャット運用](../../game-dev-room/working-style.md)
