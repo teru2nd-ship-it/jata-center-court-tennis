@@ -111,6 +111,7 @@ f175083 Refit Car Drive 3D as Dino Drive Derby
 Game Dev Room / Vault:
 
 ```text
+23e0f2a Add Dino Drive Derby 3D work report
 a857c3e Record Dino Drive goal poster direction
 3e63728 Record Dino Drive goal samples
 3c1e466 Record Dino Drive asset refresh
@@ -119,7 +120,10 @@ a857c3e Record Dino Drive goal poster direction
 
 ## 外部反映
 
-- pushはしていない。
+- `jata-arcade-control-tower` は `origin/main` より2コミット先行。
+  - `f2848f9 Add Dino Drive goal scene samples`
+  - `183339d Use goal poster samples for Dino Drive`
+- つまり `7e42f0d Update Dino Drive Derby fruit and goal assets` まではpush済み、ゴール演出サンプル2件は未push。
 - Vercel本番反映はしていない。
 - 公開URL変更はしていない。
 
