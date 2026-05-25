@@ -181,6 +181,39 @@ http://100.82.86.8:8791/
 - 素材クレジットページ
 - スマホUI微調整
 
+### Dino Drive Derby 3D 追加メモ（2026-05-25）
+
+作業場所:
+
+```text
+/Users/teru44/Downloads/jata-arcade-control-tower/games/car-drive-3d
+```
+
+目的:
+
+- 誕生日版から分離し、JATA ARCADE正式3Dゲーム `Dino Drive Derby 3D` として整える。
+- `YUZUKI` / Birthday / Gift / Present を表示から外す。
+- 恐竜ワールド、FRUIT収集、Poop障害物HP制に寄せる。
+
+今回の重要仕様:
+
+- 恐竜、岩、倒木は即ゲームオーバー。
+- Poop / Rainbow Poop はHPを1削る。HP 0でゲームオーバー。
+- iPad長押し操作、車選択、3Dガレージ、2D導線は壊さない。
+
+素材仕様のズレは確定せず保持:
+
+- FRUIT枚数: 8枠案 / 7枚+bonus panda案
+- ぶどうパンダ: 独立10点枠案 / grape内包案
+- 点数: 通常1-3点、Panda 5点、Grape Panda 10点は候補
+- persimmon: 週末引き継ぎでは削除済み扱い
+
+確認URL候補:
+
+```text
+http://127.0.0.1:8783/games/car-drive-3d/
+```
+
 ## JATA DROP
 
 主なメモ:
