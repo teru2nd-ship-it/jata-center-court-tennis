@@ -216,6 +216,7 @@ http://127.0.0.1:8783/games/car-drive-3d/
 
 2026-05-25 追加更新:
 
+- 報告書: `_GAME_DEV/car-drive/2026-05-25_報告書_Dino Drive Derby 3D.md`
 - FRUIT素材は全8種PNGへ統一。
 - Poop / Rainbow Poop / Tomato / Allosaurus はTERUさん差し替え済み素材を同名ファイルで反映。
 - ゴール動画は `Goal1.mp4`、FRUITベスト更新動画は `Goal2.mp4` を使用。
@@ -224,6 +225,7 @@ http://127.0.0.1:8783/games/car-drive-3d/
   - Sport Coupe / City Sedan / Patrol Car の3案。
   - 一枚絵のズーム、パン、紙吹雪、GOAL文字、FRUIT高得点、NEW BEST演出で動画風に見せる。
 - 追加方針: TERUさん指定の立ち絵ポスター3種を `assets/results/posters/` に整理し、タイトル部分を `GOAL!` に差し替える方向が有力。
+- 明日候補: Sport Coupeは高速だがハンドル難しめ、City Sedanは低速だがハンドルが効く、Patrol CarはPoop耐性高め。
 - ローカルサーバーでFRUIT、Poop、Allosaurus、Goal動画の読み込み確認OK。
 
 ## JATA DROP

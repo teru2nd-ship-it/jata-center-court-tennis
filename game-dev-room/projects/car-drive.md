@@ -115,3 +115,5 @@ http://127.0.0.1:8783/games/car-drive-3d/
   - Patrol Car: 夜背景、NEW BEST、スポットライト、キラキラ。
   - 一枚絵のズーム/パン/エフェクトで動画風に見せる方針。車画像や背景は後から差し替え可能。
 - 追加方針: TERUさん指定の立ち絵ポスター3種を `assets/results/posters/` に整理し、タイトル部分を `GOAL!` に差し替える方向が有力。
+- 報告書: `obsidian/30_PROJECTS/_GAME_DEV/car-drive/2026-05-25_報告書_Dino Drive Derby 3D.md`
+- 明日候補: Sport Coupeは高速だがハンドル難しめ、City Sedanは低速だがハンドルが効く、Patrol CarはPoop耐性高め。
