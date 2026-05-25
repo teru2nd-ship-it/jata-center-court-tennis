@@ -223,6 +223,7 @@ http://127.0.0.1:8783/games/car-drive-3d/
   - `http://127.0.0.1:8783/games/car-drive-3d/goal-samples.html`
   - Sport Coupe / City Sedan / Patrol Car の3案。
   - 一枚絵のズーム、パン、紙吹雪、GOAL文字、FRUIT高得点、NEW BEST演出で動画風に見せる。
+- 追加方針: TERUさん指定の立ち絵ポスター3種を `assets/results/posters/` に整理し、タイトル部分を `GOAL!` に差し替える方向が有力。
 - ローカルサーバーでFRUIT、Poop、Allosaurus、Goal動画の読み込み確認OK。
 
 ## JATA DROP

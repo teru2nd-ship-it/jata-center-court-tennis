@@ -114,3 +114,4 @@ http://127.0.0.1:8783/games/car-drive-3d/
   - City Sedan: フルーツ高得点、FRUIT BEST、フルーツ浮上。
   - Patrol Car: 夜背景、NEW BEST、スポットライト、キラキラ。
   - 一枚絵のズーム/パン/エフェクトで動画風に見せる方針。車画像や背景は後から差し替え可能。
+- 追加方針: TERUさん指定の立ち絵ポスター3種を `assets/results/posters/` に整理し、タイトル部分を `GOAL!` に差し替える方向が有力。
