@@ -219,6 +219,10 @@ http://127.0.0.1:8783/games/car-drive-3d/
 - FRUIT素材は全8種PNGへ統一。
 - Poop / Rainbow Poop / Tomato / Allosaurus はTERUさん差し替え済み素材を同名ファイルで反映。
 - ゴール動画は `Goal1.mp4`、FRUITベスト更新動画は `Goal2.mp4` を使用。
+- ゴール演出サンプルを追加。
+  - `http://127.0.0.1:8783/games/car-drive-3d/goal-samples.html`
+  - Sport Coupe / City Sedan / Patrol Car の3案。
+  - 一枚絵のズーム、パン、紙吹雪、GOAL文字、FRUIT高得点、NEW BEST演出で動画風に見せる。
 - ローカルサーバーでFRUIT、Poop、Allosaurus、Goal動画の読み込み確認OK。
 
 ## JATA DROP

@@ -108,3 +108,9 @@ http://127.0.0.1:8783/games/car-drive-3d/
 - Poop / Rainbow Poop / Tomato / Allosaurus はTERUさん差し替え済み素材を同名ファイルで反映。
 - ゴール動画は `Goal1.mp4`、FRUITベスト更新動画は `Goal2.mp4` を使用。
 - ローカルサーバーでFRUIT、Poop、Allosaurus、Goal動画の読み込み確認OK。
+- ゴール演出の車種別サンプルページを追加。
+  - URL: `http://127.0.0.1:8783/games/car-drive-3d/goal-samples.html`
+  - Sport Coupe: 疾走ズーム、GOAL文字、紙吹雪。
+  - City Sedan: フルーツ高得点、FRUIT BEST、フルーツ浮上。
+  - Patrol Car: 夜背景、NEW BEST、スポットライト、キラキラ。
+  - 一枚絵のズーム/パン/エフェクトで動画風に見せる方針。車画像や背景は後から差し替え可能。
