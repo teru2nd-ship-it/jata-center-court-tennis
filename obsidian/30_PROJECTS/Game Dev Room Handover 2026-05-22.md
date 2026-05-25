@@ -214,6 +214,13 @@ http://100.82.86.8:8791/
 http://127.0.0.1:8783/games/car-drive-3d/
 ```
 
+2026-05-25 追加更新:
+
+- FRUIT素材は全8種PNGへ統一。
+- Poop / Rainbow Poop / Tomato / Allosaurus はTERUさん差し替え済み素材を同名ファイルで反映。
+- ゴール動画は `Goal1.mp4`、FRUITベスト更新動画は `Goal2.mp4` を使用。
+- ローカルサーバーでFRUIT、Poop、Allosaurus、Goal動画の読み込み確認OK。
+
 ## JATA DROP
 
 主なメモ:
