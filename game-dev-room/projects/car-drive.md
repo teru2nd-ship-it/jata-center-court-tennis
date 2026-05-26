@@ -131,3 +131,20 @@ http://127.0.0.1:8783/games/car-drive-3d/
 ### 残る注意
 
 - Vault内の過去報告書には当時の限定版履歴が残っている。必要なら次に履歴ノートも匿名化する。
+
+## 5/26 DDD 3D 車色選択・車種性能・Poop演出
+
+- 車体色を車種ごとのボタン選択に変更。ランダムではなくTERUさんが選べる仕様。
+  - Sport Coupe: Red / Blue / Navy / Yellow
+  - City Sedan: Sky / Blue / Navy / Mint / Pink
+  - Patrol Car: White / Blue / Navy
+- 車種別性能を実装。
+  - Sport Coupe: 高速、Boost強め、ハンドルはやや難しい。
+  - City Sedan: 低速、ハンドルが効きやすい。
+  - Patrol Car: 標準寄り、HP 5でPoop耐性高め。
+- Poopダメージを音なしでも分かるように赤フラッシュとHP枠アニメーションを追加。
+- Rainbow Poopはランダム効果。
+  - Lucky: HPを1回復し、短時間シールド。
+  - Bad: 2ダメージ。
+- シールド中は恐竜・岩・倒木も1回防ぐ。
+- ローカル実装のみ。push / Vercel反映は未実行。
