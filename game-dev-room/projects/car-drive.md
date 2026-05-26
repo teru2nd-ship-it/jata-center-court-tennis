@@ -43,22 +43,15 @@
 - 素材クレジットページ
 - スマホUIの微調整
 
-## 誕生日版（2026-05-22 作成）
+## 旧2D限定版（2026-05-26 撤去）
 
-息子さんの誕生日（2026-05-23）向けに「壊さず・明日確実に遊べる」優先で2D版を仕上げた。
-元の試作（`prototypes/car-drive/` 直下4ファイル）は温存し、別フォルダに作成。
+2Dの限定イベント仕様は、JATA ARCADE本体から撤去する方針に変更。
+現在の正式導線は `Dino Drive Derby 3D` と、同梱の個人名なし `Classic Car Drive`。
 
-- 場所: `prototypes/car-drive/birthday/`
-- 構成: `index.html`（ランチャー）/ `shared/game.js` / `shared/styles.css` / `easy/` `normal/` `fast/`
-- **全部Canvas描画＝外部画像依存なし。サーバー不要・オフラインでも `index.html` ダブルクリックで遊べる。**
-- 追加した3点:
-  1. 誕生日タイトル「おたんじょうび おめでとう！」
-  2. 車4種（スポーツカー / レトロカー / トラック / きゅうきゅうしゃ、すべてCanvas描画）
-  3. ゴール到達→紙吹雪＋「おめでとう！」＋「もういちど！」
-- 難易度3版: easy=のんびり / normal=わくわく（おすすめ）/ fast=スピードチャレンジ。各 index.html の `window.CD_CONFIG` で調整。
-- ブラウザ実機で動作確認済み（3版読み込み・4車種描画・ゴール演出・衝突・スマホ375px収まり）。
-- ローカルプレビュー: `http://localhost:8791/`（`birthday/` を静的配信）。
-- TERU確認待ち: 本番採用する難易度 / 名前入りタイトルにするか。
+- JATA ARCADEトップから旧2D限定カードを外す。
+- 旧単独2Dフォルダ は削除対象。
+- `games/car-drive-3d/2d/` は `Classic Car Drive` として中立化。
+- 3D側の `2D Classic Drive` は同梱ローカル版へ接続。
 
 ## 次チャット用メモ
 
@@ -76,8 +69,8 @@ Vault側の詳細ノートは `30_PROJECTS/_GAME_DEV/car-drive/Car Drive.md`。
 
 目的:
 
-- 誕生日版/Car Drive 3Dから、JATA ARCADE正式ゲーム `Dino Drive Derby 3D` へ整理する。
-- `YUZUKI` / Birthday / Gift / Present の表示を外し、個人情報を避ける。
+- 旧2D限定版/Car Drive 3Dから、JATA ARCADE正式ゲーム `Dino Drive Derby 3D` へ整理する。
+- 個人名と限定イベント用の表示を外し、個人情報を避ける。
 - 恐竜ワールド、FRUIT収集、Poop障害物HP制へ寄せる。
 
 今日の候補実装:
@@ -122,3 +115,19 @@ http://127.0.0.1:8783/games/car-drive-3d/
   - City Sedan: `LightBlue` をパステル系ランダムへ。
   - Patrol Car: `White` は白黒維持。Poop耐性発動時の発光/色変化候補あり。
   - 調査URL: `http://127.0.0.1:8783/games/car-drive-3d/?debugMaterials=1`
+
+## 5/26 2D限定版表示の撤去
+
+- 最優先対応として、JATA ARCADE側から旧2D限定版の公開カードと単独フォルダを撤去。
+- 旧単独2Dフォルダ はローカルrepo上で削除対象にした。
+- `games/car-drive-3d/2d/` は個人名なしの `Classic Car Drive` に変換。
+  - 表示: `JATA ARCADE` / `CLASSIC DRIVE`
+  - 収集表示: `FRUIT`
+  - 3D側の `2D Classic Drive` は外部URLではなく `./2d/index.html` へ接続。
+  - 旧イベント用のファイル名は `classic-*` に変更。
+- 公開・push・Vercel反映は未実行。ローカル修正のみ。
+- 検索確認: JATA ARCADE公開/ゲーム配下で個人名、限定イベント名、旧外部URL、旧単独フォルダ名のヒットなし。
+
+### 残る注意
+
+- Vault内の過去報告書には当時の限定版履歴が残っている。必要なら次に履歴ノートも匿名化する。
