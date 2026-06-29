@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CENTER COURT - Tennis</title>
+<style>
+  :root{
+    --court:#2767b8;        /* ハードコート（コート内） */
+    --apron:#3c9a5f;        /* コート外周グリーン */
+    --line:#f4f7fb;         /* ライン白 */
+    --ball:#d8f23a;         /* テニスボール */
+    --surface-accent:#d8f23a;
+    --ink:#0c1a2b;
+    --hud:#0c1a2bcc;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:#08111d;overflow:hidden;
+    font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif;color:#eaf2ff;}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
+  canvas{display:block;touch-action:none;width:100%;height:100%;}
+
+  /* ---- オーバーレイ（メニュー / 勝敗） ---- */
+  .overlay{position:fixed;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:18px;
+    background:radial-gradient(120% 120% at 50% 0%,#15375f 0%,#0a1626 60%,#070e18 100%);
+    text-align:center;padding:24px;z-index:10;}
+  .hidden{display:none!important;}
+  .brand-block{display:flex;align-items:center;justify-content:center;gap:16px;
+    max-width:92vw;}
+  .brand-copy{text-align:left;}
+  .emblem-wrap{width:min(118px,28vw);padding:6px;border-radius:24px;
+    background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.05));
+    border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 38px rgba(0,0,0,.36);}
+  .title-emblem{display:block;width:100%;height:auto;border-radius:18px;}
+  .result-emblem{display:block;width:min(138px,34vw);height:auto;border-radius:24px;
+    box-shadow:0 18px 38px rgba(0,0,0,.35);}
+  .title{font-size:clamp(38px,11vw,84px);font-weight:900;letter-spacing:.08em;
+    line-height:.92;text-transform:uppercase;}
+  .title b{color:var(--ball);}
+  .tagline{font-size:clamp(13px,3.6vw,17px);opacity:.78;letter-spacing:.22em;
+    text-transform:uppercase;margin-top:-6px;}
+  .panel{display:flex;flex-direction:column;gap:12px;width:min(340px,86vw);margin-top:6px;}
+  .surface-select{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(430px,92vw);}
+  .surface-card{appearance:none;border:1px solid rgba(255,255,255,.22);cursor:pointer;border-radius:12px;
+    min-height:74px;padding:10px 8px;color:#eaf2ff;background:rgba(255,255,255,.08);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+    font-weight:900;letter-spacing:.06em;box-shadow:inset 0 1px 0 rgba(255,255,255,.18);}
+  .surface-card::before{content:"";display:block;width:48px;height:22px;border-radius:5px;
+    background:linear-gradient(135deg,var(--sw1),var(--sw2));box-shadow:inset 0 0 0 2px rgba(255,255,255,.28);}
+  .surface-card span{font-size:11px;opacity:.78;font-weight:800;letter-spacing:.12em;}
+  .surface-card.on{border-color:var(--surface-accent);background:rgba(216,242,58,.13);
+    box-shadow:0 0 0 2px rgba(216,242,58,.18),inset 0 1px 0 rgba(255,255,255,.25);}
+  .surface-card[data-surface="hard"]{--sw1:#2f75c7;--sw2:#173f72;}
+  .surface-card[data-surface="grass"]{--sw1:#6ca53d;--sw2:#24521d;}
+  .surface-card[data-surface="clay"]{--sw1:#cf7440;--sw2:#7e351b;}
+  .btn{appearance:none;border:0;cursor:pointer;border-radius:14px;padding:16px 18px;
+    font-size:18px;font-weight:800;letter-spacing:.04em;color:var(--ink);
+    background:var(--ball);box-shadow:0 6px 0 #97ad1f;transition:transform .06s,box-shadow .06s;}
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #97ad1f;}
+  .btn.alt{background:#1d4f8a;color:#eaf2ff;box-shadow:0 6px 0 #123459;}
+  .btn.alt:active{box-shadow:0 2px 0 #123459;}
+  .sub{font-size:13px;opacity:.6;}
+  .help{font-size:13px;line-height:1.7;opacity:.8;max-width:360px;}
+  .help b{color:var(--ball);}
+  .result{font-size:clamp(28px,8vw,52px);font-weight:900;}
+  .badge{display:inline-block;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;opacity:.6;}
+  .play-controls{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
+    transform:translateX(-50%);z-index:18;display:flex;flex-direction:column;gap:16px;align-items:center;
+    justify-content:center;padding:12px;border-radius:20px;background:rgba(8,17,29,.72);
+    border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);}
+  .play-controls.hidden{display:none!important;}
+  .control-row{display:flex;gap:12px;align-items:center;justify-content:center;}
+  .control-row + .control-row{margin-top:2px;}
+  .ctl{appearance:none;border:1px solid rgba(255,255,255,.22);min-width:72px;height:42px;
+    border-radius:13px;background:rgba(20,38,62,.92);color:#eaf2ff;font-weight:900;
+    letter-spacing:.04em;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.24);cursor:pointer;}
+  .ctl.nav{min-width:112px;height:40px;}
+  .ctl.shot{min-width:88px;}
+  .ctl.primary{background:var(--ball);color:#0c1a2b;border-color:rgba(255,255,255,.38);}
+  .ctl:active{transform:translateY(2px) scale(.98);}
+  .ctl[disabled]{opacity:.42;cursor:default;transform:none;}
+  .pause-layer{position:fixed;inset:0;z-index:16;display:flex;align-items:center;justify-content:center;
+    background:rgba(5,11,20,.46);backdrop-filter:blur(2px);text-align:center;}
+  .pause-card{width:min(320px,86vw);border-radius:18px;background:rgba(8,17,29,.9);
+    border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 50px rgba(0,0,0,.35);
+    padding:26px 20px;display:flex;flex-direction:column;gap:14px;align-items:center;}
+  .pause-card strong{font-size:34px;letter-spacing:.12em;}
+  .pause-card span{font-size:13px;color:#9fc0e6;}
+  @media(max-width:720px){
+    .brand-block{gap:10px;}
+    .brand-copy{text-align:left;}
+    .emblem-wrap{width:min(96px,25vw);padding:4px;border-radius:20px;}
+    .title-emblem{border-radius:16px;}
+    .title{font-size:clamp(34px,10vw,58px);}
+    .play-controls{bottom:max(80px,env(safe-area-inset-bottom));gap:16px;padding:12px;}
+    .control-row{gap:10px;}
+    .control-row + .control-row{margin-top:4px;}
+    .ctl{min-width:70px;height:40px;font-size:12px;}
+    .ctl.nav{min-width:104px;height:38px;}
+    .ctl.shot{min-width:86px;}
+  }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c"></canvas></div>
+<div id="playControls" class="play-controls hidden" aria-label="Game controls">
+  <div class="control-row">
+    <button id="tennisHomeBtn" class="ctl nav" type="button" aria-label="Tennis menu">HOME</button>
+    <button id="pauseBtn" class="ctl nav" type="button" aria-label="Pause">PAUSE</button>
+  </div>
+  <div class="control-row">
+    <button id="volleyBtn" class="ctl shot primary" type="button" aria-label="Volley">VOLLEY</button>
+    <button id="lobBtn" class="ctl shot" type="button" aria-label="Lob">LOB</button>
+    <button id="dropBtn" class="ctl shot" type="button" aria-label="Drop shot">DROP</button>
+  </div>
+</div>
+<div id="pauseLayer" class="pause-layer hidden">
+  <div class="pause-card">
+    <strong>PAUSED</strong>
+    <span>Match paused</span>
+    <button id="resumeBtn" class="btn" type="button">RESUME</button>
+  </div>
+</div>
+
+<!-- メニュー -->
+<div id="menu" class="overlay">
+  <div class="brand-block">
+    <div class="emblem-wrap" aria-hidden="true">
+      <img class="title-emblem" src="assets/jata-open-emblem.png" alt="">
+    </div>
+    <div class="brand-copy">
+    <div class="title">CENTER<br><b>COURT</b></div>
+    <div class="tagline">A tennis game</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="sub">Choose court</div>
+  </div>
+  <div class="surface-select" aria-label="Court selection">
+    <button class="surface-card on" data-surface="hard" type="button">HARD<span>Balanced</span></button>
+    <button class="surface-card" data-surface="grass" type="button">GRASS<span>Fast / Low</span></button>
+    <button class="surface-card" data-surface="clay" type="button">CLAY<span>Slow / High</span></button>
+  </div>
+  <div class="panel">
+    <div class="sub">Choose difficulty</div>
+    <button class="btn" data-diff="easy">EASY  One Set</button>
+    <button class="btn alt" data-diff="normal">NORMAL  Best of 3</button>
+    <button class="btn alt" data-diff="hard">HARD  Best of 5</button>
+  </div>
+  <div class="help">
+    <b>Move:</b> Drag / mouse / arrow keys. Step in to attack the net.<br>
+    <b>Rally:</b> Move into the ball for auto returns. Use <b>VOLLEY / LOB / DROP</b> for shot choice.<br>
+    <b>Serve:</b> Drag to set your stance → <b>VOLLEY</b> to toss → <b>VOLLEY</b> again to serve.
+  </div>
+</div>
+
+<!-- 勝敗 -->
+<div id="over" class="overlay hidden">
+  <img class="result-emblem" src="assets/jata-open-emblem.png" alt="JATA OPEN">
+  <div class="badge">Match Finished</div>
+  <div id="resultText" class="result"></div>
+  <div id="resultScore" class="sub" style="font-size:18px;"></div>
+  <div class="panel">
+    <button class="btn" id="againBtn">PLAY AGAIN</button>
+    <button class="btn alt" id="menuBtn">CHANGE SETTINGS</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   CENTER COURT — 疑似3Dテニス
+   主要パラメータは下の CONFIG にまとめてあるので、感触はここで調整できます。
+   ========================================================================= */
+const CONFIG = {
+  // コート論理座標: x∈[-1,1](左右)  y∈[0,1](0=手前/自分, 1=奥/CPU)  z=高さ
+  // autoR* = 自動返球の範囲(体に入る狭さ) / swingR* = タップで拾える範囲(広い)
+  player: { speed:1.85, autoRX:0.22, autoRY:0.17, swingRX:0.40, swingRY:0.30, z:0.34 },
+  swingWindow:0.35,    // タップ後にスイングが有効な時間
+  autoDelay:0.05,      // 体に入ればすぐ自動返球
+  serveToss:1.8,       // サーブのトス初速（低め）
+  tapMaxMs:260,        // この時間未満の接触＝タップ(トス/打撃)。長押し/ドラッグは移動のみ
+  tapMaxMove:26,       // タップ判定の許容移動量(px)
+  pointPause:1.7,      // ポイント間の待ち（テンポ）
+  cpu: {
+    easy:   { speed:0.75, err:0.50, react:0.22, depth:0.66 },
+    normal: { speed:1.00, err:0.34, react:0.18, depth:0.74 },
+    hard:   { speed:1.40, err:0.20, react:0.10, depth:0.80 },
+  },
+  gravity:2.35,        // z方向の重力（小さいほどふんわり）
+  flight:0.76,         // 打球の飛行時間（大きいほど遅い）
+  serveFlight:0.80,
+  netZ:0.095,          // ネットの高さ(論理z)
+  netClear:0.05,       // 打球が必ずネットを越える余裕
+  aimGain:1.4,         // 捉えた位置→打つ方向の効き
+  gamesPerSet:6,       // 1セット=6ゲーム先取(2ゲーム差)
+  tiebreakPoints:7,    // タイブレークの先取ポイント(2ポイント差)
+  setsToWin:{ easy:1, normal:2, hard:3 }, // 勝利に必要なセット数
+};
+
+const SURFACES = {
+  hard: {
+    key:'hard', name:'HARD', jp:'Hard', pace:'BALANCED',
+    court:'#2d72c8', courtFar:'#1f5ea8', courtNear:'#347fda',
+    apron:'#2d735d', apronFar:'#286754', apronNear:'#31755f',
+    wall:'#10334f', stand:'#24445c', fence:'#153248',
+    line:'#f6fbff', ball:'#d8f23a', accent:'#d8f23a',
+    skyTop:'#78bff5', skyBottom:'#16406e', texture:'hard',
+    flightScale:1.00, serveScale:1.00, bounce:0.55, spin:1.00,
+  },
+  grass: {
+    key:'grass', name:'GRASS', jp:'Grass', pace:'FAST / LOW',
+    court:'#5e942f', courtFar:'#3f741e', courtNear:'#75ad3c',
+    apron:'#244d2a', apronFar:'#12331f', apronNear:'#2e6534',
+    wall:'#133b24', stand:'#25462d', fence:'#142f1c',
+    line:'#f4fff1', ball:'#e4ff4b', accent:'#d9ff64',
+    skyTop:'#86c9ff', skyBottom:'#1b5d60', texture:'grass',
+    flightScale:0.92, serveScale:0.94, bounce:0.46, spin:1.10,
+  },
+  clay: {
+    key:'clay', name:'CLAY', jp:'Clay', pace:'SLOW / HIGH',
+    court:'#c66a37', courtFar:'#a54f25', courtNear:'#d9854b',
+    apron:'#955036', apronFar:'#7a3f2e', apronNear:'#a65a39',
+    wall:'#5f372f', stand:'#704739', fence:'#4b2c27',
+    line:'#fff4e6', ball:'#e7ff42', accent:'#ffd166',
+    skyTop:'#f0bd8a', skyBottom:'#744034', texture:'clay',
+    flightScale:1.13, serveScale:1.08, bounce:0.68, spin:0.92,
+  },
+};
+let surfaceKey = 'hard';
+let COL = SURFACES.hard;
+
+// ---- 論理ビューポート（描画は実サイズへスケール） ----
+const VW = 1000, VH = 640;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const playControls = document.getElementById('playControls');
+const tennisHomeBtn = document.getElementById('tennisHomeBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const volleyBtn = document.getElementById('volleyBtn');
+const lobBtn = document.getElementById('lobBtn');
+const dropBtn = document.getElementById('dropBtn');
+const pauseLayer = document.getElementById('pauseLayer');
+const resumeBtn = document.getElementById('resumeBtn');
+let scale = 1, scaleY = 1, offX = 0, offY = 0, DPR = 1;
+
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  const w = window.innerWidth, h = window.innerHeight;
+  canvas.width  = Math.floor(w*DPR);
+  canvas.height = Math.floor(h*DPR);
+  // Portrait phones get a gentle vertical stretch without cropping the court horizontally.
+  scale = Math.min(w/VW, h/VH);
+  scaleY = scale;
+  if(h > w*1.2){
+    scale = w/VW;
+    scaleY = Math.min(scale*1.16, h/(VH+140));
+  }
+  offX = (w - VW*scale)/2;
+  offY = (h > w*1.2) ? Math.max(72, (h - VH*scaleY)*0.38) : (h - VH*scaleY)/2;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// =========================================================================
+// コート投影（論理座標 → 画面ピクセル）
+// 手前(y=0)は広く下、奥(y=1)は狭く上。z は上方向への持ち上げ。
+// =========================================================================
+const COURT = {
+  nearY: VH*0.94, farY: VH*0.35,     // 画面上のコート手前/奥のY
+  nearHalf: VW*0.40, farHalf: VW*0.20, // コート横半幅(手前/奥)
+  cx: VW*0.5,
+  zPix: 240,                          // z=1 のときの持ち上げピクセル
+};
+function lerp(a,b,t){ return a + (b-a)*t; }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function projY(y){ return lerp(COURT.nearY, COURT.farY, y); }
+function projHalf(y){ return lerp(COURT.nearHalf, COURT.farHalf, y); }
+// 画面座標（z考慮）
+function project(x,y,z){
+  const sy = projY(y);
+  const half = projHalf(y);
+  const persp = lerp(1, 0.62, y); // 奥ほど高さの見かけを圧縮
+  return { x: COURT.cx + x*half, y: sy - (z||0)*COURT.zPix*persp, ground: sy, half };
+}
+
+// =========================================================================
+// ゲーム状態
+// =========================================================================
+const STATE = { MENU:'menu', SERVE:'serve', RALLY:'rally', POINT:'point', PAUSED:'paused', OVER:'over' };
+let state = STATE.MENU;
+let difficulty = 'normal';
+let pausedFrom = STATE.MENU;
+
+const player = { x:0, y:0.04 };
+const cpu    = { x:0, y:0.96 };
+
+const ball = {
+  x:0, y:0.5, z:0.2, vx:0, vy:0, vz:0,
+  lastHitter:null,   // 'player' | 'cpu'
+  bounces:0,         // 着地回数（現在のショットで）
+  bounceSide:null,   // 直近の着地サイド 'near'|'far'
+  isServe:false,     // サーブ球か（サービスボックス判定用）
+  serveWasReturned:false,
+  visualT:0,          // ポイント確定後にボールだけ自然に流す時間
+  alive:false,
+};
+
+let server = 'player';     // このポイントのサーバー
+let servePhase = 'ready';  // 'ready'(構え) | 'toss'(トス中)
+let isSecondServe = false;
+let tossT = 0;
+let cpuCfg = CONFIG.cpu.normal;
+let hitCooldown = { player:0, cpu:0 };
+let swingTimer = 0, ballZoneT = 0, playerCanHit = false;
+let shotIntent = 'drive';
+let cpuReact = 0;
+
+// スコア
+const score = {
+  p:0, c:0,            // ポイント（通常は0,15,30,40 / タイブレークは数字）
+  pg:0, cg:0,          // 現在セットのゲーム
+  ps:0, cs:0,          // セット数
+  setHistory:[],       // 終了セットのゲームスコア [{p,c},...]
+  tiebreak:false,
+  message:'', msgT:0, msgColor:'#d8f23a',
+};
+let setsNeeded = 1;
+let tbStartServer = 'player';
+
+// =========================================================================
+// 入力
+// =========================================================================
+const keys = {};
+let pointer = { down:false, dragging:false, x:0, y:0, downX:0, downY:0, downTime:0, moved:false };
+
+function screenToCourt(cx, cy){
+  // クライアント座標 → 論理VW/VH → コート(x,y)
+  const vx = (cx - offX) / scale;
+  const vy = (cy - offY) / scaleY;
+  // y: projYの逆変換（手前側エリアを操作対象に）
+  let ty = (vy - COURT.nearY) / (COURT.farY - COURT.nearY);
+  ty = Math.max(-0.16, Math.min(1.12, ty));
+  const half = projHalf(ty);
+  let tx = (vx - COURT.cx) / half;
+  tx = Math.max(-1.15, Math.min(1.15, tx));
+  return { x:tx, y:ty };
+}
+
+canvas.addEventListener('pointerdown', e=>{
+  e.preventDefault();
+  pointer.down=true; pointer.dragging=false; pointer.x=e.clientX; pointer.y=e.clientY;
+  pointer.downX=e.clientX; pointer.downY=e.clientY;
+  pointer.downTime=performance.now(); pointer.moved=false;
+  try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+});
+canvas.addEventListener('pointermove', e=>{
+  if(!pointer.down) return;
+  pointer.x=e.clientX; pointer.y=e.clientY;
+  const dx=e.clientX-pointer.downX, dy=e.clientY-pointer.downY;
+  if(dx*dx+dy*dy > CONFIG.tapMaxMove*CONFIG.tapMaxMove){
+    pointer.moved=true;
+    pointer.dragging=true;
+  }
+});
+window.addEventListener('pointerup', ()=>{
+  const dur = performance.now()-pointer.downTime;
+  const isTap = (dur < CONFIG.tapMaxMs && !pointer.moved); // 短く・動かさず=タップ
+  if(isTap && state===STATE.SERVE && server==='player'){
+    if(servePhase==='ready') startToss();        // タップでトス
+    else if(servePhase==='toss') hitServe('player'); // もう一度タップで打撃
+  }
+  pointer.down=false;
+  pointer.dragging=false;
+});
+window.addEventListener('keydown', e=>{
+  keys[e.key]=true;
+  if(e.key===' '){
+    e.preventDefault();
+    if(state===STATE.SERVE && server==='player'){
+      if(servePhase==='ready') startToss();
+      else if(servePhase==='toss') hitServe('player');
+    } else if(state===STATE.RALLY) triggerShot('drive');
+  }
+  if(e.key==='Escape' || e.key==='p' || e.key==='P'){
+    togglePause();
+  }
+  if(e.key==='v' || e.key==='V'){
+    triggerShot('drive');
+  }
+  if(e.key==='l' || e.key==='L'){
+    triggerShot('lob');
+  }
+  if(e.key==='b' || e.key==='B'){
+    triggerShot('lob');
+  }
+  if(e.key==='x' || e.key==='X'){
+    triggerShot('drop');
+  }
+  if(e.key==='n' || e.key==='N'){
+    triggerShot('drop');
+  }
+});
+window.addEventListener('keyup', e=>{ keys[e.key]=false; });
+
+// =========================================================================
+// 打球・サーブ
+// =========================================================================
+// 着地点(tx,ty)へ、飛行時間Tで放物線を撃つ。ネット越えを保証。
+function launch(from, tx, ty, T){
+  T *= COL.flightScale;
+  ball.x = from.x; ball.y = from.y; ball.z = Math.max(from.z, 0.04);
+  ball.vx = (tx - ball.x) / T;
+  ball.vy = (ty - ball.y) / T;
+  ball.vz = (0 - ball.z + 0.5*CONFIG.gravity*T*T) / T;
+  // ネット通過時の高さを確認し、足りなければ持ち上げる
+  if((ball.y<0.5 && ty>0.5) || (ball.y>0.5 && ty<0.5)){
+    const tNet = (0.5 - ball.y) / ball.vy;
+    if(tNet>0 && tNet<T){
+      const zNet = ball.z + ball.vz*tNet - 0.5*CONFIG.gravity*tNet*tNet;
+      const need = CONFIG.netZ + CONFIG.netClear;
+      if(zNet < need){
+        // vz を上げて到達高さを確保
+        ball.vz += (need - zNet) / tNet + 0.05;
+      }
+    }
+  }
+  ball.bounces = 0; ball.bounceSide = null; ball.alive = true;
+}
+
+// 現在の弾道で z=0 に達する着地点を予測（アウト球スルー判定用）
+function predictLanding(){
+  const g=CONFIG.gravity;
+  const disc = ball.vz*ball.vz + 2*g*ball.z;
+  const t = (ball.vz + Math.sqrt(Math.max(0,disc))) / g;
+  return { x: ball.x + ball.vx*t, y: ball.y + ball.vy*t };
+}
+
+// サーブのサイド（デュース/アド）はそのゲームで何ポイント終えたかで決まる
+function serveSide(){ return ((score.p+score.c)%2===0) ? 'deuce' : 'ad'; }
+
+// トス開始
+function startToss(){
+  servePhase='toss'; tossT=0;
+  const s = (server==='player') ? player : cpu;
+  ball.x = s.x; ball.y = s.y + (server==='player'? 0.02 : -0.02);
+  ball.z = CONFIG.player.z; ball.vz = CONFIG.serveToss;
+  ball.vx = 0; ball.vy = 0; ball.alive = true;
+  AudioFX.toss();
+  setMsg(server==='player' ? 'VOLLEY at the peak!' : '', '#d8f23a');
+}
+
+// サーブを打つ（打点の高さ z で質が決まる）
+function hitServe(who){
+  const side = serveSide();
+  const q = clamp((ball.z-0.45)/0.5, 0, 1);   // 打点が高いほど高品質（ピーク≈1.0）
+  let tx, ty;
+  if(who==='player'){                          // 相手(奥)のサービスボックスへクロス
+    tx = (side==='deuce') ? -0.40 : 0.40;
+    ty = 0.61;
+  } else {
+    tx = (side==='deuce') ?  0.40 : -0.40;
+    ty = 0.39;
+  }
+  const spread = (1-q)*0.45 + (who==='cpu' ? cpuCfg.err*0.3 : 0.05);
+  tx += (Math.random()*2-1)*spread;
+  ty += (Math.random()*2-1)*spread*0.35;
+  const fl = CONFIG.serveFlight*(1.15 - q*0.32);  // 高品質ほど速い
+  ball.isServe = true;
+  ball.serveWasReturned = false;
+  launch({x:ball.x, y:ball.y, z:Math.max(ball.z,0.30)}, tx, ty, fl*COL.serveScale);
+  ball.lastHitter = who;
+  servePhase='ready';
+  AudioFX.serve();
+  setMsg('');
+  state = STATE.RALLY;
+  syncControlButtons();
+}
+
+// サーブがサービスボックスに入ったか
+function inServiceBox(x,y){
+  const side = serveSide();
+  if(server==='player'){       // 奥コートのボックス
+    const yIn = y>=0.5 && y<=0.74;
+    const xIn = (side==='deuce') ? (x>=-0.78 && x<=0.02) : (x>=-0.02 && x<=0.78);
+    return yIn && xIn;
+  } else {                     // 手前コートのボックス
+    const yIn = y>=0.26 && y<=0.5;
+    const xIn = (side==='deuce') ? (x>=-0.02 && x<=0.78) : (x>=-0.78 && x<=0.02);
+    return yIn && xIn;
+  }
+}
+
+// フォルト処理（1stはセカンドサーブ、2ndはダブルフォルト）
+function handleFault(){
+  ball.alive=false;
+  AudioFX.fault();
+  if(!isSecondServe){
+    isSecondServe=true;
+    setMsg('FAULT - SECOND SERVE', '#ffd23f');
+    state=STATE.SERVE; servePhase='ready';
+    serveTimer = (server==='cpu') ? 0.9 : 3.0;
+    const s=(server==='player')?player:cpu;
+    ball.x=s.x; ball.y=s.y; ball.z=CONFIG.player.z; ball.alive=true;
+    syncControlButtons();
+  } else {
+    isSecondServe=false;
+    awardPoint(server==='player'?'cpu':'player', 'DOUBLE FAULT');
+  }
+}
+
+// プレイヤーの打ち返し（shot=drive/lob/drop/auto、volley=ノーバウンド）
+function playerHit(shot, volley){
+  const offset = ball.x - player.x;                 // 捉えた位置
+  let tx, ty, fl;
+  if(shot==='lob'){
+    tx = clamp(offset*CONFIG.aimGain*0.55 + player.x*0.35, -0.66, 0.66);
+    ty = 0.86 + Math.random()*0.10;
+    fl = CONFIG.flight*1.45;
+    launch({x:ball.x, y:ball.y, z:Math.max(ball.z+0.20, 0.36)}, tx, ty, fl);
+  } else if(shot==='drop'){
+    tx = clamp(offset*CONFIG.aimGain*0.45 + player.x*0.25, -0.48, 0.48);
+    ty = 0.53 + Math.random()*0.12;
+    fl = CONFIG.flight*0.86;
+    launch({x:ball.x, y:ball.y, z:Math.max(ball.z, 0.12)}, tx, ty, fl);
+  } else if(shot==='drive'){
+    tx = clamp(offset*CONFIG.aimGain + player.x, -0.74, 0.74);
+    ty = 0.76 + Math.random()*0.16;                 // 深い
+    fl = CONFIG.flight;                             // 速い
+    if(volley){ ty = 0.80 + Math.random()*0.14; fl = CONFIG.flight*0.82; } // ボレーは鋭い
+    launch({x:ball.x, y:ball.y, z:ball.z}, tx, ty, fl);
+  } else {
+    tx = clamp(offset*CONFIG.aimGain*0.8 + player.x, -0.66, 0.66);
+    ty = 0.66 + Math.random()*0.14;                 // 普通の深さ
+    fl = CONFIG.flight*1.12;                        // 少しだけ遅い
+    launch({x:ball.x, y:ball.y, z:ball.z}, tx, ty, fl);
+  }
+  ball.lastHitter='player'; ball.isServe=false; ball.serveWasReturned=true;
+  hitCooldown.player = 0.25;
+  flash('player');
+  AudioFX.hit(shot, volley, true);
+}
+
+// CPUの打ち返し
+function cpuHit(){
+  const c = cpuCfg;
+  // プレイヤーの逆サイドを狙う + 難易度ブレ
+  let tx = (player.x>0 ? -1 : 1) * (0.28 + Math.random()*0.38);
+  tx += (Math.random()*2-1)*c.err;
+  tx = Math.max(-0.74, Math.min(0.74, tx));   // 基本はシングルス内
+  let ty = c.depth - Math.random()*0.14;
+  ty = Math.max(0.06, Math.min(0.44, ty));
+  // たまにアウト（難易度に応じて。弱いほどミスしやすい）
+  if(Math.random() < c.err*0.7){ tx *= 1.35; } // ミス時はアレー外へ
+  launch({x:ball.x, y:ball.y, z:ball.z}, tx, ty, CONFIG.flight);
+  ball.lastHitter='cpu'; ball.isServe=false; ball.serveWasReturned=true;
+  hitCooldown.cpu = 0.25;
+  flash('cpu');
+  AudioFX.hit('drive', false, false);
+}
+
+let flashFx = { who:null, t:0 };
+function flash(who){ flashFx.who=who; flashFx.t=0.22; }
+
+// =========================================================================
+// Audio: procedural BGM, SFX, and crowd sounds. Starts after the first gesture.
+// =========================================================================
+const AudioFX = (()=>{
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let ctx=null, master=null, sfxBus=null, musicBus=null, crowdBus=null;
+  let noiseBuf=null, musicTimer=null, musicKind='', musicStep=0, unlocked=false;
+  const titleNotes = [392,494,587,494,440,523,659,523];
+  const victoryNotes = [523,659,784,1047,988,784,880,1047,1175,1319];
+
+  function ensure(){
+    if(ctx || !AudioCtx) return !!ctx;
+    ctx = new AudioCtx();
+    master = ctx.createGain();
+    sfxBus = ctx.createGain();
+    musicBus = ctx.createGain();
+    crowdBus = ctx.createGain();
+    master.gain.value = 0.72;
+    sfxBus.gain.value = 0.68;
+    musicBus.gain.value = 0.30;
+    crowdBus.gain.value = 0.38;
+    sfxBus.connect(master);
+    musicBus.connect(master);
+    crowdBus.connect(master);
+    master.connect(ctx.destination);
+    return true;
+  }
+
+  function unlock(){
+    if(!ensure()) return false;
+    unlocked = true;
+    if(ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return true;
+  }
+
+  function canPlay(){
+    return unlocked && ensure();
+  }
+
+  function makeNoiseBuffer(){
+    if(noiseBuf) return noiseBuf;
+    const len = Math.floor((ctx.sampleRate || 44100) * 2);
+    noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = noiseBuf.getChannelData(0);
+    for(let i=0;i<len;i++) data[i] = Math.random()*2-1;
+    return noiseBuf;
+  }
+
+  function tone(freq, dur, type, gain, at, bus, bend){
+    if(!canPlay()) return;
+    const t = ctx.currentTime + (at||0);
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, t);
+    if(bend) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq*bend), t+dur*.85);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.connect(g);
+    g.connect(bus || sfxBus);
+    o.start(t);
+    o.stop(t+dur+0.05);
+  }
+
+  function noise(dur, gain, freq, q, at, bus){
+    if(!canPlay()) return;
+    const t = ctx.currentTime + (at||0);
+    const src = ctx.createBufferSource();
+    const f = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    src.buffer = makeNoiseBuffer();
+    f.type = 'bandpass';
+    f.frequency.setValueAtTime(freq || 900, t);
+    f.Q.value = q || 0.8;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t+0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f);
+    f.connect(g);
+    g.connect(bus || sfxBus);
+    src.start(t);
+    src.stop(t+dur+0.03);
+  }
+
+  function stopMusic(){
+    if(musicTimer) clearInterval(musicTimer);
+    musicTimer = null;
+    musicKind = '';
+    musicStep = 0;
+  }
+
+  function startMusic(kind){
+    if(!unlock()) return;
+    if(musicKind === kind) return;
+    stopMusic();
+    musicKind = kind;
+    musicStep = 0;
+    const notes = kind === 'victory' ? victoryNotes : titleNotes;
+    const interval = kind === 'victory' ? 210 : 320;
+    const tick = ()=>{
+      if(!canPlay() || !musicKind) return;
+      const n = notes[musicStep % notes.length];
+      const root = kind === 'victory' ? 262 : 196;
+      const gain = kind === 'victory' ? 0.045 : 0.026;
+      tone(n, kind === 'victory' ? 0.22 : 0.18, 'triangle', gain, 0, musicBus);
+      if(musicStep % 4 === 0) tone(root, 0.38, 'sine', gain*.58, 0.01, musicBus);
+      if(kind === 'victory' && musicStep % 3 === 0) tone(n*2, 0.12, 'sine', gain*.42, 0.04, musicBus);
+      musicStep++;
+      if(kind === 'victory' && musicStep > 26) stopMusic();
+    };
+    tick();
+    musicTimer = setInterval(tick, interval);
+  }
+
+  function crowd(level){
+    if(!canPlay()) return;
+    const big = level === 'big';
+    const dur = big ? 1.7 : 0.75;
+    noise(dur, big ? 0.12 : 0.065, 1050, 0.55, 0, crowdBus);
+    noise(dur*.86, big ? 0.08 : 0.04, 1850, 0.7, 0.05, crowdBus);
+    for(let i=0;i<(big?9:4);i++){
+      const f = 420 + Math.random()*900;
+      tone(f, 0.16 + Math.random()*0.16, 'sine', big ? 0.012 : 0.007, Math.random()*dur*.55, crowdBus);
+    }
+  }
+
+  return {
+    unlock,
+    startTitle(){ if(state === STATE.MENU) startMusic('title'); },
+    stopMusic,
+    victory(){ startMusic('victory'); crowd('big'); },
+    button(){ tone(760,0.06,'triangle',0.025,0,sfxBus); tone(1040,0.05,'sine',0.014,0.035,sfxBus); },
+    toss(){ tone(520,0.09,'sine',0.018,0,sfxBus,1.35); },
+    serve(){ tone(160,0.08,'square',0.04,0,sfxBus,0.72); noise(0.08,0.035,1500,1.1,0,sfxBus); },
+    hit(kind, volley, playerSide){
+      const base = kind === 'lob' ? 230 : kind === 'drop' ? 360 : volley ? 290 : 240;
+      tone(base,0.075,'square',playerSide?0.046:0.032,0,sfxBus,kind==='lob'?1.35:0.76);
+      noise(0.07,playerSide?0.030:0.020,kind==='drop'?950:1300,1.1,0,sfxBus);
+    },
+    bounce(){ tone(150,0.045,'triangle',0.020,0,sfxBus,0.82); },
+    net(){ noise(0.17,0.07,620,2.0,0,sfxBus); tone(95,0.12,'sawtooth',0.025,0,sfxBus,0.55); },
+    fault(){ tone(220,0.16,'sawtooth',0.028,0,sfxBus,0.70); },
+    point(win){
+      if(win){ tone(880,0.09,'triangle',0.028,0,sfxBus); crowd('small'); }
+      else { tone(196,0.18,'sawtooth',0.025,0,sfxBus,0.72); noise(0.28,0.035,450,1.2,0,crowdBus); }
+    },
+    ace(win){
+      if(win){
+        tone(988,0.12,'triangle',0.040,0,sfxBus);
+        tone(1319,0.16,'sine',0.032,0.08,sfxBus);
+        crowd('big');
+      } else {
+        tone(196,0.12,'sawtooth',0.030,0,sfxBus,0.65);
+        noise(0.45,0.055,560,1.0,0,crowdBus);
+      }
+    },
+    game(win){ if(win) crowd('small'); tone(win?988:174,0.18,'triangle',win?0.035:0.025,0,sfxBus,win?1.18:0.72); },
+    set(win){ if(win) crowd('big'); tone(win?784:146,0.24,'triangle',win?0.040:0.026,0,sfxBus,win?1.25:0.65); },
+  };
+})();
+
+function unlockAudioFromGesture(){
+  const wasUnlocked = AudioFX.unlock();
+  if(wasUnlocked && state===STATE.MENU) AudioFX.startTitle();
+}
+window.addEventListener('pointerdown', unlockAudioFromGesture, {passive:true});
+window.addEventListener('keydown', unlockAudioFromGesture);
+
+// =========================================================================
+// ポイント判定
+// =========================================================================
+function setMsg(m, color){ score.message=m; score.msgColor=color||'#d8f23a'; score.msgT = m? 1.5:0; }
+
+function matchIsLive(){
+  return state===STATE.SERVE || state===STATE.RALLY || state===STATE.POINT || state===STATE.PAUSED;
+}
+
+function syncControlButtons(){
+  playControls.classList.toggle('hidden', !matchIsLive());
+  pauseLayer.classList.toggle('hidden', state!==STATE.PAUSED);
+  pauseBtn.textContent = state===STATE.PAUSED ? 'PLAY' : 'PAUSE';
+  pauseBtn.disabled = !(state===STATE.SERVE || state===STATE.RALLY || state===STATE.POINT || state===STATE.PAUSED);
+  const shotEnabled = state===STATE.RALLY || (state===STATE.SERVE && server==='player');
+  volleyBtn.disabled = !shotEnabled;
+  lobBtn.disabled = !shotEnabled;
+  dropBtn.disabled = !shotEnabled;
+}
+
+function triggerShot(kind){
+  if(state===STATE.SERVE && server==='player'){
+    if(servePhase==='ready') startToss();
+    else if(servePhase==='toss') hitServe('player');
+    return;
+  }
+  if(state===STATE.RALLY){
+    shotIntent = kind;
+    swingTimer = CONFIG.swingWindow;
+  }
+}
+
+function togglePause(){
+  if(state===STATE.PAUSED){
+    state = pausedFrom;
+    if(state===STATE.MENU || state===STATE.OVER) state = STATE.SERVE;
+    syncControlButtons();
+    return;
+  }
+  if(state===STATE.SERVE || state===STATE.RALLY || state===STATE.POINT){
+    pausedFrom = state;
+    state = STATE.PAUSED;
+    pointer.down=false; pointer.dragging=false;
+    syncControlButtons();
+  }
+}
+
+function returnToTennisHome(){
+  ball.alive=false;
+  ball.visualT=0;
+  servePhase='ready';
+  pointer.down=false; pointer.dragging=false;
+  document.getElementById('over').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+  state=STATE.MENU;
+  AudioFX.startTitle();
+  syncControlButtons();
+}
+
+function keepBallDriftingAfterPoint(reason){
+  if(!reason || reason.indexOf('OUT')<0) return;
+  ball.visualT = 1.25;
+  if(Math.abs(ball.vx)<0.16) ball.vx += (ball.x>=0 ? 0.28 : -0.28);
+  if(Math.abs(ball.vy)<0.16) ball.vy += (ball.y>=0.5 ? 0.25 : -0.25);
+  if(ball.z<=0) ball.vz = Math.max(ball.vz, 0.16);
+}
+
+function updatePointBall(dt){
+  if(ball.visualT<=0) return;
+  ball.visualT-=dt;
+  ball.x += ball.vx*dt;
+  ball.y += ball.vy*dt;
+  ball.z += ball.vz*dt;
+  ball.vz -= CONFIG.gravity*dt;
+  if(ball.z<=0){
+    ball.z=0;
+    ball.vz = Math.abs(ball.vz)>0.34 ? -ball.vz*0.32 : 0;
+    const slow = Math.pow(0.22, dt);
+    ball.vx *= slow;
+    ball.vy *= slow;
+  }
+}
+
+function pointMessage(winner, reason){
+  const gained = winner === 'player';
+  if(reason === 'ACE!') return gained ? 'ACE!' : 'CPU ACE!';
+  if(reason === 'DOUBLE FAULT') return gained ? 'DOUBLE FAULT!' : 'DOUBLE FAULT';
+  if(reason === 'WINNER!') return gained ? 'WINNER!' : 'CPU WINNER!';
+  if(reason === 'DOUBLE BOUNCE!') return gained ? 'DOUBLE BOUNCE!' : 'TOO LATE!';
+  if(reason) return `${reason} ${gained ? 'POINT WON' : 'POINT LOST'}`;
+  return gained ? 'POINT WON!' : 'POINT LOST';
+}
+
+function awardPoint(winner, reason){
+  if(state===STATE.POINT) return;
+  state = STATE.POINT;
+  syncControlButtons();
+  keepBallDriftingAfterPoint(reason);
+  ball.alive = false;
+  pointTimer = CONFIG.pointPause;
+  const gained = (winner==='player');
+  if(gained) score.p++; else score.c++;
+  const txt = pointMessage(winner, reason);
+  setMsg(txt, gained? '#7CFC8A' : '#ff7a7a');
+  if(reason === 'ACE!') AudioFX.ace(gained);
+  else AudioFX.point(gained);
+  resolvePoint();
+}
+
+function pointName(n){ return ['0','15','30','40'][n] ?? '40'; }
+
+// ---- 局面判定（次の1点でゲーム/セット/マッチが決まるか） ----
+function winsGameIf(who){
+  let p=score.p, c=score.c;
+  if(who==='player') p++; else c++;
+  const need = score.tiebreak ? CONFIG.tiebreakPoints : 4;
+  if(p>=need && p-c>=2) return 'player';
+  if(c>=need && c-p>=2) return 'cpu';
+  return null;
+}
+function winsSetIf(who){
+  if(winsGameIf(who)!==who) return false;
+  if(score.tiebreak) return true;             // タイブレーク獲得=セット獲得(7-6)
+  let pg=score.pg, cg=score.cg;
+  if(who==='player') pg++; else cg++;
+  const g=CONFIG.gamesPerSet;
+  return (who==='player') ? (pg>=g && pg-cg>=2) : (cg>=g && cg-pg>=2);
+}
+function winsMatchIf(who){
+  if(!winsSetIf(who)) return false;
+  let ps=score.ps, cs=score.cs;
+  if(who==='player') ps++; else cs++;
+  return (who==='player') ? (ps>=setsNeeded) : (cs>=setsNeeded);
+}
+// 局面ラベル（マッチ > セット > ブレイク > ゲーム）。緑=自分有利 / 赤=ピンチ
+function situationLabel(){
+  const G='#7CFC8A', R='#ff7a7a';
+  if(winsMatchIf('player')) return {t:'MATCH POINT', c:G};
+  if(winsMatchIf('cpu'))    return {t:'MATCH POINT', c:R};
+  if(winsSetIf('player'))   return {t:'SET POINT', c:G};
+  if(winsSetIf('cpu'))      return {t:'SET POINT', c:R};
+  if(winsGameIf('player')==='player')
+    return (server==='cpu') ? {t:'BREAK POINT', c:G} : {t:'GAME POINT', c:G};
+  if(winsGameIf('cpu')==='cpu')
+    return (server==='player') ? {t:'BREAK POINT', c:R} : {t:'GAME POINT', c:R};
+  return null;
+}
+
+// ---- ポイント確定後の処理 ----
+function resolvePoint(){
+  let gw=null;
+  if(score.tiebreak){
+    const n=CONFIG.tiebreakPoints;
+    if(score.p>=n && score.p-score.c>=2) gw='player';
+    else if(score.c>=n && score.c-score.p>=2) gw='cpu';
+    if(gw){
+      if(gw==='player') score.pg++; else score.cg++; // 6-6 → 7-6
+      winSet(gw);
+    }
+    return;
+  }
+  if(score.p>=4 && score.p-score.c>=2) gw='player';
+  else if(score.c>=4 && score.c-score.p>=2) gw='cpu';
+  if(gw) winGame(gw);
+  // 未決(デュース等)は awardPoint のポイント表示を残す
+}
+
+function winGame(who){
+  if(who==='player') score.pg++; else score.cg++;
+  score.p=0; score.c=0;
+  const g=CONFIG.gamesPerSet;
+  if(score.pg>=g && score.pg-score.cg>=2){ winSet('player'); return; }
+  if(score.cg>=g && score.cg-score.pg>=2){ winSet('cpu'); return; }
+  if(score.pg===g && score.cg===g){ startTiebreak(); return; }
+  const aceLead = score.message.indexOf('ACE')>=0;
+  setMsg(who==='player' ? (aceLead?'ACE! GAME!':'GAME WON!')
+                         : (aceLead?'CPU ACE! GAME':'GAME LOST'),
+    who==='player'?'#7CFC8A':'#ff7a7a');
+  AudioFX.game(who==='player');
+  server = (server==='player')?'cpu':'player'; // ゲームごとにサーブ交代
+}
+
+function startTiebreak(){
+  score.tiebreak=true; score.p=0; score.c=0;
+  server = (server==='player')?'cpu':'player'; // 6-6最終ゲームのレシーバーが最初のサーバー
+  tbStartServer = server;
+  setMsg('TIEBREAK!', '#ffd23f');
+}
+
+function winSet(who){
+  if(who==='player') score.ps++; else score.cs++;
+  score.setHistory.push({ p:score.pg, c:score.cg });
+  score.tiebreak=false;
+  const aceLead = score.message.indexOf('ACE')>=0;
+  setMsg(who==='player' ? (aceLead?'ACE! SET!':'SET WON!')
+                         : (aceLead?'CPU ACE! SET':'SET LOST'),
+    who==='player'?'#7CFC8A':'#ff7a7a');
+  AudioFX.set(who==='player');
+  if(score.ps>=setsNeeded){ matchOver('player'); return; }
+  if(score.cs>=setsNeeded){ matchOver('cpu'); return; }
+  score.pg=0; score.cg=0; score.p=0; score.c=0;
+  server = (server==='player')?'cpu':'player';
+}
+
+let pointTimer = 0;
+function matchOver(winner){
+  state = STATE.OVER;
+  const ov = document.getElementById('over');
+  document.getElementById('resultText').textContent =
+    winner==='player' ? 'YOU WIN' : 'YOU LOSE';
+  const hist = score.setHistory.map(s=>`${s.p}-${s.c}`).join('  ');
+  document.getElementById('resultScore').textContent =
+    `SETS ${score.ps} - ${score.cs}  (${hist})`;
+  ov.classList.remove('hidden');
+  if(winner==='player') AudioFX.victory();
+  else AudioFX.stopMusic();
+  syncControlButtons();
+}
+
+// =========================================================================
+// 更新
+// =========================================================================
+let last = performance.now();
+function loop(now){
+  let dt = (now-last)/1000; last = now;
+  if(dt>0.05) dt=0.05; // 安定化
+  if(state!==STATE.MENU && state!==STATE.OVER && state!==STATE.PAUSED) update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+function update(dt){
+  if(score.msgT>0) score.msgT-=dt;
+  if(hitCooldown.player>0) hitCooldown.player-=dt;
+  if(hitCooldown.cpu>0) hitCooldown.cpu-=dt;
+  if(swingTimer>0) swingTimer-=dt;
+  if(flashFx.t>0) flashFx.t-=dt;
+
+  // ---- プレイヤー移動 ----
+  movePlayer(dt);
+  // ---- CPU移動 ----
+  moveCpu(dt);
+
+  // ---- ポイント間 ----
+  if(state===STATE.POINT){
+    updatePointBall(dt);
+    pointTimer-=dt;
+    if(pointTimer<=0){ startNextPoint(); }
+    return;
+  }
+
+  // ---- サーブ ----
+  if(state===STATE.SERVE){
+    if(servePhase==='toss'){
+      // トス中: ボールは真上に上がって落ちる
+      tossT += dt;
+      ball.z += ball.vz*dt; ball.vz -= CONFIG.gravity*dt;
+      if(server==='player'){
+        // 打たずに落ちきったら構えに戻る（トスのやり直し＝キャンセル）
+        if(ball.z<=CONFIG.player.z-0.02){
+          servePhase='ready'; ball.vz=0;
+          setMsg('VOLLEY TO TOSS', '#d8f23a');
+        }
+      } else {
+        // CPUは良い打点で自動的に打つ
+        if(tossT>=0.42 && (ball.vz<0 || ball.z>1.0)) hitServe('cpu');
+      }
+    } else {
+      // 構え: ボールは手元、サーバーに追従。プレイヤーはタップでトス（pointerup/keyで処理）
+      const s=(server==='player')?player:cpu;
+      ball.x=s.x; ball.y=s.y+(server==='player'?0.02:-0.02); ball.z=CONFIG.player.z;
+      if(server==='cpu'){
+        serveTimer-=dt;
+        if(serveTimer<=0) startToss();           // CPUは自動でトス
+      }
+    }
+    return;
+  }
+
+  // ---- ボール物理 ----
+  if(ball.alive && state===STATE.RALLY){
+    ball.x += ball.vx*dt;
+    ball.y += ball.vy*dt;
+    ball.z += ball.vz*dt;
+    ball.vz -= CONFIG.gravity*dt;
+
+    // ネット衝突
+    const crossingNet = (ball.y-0.5)*(ball.y-ball.vy*dt-0.5) < 0; // 0.5 を跨いだ
+      if(crossingNet && ball.z < CONFIG.netZ){
+      AudioFX.net();
+      if(ball.isServe){ handleFault(); return; } // サーブのネットはフォルト
+      // 通常球のネット → 打った側の失点
+      awardPoint(ball.lastHitter==='player'?'cpu':'player', 'NET!');
+      return;
+    }
+
+    // 着地
+    if(ball.z<=0){
+      ball.z=0; ball.vz = -ball.vz*COL.bounce;
+      if(Math.abs(ball.vz)<0.25) ball.vz=0;
+      ball.bounces++;
+      ball.bounceSide = ball.y<0.5 ? 'near':'far';
+      AudioFX.bounce();
+      // 1バウンド目
+      if(ball.bounces===1){
+        if(ball.isServe){
+          // サーブはサービスボックス内でなければフォルト
+          if(!inServiceBox(ball.x, ball.y)){ handleFault(); return; }
+          ball.isServe=false; // 正規サーブ → 通常ラリーへ
+        } else {
+          const out = Math.abs(ball.x)>0.78 || ball.y<0.0 || ball.y>1.0;
+          if(out){
+            setMsg('', '#7CFC8A');
+            awardPoint(ball.lastHitter==='player'?'cpu':'player', 'OUT!');
+            return;
+          }
+        }
+      }
+      // 2バウンド → そのサイドが返せなかった
+      if(ball.bounces>=2){
+        const loser = ball.bounceSide==='near' ? 'player':'cpu';
+        const isAce = ball.lastHitter===server && !ball.serveWasReturned && !ball.isServe;
+        awardPoint(loser==='player'?'cpu':'player',
+          isAce ? 'ACE!' : (loser==='player' ? 'DOUBLE BOUNCE!' : 'WINNER!'));
+        return;
+      }
+    }
+
+    // ---- ヒット判定 ----
+    tryHits(dt);
+  }
+}
+
+function movePlayer(dt){
+  // 入力ターゲット
+  let tx = player.x, ty = player.y;
+  if(pointer.dragging){
+    const p = screenToCourt(pointer.x, pointer.y);
+    tx = p.x;
+    ty = (state===STATE.SERVE && server==='player')
+      ? Math.min(-0.02, Math.max(-0.12, p.y))
+      : Math.min(0.48, Math.max(0.0, p.y));
+  } else {
+    let dx=0, dy=0;
+    if(keys['ArrowLeft']||keys['a']) dx-=1;
+    if(keys['ArrowRight']||keys['d']) dx+=1;
+    if(keys['ArrowUp']||keys['w']) dy+=1;
+    if(keys['ArrowDown']||keys['s']) dy-=1;
+    tx = player.x + dx*CONFIG.player.speed*dt;
+    ty = player.y + dy*CONFIG.player.speed*dt*0.6;
+  }
+  // 追従（指）/直接（キー）
+  const sp = CONFIG.player.speed*dt*2.4;
+  player.x += Math.max(-sp, Math.min(sp, tx-player.x));
+  player.y += Math.max(-sp, Math.min(sp, ty-player.y));
+  if(state===STATE.SERVE && server==='player'){
+    // サーブはセンターマークの片側・ベースライン後方からのみ
+    const side = serveSide();
+    player.y = Math.max(-0.12, Math.min(-0.02, player.y));
+    if(side==='deuce') player.x = Math.max(0.04, Math.min(0.75, player.x)); // 右半分
+    else               player.x = Math.max(-0.75, Math.min(-0.04, player.x)); // 左半分
+  } else {
+    player.x = Math.max(-1.1, Math.min(1.1, player.x));
+    player.y = Math.max(0.0, Math.min(0.48, player.y));
+  }
+}
+
+function moveCpu(dt){
+  const c = cpuCfg;
+  // CPUサーブの構え中は所定のサイドに固定（中央へ流れない）
+  if(state===STATE.SERVE && server==='cpu'){
+    const sx = (serveSide()==='deuce') ? -0.32 : 0.32;
+    cpu.x += Math.max(-c.speed*dt, Math.min(c.speed*dt, sx-cpu.x));
+    cpu.y = 1.05;
+    return;
+  }
+  let targetX = cpu.x, targetY = 0.95;
+  if(ball.alive && ball.vy>0.001 && ball.y>0.45){
+    // ボールが向かってきている → 予測着地点へ
+    cpuReact += dt;
+    if(cpuReact>=c.react){
+      targetX = ball.x;
+      targetY = Math.min(0.97, Math.max(0.6, ball.y+0.04));
+    }
+  } else {
+    cpuReact = 0;
+    targetX = ball.x*0.4; // 中央寄りに戻る
+    targetY = 0.95;
+  }
+  const sp = c.speed*dt;
+  cpu.x += Math.max(-sp, Math.min(sp, targetX-cpu.x));
+  cpu.y += Math.max(-sp, Math.min(sp, targetY-cpu.y));
+  cpu.x = Math.max(-1.1, Math.min(1.1, cpu.x));
+  cpu.y = Math.max(0.55, Math.min(0.99, cpu.y));
+}
+
+function tryHits(dt){
+  const P=CONFIG.player;
+  playerCanHit=false;
+  // プレイヤー（手前）
+  if(ball.lastHitter!=='player' && hitCooldown.player<=0 && ball.y<0.5){
+    const dx=Math.abs(ball.x-player.x), dy=Math.abs(ball.y-player.y);
+    const zOk = ball.z < P.z+0.16;
+    if(dx<P.swingRX && dy<P.swingRY && zOk) playerCanHit=true; // 振りどき(広い圏)
+    // タップ強打 / ボレー（広く拾える）
+    if(swingTimer>0 && dx<P.swingRX && dy<P.swingRY && zOk){
+      const volley = ball.bounces===0;
+      playerHit(shotIntent, volley); swingTimer=0; ballZoneT=0; shotIntent='drive'; return;
+    }
+    // 自動返球（体に入る狭い圏・着地インのみ。アウト球はスルー）
+    if(dx<P.autoRX && dy<P.autoRY && zOk){
+      ballZoneT+=dt;
+      if(ballZoneT>=CONFIG.autoDelay){
+        const land=predictLanding();
+        const willIn = Math.abs(land.x)<=0.78 && land.y>=0 && land.y<=1.0;
+        if(ball.bounces>=1 || willIn){ playerHit('auto',false); ballZoneT=0; return; }
+        // アウトへ飛ぶ球は手を出さない
+      }
+    } else {
+      ballZoneT=0;
+    }
+  }
+  // CPU（奥）
+  if(ball.lastHitter!=='cpu' && hitCooldown.cpu<=0 && ball.y>0.5){
+    if(Math.abs(ball.x-cpu.x)<0.30 && Math.abs(ball.y-cpu.y)<0.24 && ball.z<P.z+0.16){
+      cpuHit(); return;
+    }
+  }
+}
+
+let serveTimer = 0;
+function startNextPoint(){
+  ball.alive=false; ball.visualT=0; ball.bounces=0; ball.isServe=false; ball.serveWasReturned=false;
+  isSecondServe=false; servePhase='ready';
+  swingTimer=0; ballZoneT=0; shotIntent='drive';
+  // タイブレーク中のサーブ: 最初の1本、以降2本ごとに交代
+  if(score.tiebreak){
+    const total = score.p+score.c;
+    const other = (tbStartServer==='player')?'cpu':'player';
+    server = (Math.floor((total+1)/2)%2===0) ? tbStartServer : other;
+  }
+  const side = serveSide();
+  if(server==='player'){
+    player.x = (side==='deuce')? 0.32 : -0.32; player.y = -0.06;
+    cpu.x = 0; cpu.y = 0.96;
+  } else {
+    cpu.x = (side==='deuce')? -0.32 : 0.32; cpu.y = 1.05;
+    player.x = (side==='deuce')? -0.30 : 0.30; player.y = 0.10; // レシーブ位置
+  }
+  state = STATE.SERVE;
+  serveTimer = (server==='cpu') ? 1.1 : 999; // CPUは自動、プレイヤーはタップ専用
+  setMsg(server==='player' ? 'SET STANCE - VOLLEY TO TOSS' : 'CPU SERVE', '#d8f23a');
+  syncControlButtons();
+}
+
+// =========================================================================
+// 描画
+// =========================================================================
+function render(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.translate(offX, offY);
+  ctx.scale(scale, scaleY);
+
+  drawBackground();
+  drawCourt();
+  drawServeZone();
+  // 奥のものから描く
+  drawShadow(cpu.x, cpu.y, 0);
+  drawShadow(player.x, player.y, 0);
+  if(ball.alive || ball.visualT>0 || state===STATE.SERVE) drawBallShadow();
+  drawPerson(cpu.x, cpu.y, '#ff6b4a', false);
+  if(ball.alive || ball.visualT>0 || state===STATE.SERVE) drawBall();
+  // 「振りどき」リング
+  if(state===STATE.RALLY && playerCanHit){
+    const rp=project(player.x, player.y, 0);
+    const rr=28 + Math.sin(performance.now()/70)*4;
+    ctx.strokeStyle='rgba(216,242,58,0.95)'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.ellipse(rp.x, rp.ground, rr, rr*0.42, 0,0,Math.PI*2); ctx.stroke();
+  }
+  drawPerson(player.x, player.y, '#3fd0ff', true);
+  drawNet();
+  drawChairUmpire();
+  drawHUD();
+  drawSituation();
+  drawMessage();
+
+  ctx.restore();
+}
+
+function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function isPortraitLayout(){ return window.innerHeight > window.innerWidth*1.2; }
+
+function rand01(seed){
+  const n=Math.sin(seed*12.9898 + surfaceKey.length*78.233)*43758.5453;
+  return n-Math.floor(n);
+}
+
+function shade(hex, amt){
+  const n=parseInt(hex.slice(1),16);
+  const r=clamp(((n>>16)&255)+amt,0,255)|0;
+  const g=clamp(((n>>8)&255)+amt,0,255)|0;
+  const b=clamp((n&255)+amt,0,255)|0;
+  return `rgb(${r},${g},${b})`;
+}
+
+function crowdPalette(){
+  if(COL.key==='clay') return ['#d7b18b','#b87b63','#9f6b54','#c9b9a2','#7f8585','#8f6b4e'];
+  if(COL.key==='grass') return ['#dbe9c2','#a9c27e','#7fa16a','#d6c79b','#e5edf1','#526c59'];
+  return ['#cdd7e6','#9fb0c6','#e8c98f','#b58fae','#8fb5a0','#526b84'];
+}
+
+function projectedQuad(x1,y1,x2,y2,fill){
+  const a=project(x1,y1,0), b=project(x2,y1,0), c=project(x2,y2,0), d=project(x1,y2,0);
+  ctx.fillStyle=fill;
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.lineTo(c.x,c.y); ctx.lineTo(d.x,d.y);
+  ctx.closePath(); ctx.fill();
+}
+
+function drawAudienceBand(y,h,offset,alpha){
+  const stand = COL.stand || COL.wall;
+  const fence = COL.fence || COL.wall;
+  const seat = ctx.createLinearGradient(0,y,0,y+h);
+  seat.addColorStop(0,shade(stand,22));
+  seat.addColorStop(1,shade(stand,-18));
+  ctx.fillStyle=seat;
+  ctx.fillRect(0,y,VW,h);
+  ctx.save();
+  ctx.globalAlpha=alpha*.86;
+  const crowd=crowdPalette();
+  for(let r=0;r<Math.floor(h/10);r++){
+    for(let i=0;i<96;i++){
+      const x=(i*13 + offset + (r%2)*6) % (VW+18) - 9;
+      const yy=y+5+r*10;
+      ctx.fillStyle=crowd[(i+r+surfaceKey.length)%crowd.length];
+      ctx.fillRect(x,yy,4,4);
+    }
+  }
+  ctx.restore();
+  ctx.save();
+  ctx.globalAlpha=.34;
+  ctx.strokeStyle=shade(fence,34);
+  ctx.lineWidth=1;
+  for(let x=54+offset%80;x<VW;x+=110){
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-26,y+h); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawLightRig(){
+  ctx.fillStyle='rgba(5,11,20,.72)';
+  ctx.fillRect(0,0,VW,30);
+  for(let i=0;i<12;i++){
+    const cx=40+i*84;
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    for(let k=0;k<4;k++){
+      ctx.beginPath(); ctx.arc(cx+k*10,16,3,0,Math.PI*2); ctx.fill();
+    }
+    const glow=ctx.createRadialGradient(cx+15,18,2,cx+15,28,48);
+    glow.addColorStop(0,'rgba(255,255,240,.22)');
+    glow.addColorStop(1,'rgba(255,255,240,0)');
+    ctx.fillStyle=glow; ctx.fillRect(cx-35,0,100,80);
+  }
+}
+
+function drawSimpleOfficial(x,y,s,uniform,pose){
+  const t=performance.now()/1000;
+  const bob=Math.sin(t*2.2 + x*.01)*1.4;
+  const headWiggle=Math.sin(t*3.6 + x*.02)*1.8;
+  ctx.save();
+  ctx.translate(x,y+bob);
+  ctx.strokeStyle='rgba(0,0,0,.24)';
+  ctx.lineWidth=5*s; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-7*s,18*s); ctx.lineTo(7*s,18*s); ctx.stroke();
+  ctx.strokeStyle='#101926'; ctx.lineWidth=3*s;
+  ctx.beginPath(); ctx.moveTo(-4*s,5*s); ctx.lineTo(-9*s,16*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(4*s,5*s); ctx.lineTo(9*s,16*s); ctx.stroke();
+  ctx.fillStyle=uniform;
+  roundRect(-9*s,-15*s,18*s,22*s,5*s); ctx.fill();
+  ctx.fillStyle='#f1d1ad';
+  ctx.beginPath(); ctx.arc(headWiggle,-24*s,7*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#203042';
+  ctx.beginPath(); ctx.arc(headWiggle,-29*s,7*s,Math.PI,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#f1d1ad'; ctx.lineWidth=3*s;
+  if(pose==='call'){
+    ctx.beginPath(); ctx.moveTo(-8*s,-8*s); ctx.lineTo(-20*s,-28*s); ctx.stroke();
+    ctx.fillStyle='#fff4cc'; ctx.fillRect(-25*s,-34*s,10*s,7*s);
+  } else if(pose==='throw'){
+    ctx.beginPath(); ctx.moveTo(8*s,-8*s); ctx.lineTo(20*s,-22*s); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(-8*s,-8*s); ctx.lineTo(-16*s,2*s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(8*s,-8*s); ctx.lineTo(16*s,2*s); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function groundTopY(){
+  return COURT.farY - 72;
+}
+
+function drawBackCourtSpace(){
+  const floorTop = groundTopY();
+  const top = floorTop - 38;
+  const fence = COL.fence || COL.wall;
+  const wall = ctx.createLinearGradient(0,top,0,floorTop);
+  wall.addColorStop(0,shade(fence,-12));
+  wall.addColorStop(.58,fence);
+  wall.addColorStop(1,shade(fence,-4));
+  ctx.fillStyle=wall;
+  ctx.fillRect(0,top,VW,floorTop-top);
+
+  const seatShadow=ctx.createLinearGradient(0,top,0,top+24);
+  seatShadow.addColorStop(0,'rgba(0,0,0,.28)');
+  seatShadow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=seatShadow;
+  ctx.fillRect(0,top,VW,28);
+}
+
+function drawGroundLayer(){
+  const floorTop = groundTopY();
+  const floor = ctx.createLinearGradient(0,floorTop,0,VH);
+  floor.addColorStop(0,shade(COL.apron,-4));
+  floor.addColorStop(.42,COL.apron);
+  floor.addColorStop(1,COL.apronNear);
+  ctx.fillStyle=floor;
+  ctx.fillRect(0,floorTop,VW,VH-floorTop);
+}
+
+function drawBackCourtCrew(){
+  const outCall = score.message && score.message.indexOf('OUT')>=0 && score.msgT>0;
+  drawSimpleOfficial(126,COURT.farY-48,0.70,'#1e5174','throw');
+  drawSimpleOfficial(874,COURT.farY-48,0.70,'#1e5174','stand');
+  drawSimpleOfficial(500,COURT.farY-52,0.74,'#22344a',outCall?'call':'stand');
+
+  const t=(performance.now()/1000)%3.2;
+  if(t<1.35){
+    const k=t/1.35;
+    const bx=148 + k*82;
+    const by=COURT.farY-76 - Math.sin(k*Math.PI)*24;
+    ctx.fillStyle=COL.ball;
+    ctx.beginPath(); ctx.arc(bx,by,5,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function drawBackground(){
+  const sky = ctx.createLinearGradient(0,0,0,COURT.farY+18);
+  sky.addColorStop(0,COL.skyTop);
+  sky.addColorStop(.62,COL.skyBottom);
+  sky.addColorStop(1,shade(COL.wall,-12));
+  ctx.fillStyle=sky;
+  ctx.fillRect(0,0,VW,COURT.farY+22);
+  drawAudienceBand(18,32,0,.54);
+  drawAudienceBand(56,30,31,.62);
+  drawAudienceBand(92,26,18,.46);
+  drawLightRig();
+  drawBackCourtSpace();
+  drawGroundLayer();
+  drawProjectedApron();
+  drawBackCourtCrew();
+}
+
+function drawProjectedApron(){
+  const edgeDark='rgba(0,0,0,.13)';
+  ctx.save();
+  ctx.beginPath();
+  const floorTop = groundTopY();
+  ctx.rect(0,floorTop,VW,VH-floorTop);
+  ctx.clip();
+  projectedQuad(-1.34,-0.12,1.34,0,shade(COL.apron,-6));
+  projectedQuad(-1.36,0,-1,1,edgeDark);
+  projectedQuad(1,0,1.36,1,edgeDark);
+  ctx.restore();
+}
+
+function drawServeZone(){
+  if(state!==STATE.SERVE || server!=='player') return;
+  const side=serveSide();
+  const x1 = (side==='deuce')? 0.02 : -0.78;
+  const x2 = (side==='deuce')? 0.78 : -0.02;
+  const a=project(x1,-0.12,0), b=project(x2,-0.12,0), c=project(x2,-0.02,0), d=project(x1,-0.02,0);
+  ctx.save();
+  const g=ctx.createLinearGradient(0,a.y,0,c.y);
+  g.addColorStop(0,shade(COL.apronNear,-2));
+  g.addColorStop(1,shade(COL.apronNear,-16));
+  ctx.globalAlpha=.36;
+  ctx.fillStyle=g;
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.lineTo(c.x,c.y); ctx.lineTo(d.x,d.y);
+  ctx.closePath(); ctx.fill();
+  ctx.globalAlpha=.18;
+  ctx.fillStyle=COL.line;
+  ctx.fillRect((a.x+b.x)/2-2, (a.y+c.y)/2-1, 4, 2);
+  ctx.restore();
+}
+
+function drawCourt(){
+  const tl=project(-1,1,0), tr=project(1,1,0), br=project(1,0,0), bl=project(-1,0,0);
+  // コートと床の接地影。強くしすぎると板が浮いて見えるので薄く短くする。
+  const courtShadow=ctx.createLinearGradient(0,tl.y,0,bl.y+10);
+  courtShadow.addColorStop(0,'rgba(0,0,0,.08)');
+  courtShadow.addColorStop(1,'rgba(0,0,0,.15)');
+  ctx.fillStyle=courtShadow;
+  ctx.beginPath();
+  ctx.moveTo(tl.x-2,tl.y+4); ctx.lineTo(tr.x+2,tr.y+4); ctx.lineTo(br.x+5,br.y+7); ctx.lineTo(bl.x-5,bl.y+7);
+  ctx.closePath(); ctx.fill();
+
+  // コート面
+  ctx.beginPath();
+  ctx.moveTo(tl.x,tl.y); ctx.lineTo(tr.x,tr.y); ctx.lineTo(br.x,br.y); ctx.lineTo(bl.x,bl.y);
+  ctx.closePath();
+  const courtG=ctx.createLinearGradient(0,tl.y,0,bl.y);
+  courtG.addColorStop(0,COL.courtFar);
+  courtG.addColorStop(.55,COL.court);
+  courtG.addColorStop(1,COL.courtNear);
+  ctx.fillStyle = courtG; ctx.fill();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(tl.x,tl.y); ctx.lineTo(tr.x,tr.y); ctx.lineTo(br.x,br.y); ctx.lineTo(bl.x,bl.y);
+  ctx.closePath(); ctx.clip();
+  drawSurfaceTexture();
+  ctx.restore();
+
+  ctx.lineWidth=4; ctx.strokeStyle=COL.line;
+  // 外枠
+  ctx.stroke();
+  // サイドライン（シングルス）
+  line(-0.78,0,-0.78,1); line(0.78,0,0.78,1);
+  // サービスライン
+  line(-0.78,0.27,0.78,0.27); line(-0.78,0.73,0.78,0.73);
+  // センターサービスライン
+  line(0,0.27,0,0.73);
+  // センターマーク
+  line(0,0,0,0.03); line(0,0.97,0,1);
+}
+function drawSurfaceTexture(){
+  if(COL.texture==='grass'){
+    for(let i=0;i<10;i++){
+      const y1=i/10, y2=(i+1)/10;
+      projectedQuad(-1,y1,1,y2,i%2===0?'rgba(255,255,255,.040)':'rgba(0,0,0,.030)');
+    }
+    for(let i=0;i<110;i++){
+      const x=-.95+rand01(i*3.1)*1.9, y=rand01(i*5.3);
+      const p=project(x,y,0);
+      ctx.fillStyle='rgba(255,255,255,.09)';
+      ctx.fillRect(p.x,p.y,1.5,5*lerp(1,.55,y));
+    }
+  } else if(COL.texture==='clay'){
+    for(let i=0;i<170;i++){
+      const x=-.96+rand01(i*2.7)*1.92, y=rand01(i*4.1);
+      const p=project(x,y,0);
+      const a=.08+rand01(i)*.1;
+      ctx.fillStyle=`rgba(82,34,20,${a})`;
+      ctx.fillRect(p.x,p.y,2+rand01(i*6)*6,1.4);
+    }
+    ctx.strokeStyle='rgba(255,238,210,.09)';
+    for(let i=0;i<12;i++){
+      const y=.09+i*.075;
+      const a=project(-.88+rand01(i)*.18,y,0), b=project(.82-rand01(i+20)*.18,y,0);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    }
+  } else {
+    for(let i=0;i<220;i++){
+      const x=-.96+rand01(i*1.7)*1.92, y=rand01(i*2.9);
+      const p=project(x,y,0);
+      ctx.fillStyle=i%2?'rgba(255,255,255,.08)':'rgba(0,0,0,.055)';
+      ctx.fillRect(p.x,p.y,1.8,1.8);
+    }
+  }
+  const shine=ctx.createLinearGradient(0,COURT.farY,0,COURT.nearY);
+  shine.addColorStop(0,'rgba(255,255,255,.10)');
+  shine.addColorStop(.32,'rgba(255,255,255,0)');
+  shine.addColorStop(1,'rgba(0,0,0,.10)');
+  ctx.fillStyle=shine;
+  ctx.fillRect(0,COURT.farY,VW,VH-COURT.farY);
+}
+function line(x1,y1,x2,y2){
+  const a=project(x1,y1,0), b=project(x2,y2,0);
+  ctx.lineWidth=Math.max(2.2,4.2-((y1+y2)/2)*1.4);
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+}
+
+function drawNet(){
+  const lz=CONFIG.netZ;
+  const L=project(-1.05,0.5,0), R=project(1.05,0.5,0);
+  const Lt=project(-1.05,0.5,lz), Rt=project(1.05,0.5,lz);
+  // ネット面
+  ctx.fillStyle='rgba(240,245,255,0.18)';
+  ctx.beginPath();
+  ctx.moveTo(L.x,L.y); ctx.lineTo(R.x,R.y); ctx.lineTo(Rt.x,Rt.y); ctx.lineTo(Lt.x,Lt.y);
+  ctx.closePath(); ctx.fill();
+  // 網目
+  ctx.strokeStyle='rgba(255,255,255,0.28)'; ctx.lineWidth=1;
+  for(let i=0;i<=28;i++){
+    const t=i/28;
+    const a=project(-1.05+2.1*t,0.5,0), b=project(-1.05+2.1*t,0.5,lz);
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+  }
+  // 上テープ
+  ctx.strokeStyle='#f4f7fb'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(Lt.x,Lt.y); ctx.lineTo(Rt.x,Rt.y); ctx.stroke();
+  // ポスト
+  ctx.strokeStyle='#0c1a2b'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(L.x,L.y); ctx.lineTo(Lt.x,Lt.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(R.x,R.y); ctx.lineTo(Rt.x,Rt.y); ctx.stroke();
+}
+
+function drawChairUmpire(){
+  const p=project(1.12,0.50,0);
+  const s=.58;
+  const outCall = score.message && score.message.indexOf('OUT')>=0 && score.msgT>0;
+  ctx.save();
+  ctx.translate(p.x,p.ground);
+  ctx.fillStyle='rgba(0,0,0,.22)';
+  ctx.beginPath(); ctx.ellipse(0,35*s,24*s,7*s,0,0,Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle='#101b2b';
+  ctx.lineWidth=4*s; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(-18*s,-9*s); ctx.lineTo(-25*s,34*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(18*s,-9*s); ctx.lineTo(25*s,34*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-20*s,8*s); ctx.lineTo(20*s,8*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-22*s,22*s); ctx.lineTo(22*s,22*s); ctx.stroke();
+
+  ctx.fillStyle='rgba(22,36,52,.95)';
+  roundRect(-24*s,-25*s,48*s,18*s,5*s); ctx.fill();
+  ctx.fillStyle='rgba(241,247,255,.92)';
+  roundRect(-20*s,-54*s,40*s,28*s,7*s); ctx.fill();
+  ctx.strokeStyle='rgba(9,17,29,.7)';
+  ctx.lineWidth=2*s;
+  roundRect(-20*s,-54*s,40*s,28*s,7*s); ctx.stroke();
+
+  ctx.fillStyle='#22344a';
+  roundRect(-10*s,-45*s,20*s,22*s,7*s); ctx.fill();
+  ctx.fillStyle='#f1d1ad';
+  ctx.beginPath(); ctx.arc(0,-58*s,7*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#152132';
+  ctx.beginPath(); ctx.arc(0,-62*s,7*s,Math.PI,Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle='#f1d1ad'; ctx.lineWidth=3*s;
+  if(outCall){
+    ctx.beginPath(); ctx.moveTo(10*s,-40*s); ctx.lineTo(22*s,-60*s); ctx.stroke();
+    ctx.fillStyle='#fff3c9';
+    ctx.fillRect(22*s,-66*s,10*s,7*s);
+  } else {
+    ctx.beginPath(); ctx.moveTo(10*s,-40*s); ctx.lineTo(18*s,-31*s); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(-10*s,-40*s); ctx.lineTo(-18*s,-31*s); ctx.stroke();
+
+  ctx.strokeStyle='#101b2b';
+  ctx.lineWidth=3*s;
+  ctx.beginPath(); ctx.moveTo(-6*s,-23*s); ctx.lineTo(-11*s,-9*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(6*s,-23*s); ctx.lineTo(11*s,-9*s); ctx.stroke();
+  ctx.restore();
+}
+
+function drawShadow(x,y){
+  const p=project(x,y,0);
+  ctx.fillStyle='rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.ellipse(p.x, p.ground, 24*lerp(1,0.6,y), 8*lerp(1,0.6,y), 0,0,Math.PI*2);
+  ctx.fill();
+}
+
+function drawPerson(x,y,color,near){
+  const p=project(x,y,0);
+  const s=lerp(1.0,0.62,y);
+  const isHitter = (near && flashFx.who==='player' && flashFx.t>0) ||
+                   (!near && flashFx.who==='cpu' && flashFx.t>0);
+  const shirt = near ? '#36c8ee' : '#ff7156';
+  const shorts = near ? '#10233b' : '#5b2018';
+  const trim = near ? '#e9fbff' : '#ffe9df';
+  ctx.save();
+  ctx.translate(p.x, p.ground);
+  ctx.strokeStyle='#101a28'; ctx.lineCap='round';
+  ctx.lineWidth=6*s;
+  ctx.beginPath(); ctx.moveTo(-7*s,-21*s); ctx.lineTo(-14*s,-1*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(7*s,-21*s); ctx.lineTo(14*s,-1*s); ctx.stroke();
+  ctx.strokeStyle=trim; ctx.lineWidth=3*s;
+  ctx.beginPath(); ctx.moveTo(-14*s,0); ctx.lineTo(-21*s,1*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(14*s,0); ctx.lineTo(21*s,1*s); ctx.stroke();
+
+  ctx.fillStyle=shorts;
+  roundRect(-13*s,-29*s,26*s,14*s,5*s); ctx.fill();
+  const bodyG=ctx.createLinearGradient(-12*s,-48*s,12*s,-20*s);
+  bodyG.addColorStop(0,shade(shirt,32));
+  bodyG.addColorStop(1,shirt);
+  ctx.fillStyle=bodyG;
+  roundRect(-14*s,-50*s,28*s,30*s,9*s); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.35)';
+  ctx.fillRect(-4*s,-48*s,3*s,26*s);
+
+  ctx.fillStyle='#f4d9b8';
+  ctx.beginPath(); ctx.arc(0,-56*s,9*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=near ? '#1a3652' : '#402018';
+  ctx.beginPath(); ctx.ellipse(0,-62*s,9*s,5*s,0,Math.PI,Math.PI*2); ctx.fill();
+
+  const swing = isHitter ? 1 : 0.35;
+  const side = near? 1:-1;
+  const rx = side * 29*s*swing;
+  const ry = -36*s - (isHitter?15*s:0);
+  ctx.strokeStyle='#18283e'; ctx.lineWidth=4*s;
+  ctx.beginPath(); ctx.moveTo(11*s*side,-37*s); ctx.lineTo(rx,ry); ctx.stroke();
+  ctx.save();
+  ctx.translate(rx,ry);
+  ctx.rotate(side*(isHitter ? .35 : .18));
+  ctx.fillStyle='rgba(220,235,255,0.42)';
+  ctx.beginPath(); ctx.ellipse(0,0,10*s,14*s,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#131f30'; ctx.lineWidth=2.5*s;
+  ctx.beginPath(); ctx.ellipse(0,0,10*s,14*s,0,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.58)'; ctx.lineWidth=1*s;
+  for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(i*3*s,-11*s); ctx.lineTo(i*3*s,11*s); ctx.stroke(); }
+  for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(-8*s,i*4*s); ctx.lineTo(8*s,i*4*s); ctx.stroke(); }
+  ctx.restore();
+  ctx.restore();
+}
+
+function drawBallShadow(){
+  const p=project(ball.x, ball.y, 0);
+  const sh = Math.max(0.3, 1-ball.z*1.4);
+  ctx.fillStyle=`rgba(0,0,0,${0.28*sh})`;
+  ctx.beginPath();
+  ctx.ellipse(p.x, p.ground, 10*lerp(1,0.6,ball.y), 4*lerp(1,0.6,ball.y),0,0,Math.PI*2);
+  ctx.fill();
+}
+function drawBall(){
+  const speed=Math.hypot(ball.vx,ball.vy);
+  if(speed>.55){
+    ctx.save();
+    for(let i=3;i>=1;i--){
+      const p=project(ball.x-ball.vx*0.035*i, ball.y-ball.vy*0.035*i, Math.max(0,ball.z-ball.vz*0.025*i));
+      const r=(8-i)*lerp(1.05,0.62,ball.y);
+      ctx.fillStyle=`rgba(216,242,58,${0.08*i})`;
+      ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  const p=project(ball.x, ball.y, ball.z);
+  const r = 9*lerp(1.05,0.62,ball.y);
+  const g=ctx.createRadialGradient(p.x-r*0.3,p.y-r*0.3,1,p.x,p.y,r);
+  g.addColorStop(0,'#ffff9a'); g.addColorStop(.45,COL.ball); g.addColorStop(1,shade(COL.ball,-42));
+  ctx.fillStyle=g;
+  ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.76)'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.arc(p.x-r*0.2,p.y, r*0.95, -0.7, 0.7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(p.x+r*0.2,p.y, r*0.95, Math.PI-0.7, Math.PI+0.7); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.42)';
+  ctx.beginPath(); ctx.arc(p.x-r*.28,p.y-r*.36,r*.18,0,Math.PI*2); ctx.fill();
+}
+
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+// HUD
+function ptLabel(){
+  if(score.tiebreak) return { p:String(score.p), c:String(score.c) };
+  if(score.p>=3 && score.c>=3){
+    if(score.p===score.c) return { p:'40', c:'40' };
+    return (score.p>score.c) ? { p:'Ad', c:'–' } : { p:'–', c:'Ad' };
+  }
+  return { p:pointName(score.p), c:pointName(score.c) };
+}
+function drawHUD(){
+  ctx.save();
+  ctx.fillStyle='rgba(8,17,29,0.8)';
+  const portrait = isPortraitLayout();
+  const y0 = portrait ? -166 : 14;
+  const barW = portrait ? 650 : 480;
+  const barH = score.setHistory.length ? (portrait ? 118 : 106) : (portrait ? 100 : 88);
+  roundRect(VW/2-barW/2, y0, barW, barH, 16); ctx.fill();
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  // ポイント
+  const L=ptLabel();
+  ctx.fillStyle='#eaf2ff'; ctx.font=(portrait?'900 34px':'800 26px') + ' Trebuchet MS, sans-serif';
+  ctx.fillText(`YOU  ${L.p}`, VW/2-(portrait?150:115), y0+(portrait?32:21));
+  ctx.fillText(`${L.c}  CPU`, VW/2+(portrait?150:115), y0+(portrait?32:21));
+  // セット＋ゲーム
+  ctx.font=(portrait?'800 18px':'700 15px') + ' Trebuchet MS, sans-serif'; ctx.fillStyle='#9fc0e6';
+  let mid = `SETS ${score.ps}-${score.cs}   GAMES ${score.pg}-${score.cg}`;
+  if(score.tiebreak) mid += '   TIEBREAK';
+  ctx.fillText(mid, VW/2, y0+(portrait?62:45));
+  ctx.font=(portrait?'900 14px':'900 12px') + ' Trebuchet MS, sans-serif'; ctx.fillStyle=COL.accent;
+  ctx.fillText(`${COL.name} COURT  /  ${COL.pace}`, VW/2, y0+(portrait?84:64));
+  // 終了セットの履歴
+  if(score.setHistory.length){
+    ctx.font='700 13px Trebuchet MS, sans-serif'; ctx.fillStyle='#6f8fb5';
+    ctx.fillText(score.setHistory.map(s=>`${s.p}-${s.c}`).join('  '), VW/2, y0+(portrait?106:82));
+  }
+  // サーブ側の表示
+  ctx.fillStyle = server==='player' ? '#d8f23a':'#ff6b4a';
+  ctx.beginPath(); ctx.arc(VW/2 + (server==='player'?-(portrait?286:210):(portrait?286:210)), y0+(portrait?32:21), portrait?8:6,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawSituation(){
+  if(state!==STATE.SERVE && state!==STATE.RALLY) return;
+  const s = situationLabel();
+  if(!s) return;
+  const yTop = isPortraitLayout() ? (score.setHistory.length ? -36 : -50) : (score.setHistory.length ? 130 : 112);
+  ctx.save();
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.globalAlpha = 0.72 + 0.28*Math.sin(performance.now()/240);
+  ctx.font='900 22px Trebuchet MS, sans-serif';
+  const w = ctx.measureText(s.t).width + 36;
+  ctx.fillStyle='rgba(8,17,29,0.82)';
+  roundRect(VW/2-w/2, yTop, w, 32, 16); ctx.fill();
+  ctx.fillStyle=s.c;
+  ctx.fillText(s.t, VW/2, yTop+17);
+  ctx.restore();
+}
+
+function drawMessage(){
+  if(score.msgT<=0 || !score.message) return;
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, score.msgT*2.2);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='900 46px Trebuchet MS, sans-serif';
+  ctx.lineWidth=7; ctx.strokeStyle='#08111d';
+  ctx.strokeText(score.message, VW/2, VH*0.44);
+  ctx.fillStyle = score.msgColor || '#d8f23a';
+  ctx.fillText(score.message, VW/2, VH*0.44);
+  ctx.restore();
+}
+
+// =========================================================================
+// 起動・メニュー
+// =========================================================================
+function setSurface(key){
+  surfaceKey = SURFACES[key] ? key : 'hard';
+  COL = SURFACES[surfaceKey];
+  AudioFX.button();
+  document.documentElement.style.setProperty('--court', COL.court);
+  document.documentElement.style.setProperty('--apron', COL.apron);
+  document.documentElement.style.setProperty('--line', COL.line);
+  document.documentElement.style.setProperty('--ball', COL.ball);
+  document.documentElement.style.setProperty('--surface-accent', COL.accent);
+  document.querySelectorAll('[data-surface]').forEach(btn=>{
+    btn.classList.toggle('on', btn.dataset.surface===surfaceKey);
+  });
+}
+
+function startMatch(diff){
+  AudioFX.button();
+  AudioFX.stopMusic();
+  difficulty=diff; cpuCfg=CONFIG.cpu[diff];
+  setsNeeded=CONFIG.setsToWin[diff];
+  score.p=score.c=score.pg=score.cg=score.ps=score.cs=0;
+  score.setHistory=[]; score.tiebreak=false; score.message='';
+  player.x=0; player.y=0.04; cpu.x=0; cpu.y=0.96;
+  server='player';
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  startNextPoint();
+  syncControlButtons();
+}
+
+function stopButtonPointer(e){
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+let lastControlAction = 0;
+function runControlAction(e, fn){
+  stopButtonPointer(e);
+  const now=performance.now();
+  if(now-lastControlAction<120) return;
+  lastControlAction=now;
+  AudioFX.button();
+  fn();
+}
+
+tennisHomeBtn.addEventListener('pointerup', e=>runControlAction(e, returnToTennisHome));
+pauseBtn.addEventListener('pointerup', e=>runControlAction(e, togglePause));
+resumeBtn.addEventListener('pointerup', e=>runControlAction(e, togglePause));
+volleyBtn.addEventListener('pointerdown', e=>runControlAction(e, ()=>triggerShot('drive')));
+lobBtn.addEventListener('pointerdown', e=>runControlAction(e, ()=>triggerShot('lob')));
+dropBtn.addEventListener('pointerdown', e=>runControlAction(e, ()=>triggerShot('drop')));
+
+document.querySelectorAll('[data-surface]').forEach(b=>{
+  b.addEventListener('click', ()=> setSurface(b.dataset.surface));
+});
+document.querySelectorAll('#menu .btn').forEach(b=>{
+  b.addEventListener('click', ()=> startMatch(b.dataset.diff));
+});
+document.getElementById('againBtn').addEventListener('click', ()=> startMatch(difficulty));
+document.getElementById('menuBtn').addEventListener('click', ()=>{
+  returnToTennisHome();
+});
+
+setSurface('hard');
+syncControlButtons();
+requestAnimationFrame(loop);
+</script>
+<script>
+/* JATA ARCADE shared menu: GAMES + fullscreen/new-window */
+(function(){
+  if(window.__jataMenu)return; window.__jataMenu=1;
+  var HOME='https://www.teru44.net/games';
+  var css="#jm-hot{position:fixed;top:0;left:0;right:0;height:22px;z-index:2147483640}"+
+    "#jm-handle{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:2147483646;width:58px;height:18px;background:rgba(8,17,29,.94);border:1px solid rgba(255,255,255,.18);border-top:none;border-radius:0 0 11px 11px;color:#9fc0e6;font:11px/1 -apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .2s}"+
+    "#jm-handle.h{opacity:0;pointer-events:none}"+
+    "#jm-bar{position:fixed;top:0;left:50%;transform:translate(-50%,-120%);z-index:2147483647;display:flex;gap:8px;padding:8px 10px;background:rgba(8,17,29,.98);border:1px solid rgba(255,255,255,.18);border-top:none;border-radius:0 0 16px 16px;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .28s ease}"+
+    "#jm-bar.s{transform:translate(-50%,0)}"+
+    ".jm-b{background:#13233a;border:1px solid rgba(255,255,255,.18);color:#eaf2ff;border-radius:10px;padding:9px 14px;font:800 13px -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}"+
+    ".jm-b:active{transform:scale(.95)}";
+  var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+  function ready(fn){ if(document.body) fn(); else requestAnimationFrame(function(){ready(fn);}); }
+  ready(function(){
+    var hot=document.createElement('div');hot.id='jm-hot';
+    var handle=document.createElement('button');handle.id='jm-handle';handle.textContent='▾';handle.setAttribute('aria-label','Menu');
+    var bar=document.createElement('div');bar.id='jm-bar';
+    var home=document.createElement('a');home.className='jm-b';home.href=HOME;home.target='_top';home.textContent='🏠 GAMES';
+    var fs=document.createElement('button');fs.className='jm-b';fs.type='button';
+    bar.appendChild(home);bar.appendChild(fs);document.body.appendChild(hot);document.body.appendChild(handle);document.body.appendChild(bar);
+    var open=false,timer=0;
+    function setOpen(v){open=v;bar.classList.toggle('s',open);handle.classList.toggle('h',open);}
+    function schedule(){clearTimeout(timer);timer=setTimeout(function(){setOpen(false);},2800);}
+    hot.addEventListener('pointerenter',function(){setOpen(true);schedule();});
+    handle.addEventListener('click',function(e){e.preventDefault();setOpen(!open);if(open)schedule();});
+    bar.addEventListener('pointerenter',function(){clearTimeout(timer);});
+    bar.addEventListener('pointerleave',schedule);
+    var ua=navigator.userAgent||'';
+    var isiPhone=/iPhone|iPod/.test(ua);
+    var de=document.documentElement;
+    var req=de.requestFullscreen||de.webkitRequestFullscreen;
+    var exit=document.exitFullscreen||document.webkitExitFullscreen;
+    if(!isiPhone && req){
+      fs.textContent='⛶ FULLSCREEN';
+      fs.addEventListener('click',function(){
+        var active=document.fullscreenElement||document.webkitFullscreenElement;
+        if(!active){req.call(de);}else if(exit){exit.call(document);}
+        setTimeout(function(){window.dispatchEvent(new Event('resize'));},250);
+      });
+      document.addEventListener('fullscreenchange',function(){fs.textContent=document.fullscreenElement?'⛶ EXIT':'⛶ FULLSCREEN';});
+      document.addEventListener('webkitfullscreenchange',function(){fs.textContent=document.webkitFullscreenElement?'⛶ EXIT':'⛶ FULLSCREEN';});
+    }else{
+      fs.textContent='🗗 OPEN WINDOW';
+      fs.addEventListener('click',function(){window.open(location.href,'_blank','noopener');});
+    }
+  });
+})();
+</script>
+</body>
+</html>
