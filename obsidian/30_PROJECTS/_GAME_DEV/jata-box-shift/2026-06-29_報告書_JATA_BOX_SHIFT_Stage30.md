@@ -155,6 +155,28 @@ TERU確認で以下の不具合が出た。
 - CSS/HTML参照アセット9件がすべてローカルに存在することを確認。
 - ローカルHTTPで主役、卵、水苔、歩行フレームPNGが `200`。
 
+Git / Vercel:
+
+```text
+commit: 054a265 Fix JATA BOX SHIFT navigation and assets
+production URL: https://jata-box-shift.vercel.app/
+deployment: https://jata-box-shift-ndk0g9np5-teru2nd-ship-its-projects.vercel.app
+deployment id: dpl_FucEUv1oduJHxjf3hEr61YEsPn1p
+inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/FucEUv1oduJHxjf3hEr61YEsPn1p
+```
+
+公開後確認:
+
+- `https://jata-box-shift.vercel.app/` は `HTTP/2 200`。
+- `assets/sumomo-step-0.png` は `HTTP/2 200`。
+- `assets/sumomo-step-1.png` は `HTTP/2 200`。
+- `assets/sumomo-step-2.png` は `HTTP/2 200`。
+- `assets/sumomo-step-3.png` は `HTTP/2 200`。
+- `assets/egg.png` は `HTTP/2 200`。
+- `assets/mizugoke.png` は `HTTP/2 200`。
+- 公開HTMLで `game.js?v=box-shift-progress-fix` 読み込みを確認。
+- 公開 `game.js?v=box-shift-progress-fix` に `PROGRESS_KEY`、`highestUnlocked`、`goHome()`、循環しない `changeLevel(delta)` が含まれることを確認。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:
