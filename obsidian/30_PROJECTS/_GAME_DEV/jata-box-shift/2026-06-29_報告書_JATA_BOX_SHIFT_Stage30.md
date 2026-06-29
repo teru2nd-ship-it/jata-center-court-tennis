@@ -8,7 +8,7 @@ scope:
   - sokoban
   - stage-design
   - vercel-production
-status: local_verified
+status: production_updated
 audience:
   - TERU
   - Codex
@@ -117,6 +117,32 @@ node --check game.js
 
 ## Git / Vercel
 
-この報告作成時点ではローカル検証済み。
+GitHub:
 
-Git commit / push と Vercel production deploy の結果は、この後の公開作業完了後に追記する。
+```text
+repo: https://github.com/teru2nd-ship-it/jata-center-court-tennis.git
+branch: main
+commit: 57d6bda Add JATA BOX SHIFT stages 21-30
+```
+
+Vercel:
+
+```text
+project: jata-box-shift
+production URL: https://jata-box-shift.vercel.app/
+deployment: https://jata-box-shift-gv4ztuzh9-teru2nd-ship-its-projects.vercel.app
+deployment id: dpl_FsHAxMAkwdxNceUDMf2njZWjmFNN
+inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/FsHAxMAkwdxNceUDMf2njZWjmFNN
+```
+
+公開後確認:
+
+- `https://jata-box-shift.vercel.app/` は `HTTP/2 200`。
+- 公開HTMLで `1/30` 表示を確認。
+- 公開HTMLで `game.js?v=box-shift-30` 読み込みを確認。
+- 公開 `game.js?v=box-shift-30` に21〜30面の追加データが含まれることを確認。
+
+ローカル注意:
+
+- `game-dev-room/prototypes/sokoban/.vercel/` はVercel CLIのローカルリンク情報。コミットしない。
+- `game-dev-room/prototypes/sokoban/.gitignore` で `.vercel` を除外する。
