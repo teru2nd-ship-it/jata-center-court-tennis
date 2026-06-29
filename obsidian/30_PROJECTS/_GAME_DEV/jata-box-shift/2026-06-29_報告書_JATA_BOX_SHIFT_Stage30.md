@@ -97,6 +97,23 @@ assets/clear/jungle-sumomo-bg-3.jpg
 - 既存のランダム薄表示ローテーションに3枚目として参加。
 - `index.html` のキャッシュ版数を `game.js?v=box-shift-bg3` へ更新。
 
+Git / Vercel:
+
+```text
+commit: 0ad8811 Add JATA BOX SHIFT jungle backdrop
+production URL: https://jata-box-shift.vercel.app/
+deployment: https://jata-box-shift-5nbfspdtx-teru2nd-ship-its-projects.vercel.app
+deployment id: dpl_4qTGzSzaDdRtzMou5ts9BphMKakz
+inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/4qTGzSzaDdRtzMou5ts9BphMKakz
+```
+
+公開後確認:
+
+- `https://jata-box-shift.vercel.app/` は `HTTP/2 200`。
+- `assets/clear/jungle-sumomo-bg-3.jpg` は `HTTP/2 200`。
+- 公開HTMLで `game.js?v=box-shift-bg3` 読み込みを確認。
+- 公開 `game.js?v=box-shift-bg3` に背景3枚が含まれることを確認。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:
