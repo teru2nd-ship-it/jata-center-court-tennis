@@ -114,6 +114,47 @@ inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/4qTGzSzaDdR
 - 公開HTMLで `game.js?v=box-shift-bg3` 読み込みを確認。
 - 公開 `game.js?v=box-shift-bg3` に背景3枚が含まれることを確認。
 
+## 2026-06-30 追記: ナビゲーションと画像欠け修正
+
+TERU確認で以下の不具合が出た。
+
+- メインメニューへ戻りにくい。
+- `PREV` が1面から30面へ循環してしまう。
+- 主役マス、卵、水苔の画像が表示されない。
+
+原因:
+
+- `styles.css` は旧公開版と同じく `assets/sumomo-step-*.png`、`assets/egg.png`、`assets/mizugoke.png` を参照していた。
+- ただしローカルGitへ公開版20面時代の画像アセットを取り込めておらず、本番でも該当PNGが404になっていた。
+- 旧Vercelデプロイ `dpl_96RMEpWLCmE5aC5dGrgy2q2R9MXM` のファイル一覧から、正規アセットのUIDを確認して復元した。
+
+修正内容:
+
+- `assets/egg.png`
+- `assets/mizugoke.png`
+- `assets/sumomo.png`
+- `assets/sumomo-step-0.png`
+- `assets/sumomo-step-1.png`
+- `assets/sumomo-step-2.png`
+- `assets/sumomo-step-3.png`
+- 常時表示の `HOME` 導線をヘッダーへ追加。
+- 30面クリア後のオーバーレイボタンを `HOME` に切り替え。
+- ステージ移動を循環式から進行管理式へ変更。
+- `jata-box-shift-progress:v1` で最高解放ステージを保存。
+- 初回は1面のみ、クリアすると次の1面だけ解放。
+- `PREV` / `NEXT` は解放済み範囲外へ移動できない。
+- `index.html` のキャッシュ版数を `game.js?v=box-shift-progress-fix` へ更新。
+
+ローカル確認:
+
+- `node --check game.js`
+- DOMスタブで初期 `PREV` が30面へ循環しないことを確認。
+- DOMスタブで未クリア時 `NEXT` が進まないことを確認。
+- DOMスタブで1面クリア後に2面が解放されることを確認。
+- DOMスタブで30面クリア後のオーバーレイが `HOME` になることを確認。
+- CSS/HTML参照アセット9件がすべてローカルに存在することを確認。
+- ローカルHTTPで主役、卵、水苔、歩行フレームPNGが `200`。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:

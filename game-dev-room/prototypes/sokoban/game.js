@@ -11,12 +11,17 @@ const clearText = document.querySelector("#clearText");
 const bgmBtn = document.querySelector("#bgmBtn");
 const sfxBtn = document.querySelector("#sfxBtn");
 const editBtn = document.querySelector("#editBtn");
+const prevBtn = document.querySelector("#prevBtn");
+const nextBtn = document.querySelector("#nextBtn");
+const overlayNextBtn = document.querySelector("#overlayNextBtn");
 const editorPanel = document.querySelector("#editorPanel");
 const levelEditor = document.querySelector("#levelEditor");
 const editorStatus = document.querySelector("#editorStatus");
 const clearTitle = overlay.querySelector("strong");
 
+const HOME_URL = "https://www.teru44.net/games";
 const CUSTOM_LEVEL_KEY = "jata-box-shift-custom:v1";
+const PROGRESS_KEY = "jata-box-shift-progress:v1";
 const BACKDROP_IMAGES = [
   "./assets/clear/sparkle-sumomo-bg-1.jpg",
   "./assets/clear/nest-sumomo-bg-2.jpg",
@@ -281,6 +286,36 @@ let bgmOn = localStorage.getItem("jata-box-shift-bgm:v1") !== "off";
 let sfxOn = localStorage.getItem("jata-box-shift-sfx:v1") !== "off";
 let playerFacing = "right";
 let playerFrame = 0;
+let highestUnlocked = readHighestUnlocked();
+
+function readHighestUnlocked() {
+  const saved = Number(localStorage.getItem(PROGRESS_KEY));
+  if (!Number.isInteger(saved)) return 0;
+  return Math.max(0, Math.min(saved, LEVELS.length - 1));
+}
+
+function unlockNextLevel() {
+  if (customMode) return;
+  const nextLevel = Math.min(LEVELS.length - 1, levelIndex + 1);
+  if (nextLevel > highestUnlocked) {
+    highestUnlocked = nextLevel;
+    localStorage.setItem(PROGRESS_KEY, String(highestUnlocked));
+  }
+}
+
+function updateProgressControls() {
+  prevBtn.disabled = customMode || levelIndex <= 0;
+  nextBtn.disabled = customMode || levelIndex >= highestUnlocked || levelIndex >= LEVELS.length - 1;
+  overlayNextBtn.textContent = !customMode && levelIndex === LEVELS.length - 1 && isCleared() ? "HOME" : "次へ";
+}
+
+function goHome() {
+  try {
+    (window.top || window).location.href = HOME_URL;
+  } catch {
+    window.location.href = HOME_URL;
+  }
+}
 
 function initAudio() {
   if (audioContext) return;
@@ -366,8 +401,9 @@ function normalizeLevel(rows) {
 
 function loadLevel(index) {
   customMode = false;
-  updateBackdrop(index);
-  const rows = normalizeLevel(LEVELS[index]);
+  levelIndex = Math.max(0, Math.min(index, highestUnlocked, LEVELS.length - 1));
+  updateBackdrop(levelIndex);
+  const rows = normalizeLevel(LEVELS[levelIndex]);
   loadRows(rows);
 }
 
@@ -510,10 +546,12 @@ function move(dirName) {
   if (isCleared()) {
     const world = currentWorld();
     const finalClear = !customMode && levelIndex === LEVELS.length - 1;
+    unlockNextLevel();
     clearTitle.textContent = finalClear ? "HAPPY HATCH!" : "NEST CLEAR!";
     clearText.textContent =
       finalClear ? "巨大な巣が完成。ちびコーンスネーク誕生!" : world.clear;
     overlay.classList.toggle("is-final-clear", finalClear);
+    updateProgressControls();
     playClearSound(finalClear);
     overlay.classList.remove("hidden");
   }
@@ -564,11 +602,13 @@ function render() {
   stageText.textContent = customMode ? "DIY" : `${levelIndex + 1}/${LEVELS.length}`;
   movesText.textContent = String(state.moves);
   boxesText.textContent = `${onTarget}/${state.boxes.size}`;
+  updateProgressControls();
 }
 
 function changeLevel(delta) {
-  levelIndex = (levelIndex + delta + LEVELS.length) % LEVELS.length;
-  loadLevel(levelIndex);
+  const target = levelIndex + delta;
+  if (target < 0 || target > highestUnlocked || target >= LEVELS.length) return;
+  loadLevel(target);
 }
 
 function editorRows() {
@@ -754,8 +794,8 @@ document.querySelector("#testBtn").addEventListener("click", () => {
 
 document.querySelector("#closeEditorBtn").addEventListener("click", closeEditor);
 
-document.querySelector("#prevBtn").addEventListener("click", () => changeLevel(-1));
-document.querySelector("#nextBtn").addEventListener("click", () => changeLevel(1));
+prevBtn.addEventListener("click", () => changeLevel(-1));
+nextBtn.addEventListener("click", () => changeLevel(1));
 document.querySelector("#resetBtn").addEventListener("click", () => {
   if (customMode && customLevel) loadCustomLevel(customLevel);
   else loadLevel(levelIndex);
@@ -765,7 +805,13 @@ document.querySelector("#againBtn").addEventListener("click", () => {
   if (customMode && customLevel) loadCustomLevel(customLevel);
   else loadLevel(levelIndex);
 });
-document.querySelector("#overlayNextBtn").addEventListener("click", () => changeLevel(1));
+overlayNextBtn.addEventListener("click", () => {
+  if (!customMode && levelIndex === LEVELS.length - 1 && isCleared()) {
+    goHome();
+    return;
+  }
+  changeLevel(1);
+});
 
 document.querySelectorAll("[data-dir]").forEach((button) => {
   button.addEventListener("pointerdown", (event) => {

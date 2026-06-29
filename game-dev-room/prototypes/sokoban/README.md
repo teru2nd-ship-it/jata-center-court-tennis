@@ -18,8 +18,10 @@
 - Undo / Reset / Prev / Next
 - DIYステージエディタ
 - JATA ARCADE共通メニュー
+- 常時表示のHOME導線
+- クリア済みステージだけを移動できる進行管理
 - クリア背景画像のランダム薄表示
-- 30面クリア時のエンドカード演出（`game.js?v=box-shift-bg3`）
+- 30面クリア時のエンドカード演出（`game.js?v=box-shift-progress-fix`）
 
 ## 追加背景
 

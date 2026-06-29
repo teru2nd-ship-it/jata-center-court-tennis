@@ -76,6 +76,15 @@ button:active {
   transform: translateY(1px);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+button:disabled:active {
+  transform: none;
+}
+
 .app {
   width: min(100%, 560px);
   position: relative;
@@ -130,14 +139,31 @@ h1 {
 
 .top-actions {
   display: grid;
-  grid-template-columns: repeat(3, auto);
+  grid-template-columns: repeat(4, auto);
   gap: 8px;
 }
 
-.top-actions button {
+.top-actions button,
+.home-link {
   min-height: 38px;
   padding: 0 10px;
   font-size: 13px;
+}
+
+.home-link {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #344a73, #1d2d4a);
+  color: var(--text);
+  font: inherit;
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.home-link:active {
+  transform: translateY(1px);
 }
 
 .top-actions button[aria-pressed="false"] {
@@ -676,6 +702,7 @@ h1 {
   }
 
   .top-actions button,
+  .home-link,
   .toolbar button,
   .editor-actions button {
     min-height: 34px;
