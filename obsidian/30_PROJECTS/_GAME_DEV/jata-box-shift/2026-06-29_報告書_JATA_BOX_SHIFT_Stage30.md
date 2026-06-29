@@ -166,6 +166,27 @@ inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/FsHAxMAkwdx
 - 公開HTMLで `game.js?v=box-shift-30` 読み込みを確認。
 - 公開 `game.js?v=box-shift-30` に21〜30面の追加データが含まれることを確認。
 
+## 2026-06-30 Git / Vercel 追記
+
+エンドカードと背景画像の反映:
+
+```text
+commit: c52285f Add JATA BOX SHIFT end card art
+production URL: https://jata-box-shift.vercel.app/
+deployment: https://jata-box-shift-c6027a1mq-teru2nd-ship-its-projects.vercel.app
+deployment id: dpl_4BprhBWPWS66jy27sBDUypdobV5o
+inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/4BprhBWPWS66jy27sBDUypdobV5o
+```
+
+公開後確認:
+
+- `https://jata-box-shift.vercel.app/` は `HTTP/2 200`。
+- `assets/clear/end-card-hatchling.jpg` は `HTTP/2 200`。
+- `assets/clear/nest-sumomo-bg-2.jpg` は `HTTP/2 200`。
+- `assets/clear/sparkle-sumomo-bg-1.jpg` は `HTTP/2 200`。
+- 公開HTMLで `game.js?v=box-shift-endcard` 読み込みを確認。
+- 公開 `game.js?v=box-shift-endcard` に `BACKDROP_IMAGES`、`HAPPY HATCH!`、`is-final-clear` が含まれることを確認。
+
 ローカル注意:
 
 - `game-dev-room/prototypes/sokoban/.vercel/` はVercel CLIのローカルリンク情報。コミットしない。
