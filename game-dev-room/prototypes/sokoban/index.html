@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>JATA BOX SHIFT - Nest Builder</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-label="JATA BOX SHIFT">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">JATA PUZZLE M1</p>
+          <h1>JATA BOX SHIFT</h1>
+          <p class="subtitle">Nest Builder</p>
+        </div>
+        <div class="top-actions">
+          <button id="bgmBtn" type="button" aria-pressed="true" title="BGM">BGM</button>
+          <button id="sfxBtn" type="button" aria-pressed="true" title="効果音">SFX</button>
+          <button id="editBtn" type="button" title="DIYステージ">DIY</button>
+        </div>
+      </header>
+
+      <section class="status" aria-live="polite">
+        <div>
+          <span>STAGE</span>
+          <strong id="stageText">1/30</strong>
+        </div>
+        <div>
+          <span>MOVES</span>
+          <strong id="movesText">0</strong>
+        </div>
+        <div>
+          <span>EGGS</span>
+          <strong id="boxesText">0/0</strong>
+        </div>
+      </section>
+
+      <section class="world" aria-live="polite">
+        <span id="worldIcon">🌱</span>
+        <strong id="worldText">草原</strong>
+        <small id="worldSub">卵を巣へ運ぼう</small>
+      </section>
+
+      <section class="toolbar" aria-label="ゲーム操作">
+        <button id="prevBtn" type="button">PREV</button>
+        <button id="undoBtn" type="button">UNDO</button>
+        <button id="resetBtn" type="button">RESET</button>
+        <button id="nextBtn" type="button">NEXT</button>
+      </section>
+
+      <section id="editorPanel" class="editor hidden" aria-label="DIYステージエディタ">
+        <div class="editor-head">
+          <strong>DIY STAGE</strong>
+          <span id="editorStatus"># 壁 / @ すもも / $ 卵 / . 巣</span>
+        </div>
+        <textarea id="levelEditor" spellcheck="false" aria-label="ステージテキスト"></textarea>
+        <div class="editor-actions">
+          <button id="sampleBtn" type="button">SAMPLE</button>
+          <button id="checkBtn" type="button">CHECK</button>
+          <button id="testBtn" type="button">TEST PLAY</button>
+          <button id="closeEditorBtn" type="button">CLOSE</button>
+        </div>
+      </section>
+
+      <section class="board-wrap">
+        <div id="board" class="board" aria-label="パズル盤面"></div>
+        <div id="clearOverlay" class="overlay hidden">
+          <strong>NEST CLEAR!</strong>
+          <span id="clearText">よくできました</span>
+          <div class="overlay-actions">
+            <button id="againBtn" type="button">もう一回</button>
+            <button id="overlayNextBtn" type="button">次へ</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="pad" aria-label="移動ボタン">
+        <span></span>
+        <button data-dir="up" type="button" aria-label="上">▲</button>
+        <span></span>
+        <button data-dir="left" type="button" aria-label="左">◀</button>
+        <button data-dir="down" type="button" aria-label="下">▼</button>
+        <button data-dir="right" type="button" aria-label="右">▶</button>
+      </section>
+    </main>
+
+    <script src="./game.js?v=box-shift-30"></script>
+    <script>
+      (() => {
+        "use strict";
+
+        if (window.__jataMenu) {
+          return;
+        }
+        window.__jataMenu = true;
+        window.__jataGameMenu = true;
+
+        const homeUrl = "https://www.teru44.net/games";
+
+        function isIPhone() {
+          const ua = navigator.userAgent || "";
+          const platform = navigator.platform || "";
+          return /iPhone|iPod/.test(ua) || platform === "iPhone";
+        }
+
+        function fullscreenElement() {
+          return document.fullscreenElement || document.webkitFullscreenElement || null;
+        }
+
+        function requestFullscreen() {
+          return document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || null;
+        }
+
+        function exitFullscreen() {
+          return document.exitFullscreen || document.webkitExitFullscreen || null;
+        }
+
+        function openNewWindow() {
+          window.open(window.location.href, "_blank", "noopener");
+        }
+
+        function injectStyles() {
+          if (document.getElementById("jm-style")) {
+            return;
+          }
+          const style = document.createElement("style");
+          style.id = "jm-style";
+          style.textContent =
+            "#jm-hot{position:fixed;top:0;left:0;right:0;height:22px;z-index:2147483640}" +
+            "#jm-handle{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:2147483646;width:58px;height:18px;min-height:0;padding:0;background:rgba(18,26,51,.92);border:1px solid #26315c;border-top:none;border-radius:0 0 11px 11px;color:#8b95c9;font:11px/1 -apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .2s;-webkit-tap-highlight-color:transparent}" +
+            "#jm-handle.h{opacity:0;pointer-events:none}" +
+            "#jm-bar{position:fixed;top:0;left:50%;transform:translate(-50%,-120%);z-index:2147483647;display:flex;gap:8px;padding:8px 10px;background:rgba(13,19,38,.97);border:1px solid #26315c;border-top:none;border-radius:0 0 16px 16px;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .28s ease}" +
+            "#jm-bar.s{transform:translate(-50%,0)}" +
+            ".jm-b{min-height:0;background:#121a33;border:1px solid #26315c;color:#e8ecff;border-radius:10px;padding:9px 14px;font:700 13px -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}" +
+            ".jm-b:active{transform:scale(.95)}" +
+            ".jm-b:focus-visible,#jm-handle:focus-visible{outline:3px solid rgba(97,229,155,.72);outline-offset:2px}";
+          document.head.appendChild(style);
+        }
+
+        function init() {
+          if (!document.body || document.getElementById("jm-bar")) {
+            return;
+          }
+
+          injectStyles();
+
+          const hot = document.createElement("div");
+          hot.id = "jm-hot";
+
+          const handle = document.createElement("button");
+          handle.id = "jm-handle";
+          handle.type = "button";
+          handle.textContent = "▾";
+          handle.setAttribute("aria-label", "メニュー");
+
+          const bar = document.createElement("div");
+          bar.id = "jm-bar";
+
+          const home = document.createElement("a");
+          home.className = "jm-b";
+          home.href = homeUrl;
+          home.target = "_top";
+          home.rel = "noopener";
+          home.textContent = "🏠 GAMES";
+
+          const full = document.createElement("button");
+          full.className = "jm-b";
+          full.type = "button";
+
+          let timer = null;
+          function show() {
+            clearTimeout(timer);
+            bar.classList.add("s");
+            handle.classList.add("h");
+          }
+          function hideSoon() {
+            timer = setTimeout(() => {
+              bar.classList.remove("s");
+              handle.classList.remove("h");
+            }, 260);
+          }
+          function updateFullscreenLabel() {
+            if (isIPhone()) {
+              full.textContent = "🗗 別ウィンドウ";
+              full.setAttribute("aria-label", "別ウィンドウで開く");
+              return;
+            }
+            full.textContent = fullscreenElement() ? "⛶ 解除" : "⛶ 全画面";
+            full.setAttribute("aria-label", fullscreenElement() ? "全画面解除" : "全画面");
+          }
+
+          full.addEventListener("click", () => {
+            if (isIPhone()) {
+              openNewWindow();
+              return;
+            }
+            const exit = exitFullscreen();
+            const request = requestFullscreen();
+            if (fullscreenElement()) {
+              if (exit) {
+                exit.call(document);
+              }
+              return;
+            }
+            if (!request) {
+              openNewWindow();
+              return;
+            }
+            const result = request.call(document.documentElement);
+            if (result && typeof result.catch === "function") {
+              result.catch(openNewWindow);
+            }
+          });
+
+          hot.addEventListener("mouseenter", show);
+          bar.addEventListener("mouseenter", () => clearTimeout(timer));
+          bar.addEventListener("mouseleave", hideSoon);
+          handle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (bar.classList.contains("s")) {
+              bar.classList.remove("s");
+              handle.classList.remove("h");
+            } else {
+              show();
+            }
+          });
+          document.addEventListener("click", (event) => {
+            if (bar.classList.contains("s") && !bar.contains(event.target) && event.target !== handle) {
+              bar.classList.remove("s");
+              handle.classList.remove("h");
+            }
+          });
+          document.addEventListener("fullscreenchange", updateFullscreenLabel);
+          document.addEventListener("webkitfullscreenchange", updateFullscreenLabel);
+
+          updateFullscreenLabel();
+          bar.append(home, full);
+          document.body.append(hot, handle, bar);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init, { once: true });
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>
