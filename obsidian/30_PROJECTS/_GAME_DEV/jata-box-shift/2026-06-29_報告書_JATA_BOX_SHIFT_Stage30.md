@@ -59,6 +59,30 @@ https://jata-box-shift.vercel.app/game.js
 - `README.md` を30ステージ表記へ更新。
 - ステージボタンは30面でも折り返し表示できるよう維持。
 
+## 2026-06-30 追記: エンドカードと背景画像
+
+TERU作成の画像3枚を `game-dev-room/prototypes/sokoban/assets/clear/` に追加した。
+
+使い分け:
+
+- `end-card-hatchling.jpg`: 30面クリア時のエンドカード本体。3枚目の孵化画像。
+- `sparkle-sumomo-bg-1.jpg`: ステージ背景用。1枚目を薄くランダム表示。
+- `nest-sumomo-bg-2.jpg`: ステージ背景用。2枚目を薄くランダム表示。
+
+実装内容:
+
+- 通常プレイ中の背景に `BACKDROP_IMAGES` から画像を薄く表示。
+- ステージごとに背景が自然に切り替わるよう、セッション内ランダムシードを使用。
+- 30面クリア時だけ `HAPPY HATCH!` のアニメーション文字を表示。
+- 30面クリア時だけ `end-card-hatchling.jpg` を全面エンドカードとして表示。
+- `index.html` のキャッシュ版数を `game.js?v=box-shift-endcard` へ更新。
+
+次に背景を増やす場合:
+
+1. 画像を `assets/clear/` に追加する。
+2. `game.js` の `BACKDROP_IMAGES` に画像パスを追加する。
+3. `README.md` の「追加背景」に画像名を追記する。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:

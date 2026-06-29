@@ -14,8 +14,14 @@ const editBtn = document.querySelector("#editBtn");
 const editorPanel = document.querySelector("#editorPanel");
 const levelEditor = document.querySelector("#levelEditor");
 const editorStatus = document.querySelector("#editorStatus");
+const clearTitle = overlay.querySelector("strong");
 
 const CUSTOM_LEVEL_KEY = "jata-box-shift-custom:v1";
+const BACKDROP_IMAGES = [
+  "./assets/clear/sparkle-sumomo-bg-1.jpg",
+  "./assets/clear/nest-sumomo-bg-2.jpg",
+];
+const BACKDROP_SEED = Math.floor(Math.random() * BACKDROP_IMAGES.length);
 
 const BASE_LEVELS = [
   ["######", "#@ $.#", "######"],
@@ -359,13 +365,21 @@ function normalizeLevel(rows) {
 
 function loadLevel(index) {
   customMode = false;
+  updateBackdrop(index);
   const rows = normalizeLevel(LEVELS[index]);
   loadRows(rows);
 }
 
 function loadCustomLevel(rows) {
   customMode = true;
+  updateBackdrop(Math.floor(Math.random() * Math.max(1, BACKDROP_IMAGES.length)));
   loadRows(normalizeLevel(rows));
+}
+
+function updateBackdrop(index) {
+  if (!BACKDROP_IMAGES.length) return;
+  const image = BACKDROP_IMAGES[(index + BACKDROP_SEED) % BACKDROP_IMAGES.length];
+  document.body.style.setProperty("--stage-backdrop-image", `url("${image}")`);
 }
 
 function loadRows(rows) {
@@ -401,6 +415,7 @@ function loadRows(rows) {
   state.playerFacing = playerFacing;
   state.playerFrame = playerFrame;
   overlay.classList.add("hidden");
+  overlay.classList.remove("is-final-clear");
   updateWorld();
   render();
 }
@@ -449,6 +464,7 @@ function restoreState(snapshot) {
   playerFacing = state.playerFacing || "right";
   playerFrame = state.playerFrame || 0;
   overlay.classList.add("hidden");
+  overlay.classList.remove("is-final-clear");
   render();
 }
 
@@ -493,8 +509,10 @@ function move(dirName) {
   if (isCleared()) {
     const world = currentWorld();
     const finalClear = !customMode && levelIndex === LEVELS.length - 1;
+    clearTitle.textContent = finalClear ? "HAPPY HATCH!" : "NEST CLEAR!";
     clearText.textContent =
       finalClear ? "巨大な巣が完成。ちびコーンスネーク誕生!" : world.clear;
+    overlay.classList.toggle("is-final-clear", finalClear);
     playClearSound(finalClear);
     overlay.classList.remove("hidden");
   }

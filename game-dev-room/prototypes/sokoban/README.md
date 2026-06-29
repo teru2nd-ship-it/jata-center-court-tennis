@@ -18,6 +18,23 @@
 - Undo / Reset / Prev / Next
 - DIYステージエディタ
 - JATA ARCADE共通メニュー
+- クリア背景画像のランダム薄表示
+- 30面クリア時のエンドカード演出（`game.js?v=box-shift-endcard`）
+
+## 追加背景
+
+ステージ背景は `game.js` の `BACKDROP_IMAGES` に画像パスを追加すると増やせる。
+
+```text
+assets/clear/sparkle-sumomo-bg-1.jpg
+assets/clear/nest-sumomo-bg-2.jpg
+```
+
+最終クリアのエンドカードは `styles.css` の `.overlay.is-final-clear` で指定している。
+
+```text
+assets/clear/end-card-hatchling.jpg
+```
 
 ## ローカル確認
 
