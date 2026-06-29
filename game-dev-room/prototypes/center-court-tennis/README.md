@@ -56,8 +56,8 @@ python3 -m http.server 8000 --directory game-dev-room/prototypes/center-court-te
 
 - Production URL: https://jata-center-court-tennis.vercel.app/
 - Vercel project: `jata-center-court-tennis`
-- Latest production deployment: `https://jata-center-court-tennis-pqbgesb1g-teru2nd-ship-its-projects.vercel.app`
-- Deployment id: `dpl_Gb1StyXuPF5i7WpN5mxYbdSv2DTv`
+- Latest production deployment: `https://jata-center-court-tennis-hg26fthgg-teru2nd-ship-its-projects.vercel.app`
+- Deployment id: `dpl_GMfHrPygFb9YTaEiwCwKdXHxE6i5`
 - Deployed from this folder with Vercel CLI on 2026-06-29.
 
 ## Next Candidates
@@ -84,3 +84,5 @@ python3 -m http.server 8000 --directory game-dev-room/prototypes/center-court-te
 - 2026-06-29: Added procedural BGM, crowd reactions, SFX, natural out-ball drift, and the JATA OPEN emblem on title/result overlays.
 - 2026-06-29: Switched visible UI language to mostly English and added service ace detection with `ACE!` / `CPU ACE!` callouts.
 - 2026-06-29: Published production deployment to Vercel at `https://jata-center-court-tennis.vercel.app/`.
+- 2026-06-29: Reworked the JATA OPEN emblem into an original `CENTER COURT / JATA OPEN` badge and removed the risky `THE CHAMPIONSHIPS` wording.
+- 2026-06-29: Redeployed the safer emblem to Vercel production.
