@@ -52,12 +52,20 @@ Open `index.html` directly in a browser, or serve this folder as static HTML.
 python3 -m http.server 8000 --directory game-dev-room/prototypes/center-court-tennis
 ```
 
+## Production
+
+- Production URL: https://jata-center-court-tennis.vercel.app/
+- Vercel project: `jata-center-court-tennis`
+- Latest production deployment: `https://jata-center-court-tennis-pqbgesb1g-teru2nd-ship-its-projects.vercel.app`
+- Deployment id: `dpl_Gb1StyXuPF5i7WpN5mxYbdSv2DTv`
+- Deployed from this folder with Vercel CLI on 2026-06-29.
+
 ## Next Candidates
 
 - Test play on iPhone and desktop
 - Tune CPU difficulty and rally tempo
 - Consider a full Three.js version as a separate upgrade once the 2D/pseudo-3D game feel is settled
-- Decide whether to publish as a standalone game or add to JATA ARCADE later
+- Add the production URL to JATA ARCADE / `teru44.net/games` when ready
 
 ## Fix Log
 
@@ -75,3 +83,4 @@ python3 -m http.server 8000 --directory game-dev-room/prototypes/center-court-te
 - 2026-06-29: Added B/N keyboard shortcuts and upgraded the court crew with back-court ball kids, line judge, and a larger chair umpire beside the net.
 - 2026-06-29: Added procedural BGM, crowd reactions, SFX, natural out-ball drift, and the JATA OPEN emblem on title/result overlays.
 - 2026-06-29: Switched visible UI language to mostly English and added service ace detection with `ACE!` / `CPU ACE!` callouts.
+- 2026-06-29: Published production deployment to Vercel at `https://jata-center-court-tennis.vercel.app/`.
