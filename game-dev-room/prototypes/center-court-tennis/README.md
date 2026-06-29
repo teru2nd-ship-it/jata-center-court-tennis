@@ -56,8 +56,8 @@ python3 -m http.server 8000 --directory game-dev-room/prototypes/center-court-te
 
 - Production URL: https://jata-center-court-tennis.vercel.app/
 - Vercel project: `jata-center-court-tennis`
-- Latest production deployment: `https://jata-center-court-tennis-hg26fthgg-teru2nd-ship-its-projects.vercel.app`
-- Deployment id: `dpl_GMfHrPygFb9YTaEiwCwKdXHxE6i5`
+- Latest production deployment: `https://jata-center-court-tennis-5csg6hed9-teru2nd-ship-its-projects.vercel.app`
+- Deployment id: `dpl_GHT2nvkmCX3sJvTwGTkK8Np4HjNy`
 - Deployed from this folder with Vercel CLI on 2026-06-29.
 
 ## Next Candidates
@@ -86,3 +86,5 @@ python3 -m http.server 8000 --directory game-dev-room/prototypes/center-court-te
 - 2026-06-29: Published production deployment to Vercel at `https://jata-center-court-tennis.vercel.app/`.
 - 2026-06-29: Reworked the JATA OPEN emblem into an original `CENTER COURT / JATA OPEN` badge and removed the risky `THE CHAMPIONSHIPS` wording.
 - 2026-06-29: Redeployed the safer emblem to Vercel production.
+- 2026-06-29: Replaced the emblem with TERU's preferred `CENTER COURT / JATA OPEN` custom artwork.
+- 2026-06-29: Redeployed TERU's preferred emblem to Vercel production.

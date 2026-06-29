@@ -46,9 +46,9 @@ https://jata-center-court-tennis.vercel.app/
 Vercel:
 
 - project: `jata-center-court-tennis`
-- production deployment: `https://jata-center-court-tennis-hg26fthgg-teru2nd-ship-its-projects.vercel.app`
-- deployment id: `dpl_GMfHrPygFb9YTaEiwCwKdXHxE6i5`
-- inspect: `https://vercel.com/teru2nd-ship-its-projects/jata-center-court-tennis/GMfHrPygFb9YTaEiwCwKdXHxE6i5`
+- production deployment: `https://jata-center-court-tennis-5csg6hed9-teru2nd-ship-its-projects.vercel.app`
+- deployment id: `dpl_GHT2nvkmCX3sJvTwGTkK8Np4HjNy`
+- inspect: `https://vercel.com/teru2nd-ship-its-projects/jata-center-court-tennis/GHT2nvkmCX3sJvTwGTkK8Np4HjNy`
 
 ## 実装したこと
 
@@ -69,6 +69,7 @@ Vercel:
 - サービスエース判定を追加し、`ACE!` / `CPU ACE!` で盛り上がる演出を追加。
 - いつもの `teru44.net/games` 戻るボタンと、iPhoneは別ウィンドウ / PC・iPadは全画面ボタンを追加。
 - 公開後、既存エンブレムの `THE CHAMPIONSHIPS` 表記がWimbledon連想リスクになり得るため、Image2の中央ラケット/ボール素材を活かした `CENTER COURT / JATA OPEN` 独自バッジへ差し替え。
+- その後、TERUさん指定の `テニスエンブレム.png` を軽量化し、タイトル/勝敗画面用エンブレムとして再差し替え。
 
 ## 確認済み
 
@@ -86,6 +87,8 @@ Vercel:
 - `https://jata-center-court-tennis.vercel.app/assets/jata-open-emblem.png` は `curl -I` で `HTTP/2 200`。
 - エンブレム差し替え後、Vercel production へ再デプロイ完了。
 - 差し替え後の `https://jata-center-court-tennis.vercel.app/assets/jata-open-emblem.png` は `curl -I` で `HTTP/2 200`。
+- TERUさん指定エンブレムへの再差し替え後、Vercel production へ再デプロイ完了。
+- 指定エンブレム差し替え後の `https://jata-center-court-tennis.vercel.app/assets/jata-open-emblem.png` は `curl -I` で `HTTP/2 200`。
 
 ## 現在の状態
 
