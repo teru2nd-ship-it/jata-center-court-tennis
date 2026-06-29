@@ -20,6 +20,7 @@ const CUSTOM_LEVEL_KEY = "jata-box-shift-custom:v1";
 const BACKDROP_IMAGES = [
   "./assets/clear/sparkle-sumomo-bg-1.jpg",
   "./assets/clear/nest-sumomo-bg-2.jpg",
+  "./assets/clear/jungle-sumomo-bg-3.jpg",
 ];
 const BACKDROP_SEED = Math.floor(Math.random() * BACKDROP_IMAGES.length);
 
