@@ -298,6 +298,25 @@ TERU確認で、30面クリア後にタイトル画面へ戻ってSTARTすると
 - ゲーム中HOMEでタイトルへ戻ったあと、再STARTしても `1/30` になることを確認。
 - ブラウザコンソールエラーなし。
 
+Git / Vercel:
+
+```text
+commit: ffceddc Start JATA BOX SHIFT title from stage one
+production URL: https://jata-box-shift.vercel.app/
+deployment: https://jata-box-shift-me79x7svo-teru2nd-ship-its-projects.vercel.app
+deployment id: dpl_5SdCpbTSX5kQEJFVuRDud5xMy5T6
+inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/5SdCpbTSX5kQEJFVuRDud5xMy5T6
+```
+
+公開後確認:
+
+- `https://jata-box-shift.vercel.app/` は `HTTP/2 200`。
+- `https://jata-box-shift.vercel.app/game.js?v=box-shift-title-start-1` は `HTTP/2 200`。
+- 公開HTMLで `game.js?v=box-shift-title-start-1` を確認。
+- 公開JSで `startBtn.textContent = "START"`、`startGame()` 内の `loadLevel(0)` を確認。
+- 公開JSに旧 `loadLevel(Math.min(highestUnlocked` が含まれないことを確認。
+- Vercelログは対象デプロイで `No logs found`。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:
