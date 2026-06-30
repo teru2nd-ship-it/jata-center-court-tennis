@@ -253,6 +253,24 @@ TERU確認で、ゲーム中HOMEの戻り先を変更した。
 - ゲーム中ヘッダー `HOME` クリック後、URLは変わらず、タイトル画面が再表示されることを確認。
 - ブラウザコンソールエラーなし。
 
+Git / Vercel:
+
+```text
+commit: cdbc270 Return JATA BOX SHIFT home to title
+production URL: https://jata-box-shift.vercel.app/
+deployment: https://jata-box-shift-bju2mwz4a-teru2nd-ship-its-projects.vercel.app
+deployment id: dpl_HsnnFDkqMf9X34P7Fywj9eEEQnEq
+inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/HsnnFDkqMf9X34P7Fywj9eEEQnEq
+```
+
+公開後確認:
+
+- `https://jata-box-shift.vercel.app/` は `HTTP/2 200`。
+- `https://jata-box-shift.vercel.app/game.js?v=box-shift-title-home` は `HTTP/2 200`。
+- 公開HTMLで `game.js?v=box-shift-title-home`、共通メニュー `GAMES`、表紙HOMEリンク削除を確認。
+- 公開JSで `returnToTitle` が含まれ、旧 `goHome` が含まれないことを確認。
+- Vercelログは対象デプロイで `No logs found`。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:
