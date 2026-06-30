@@ -177,6 +177,38 @@ inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/FucEUv1oduJ
 - 公開HTMLで `game.js?v=box-shift-progress-fix` 読み込みを確認。
 - 公開 `game.js?v=box-shift-progress-fix` に `PROGRESS_KEY`、`highestUnlocked`、`goHome()`、循環しない `changeLevel(delta)` が含まれることを確認。
 
+## 2026-06-30 追記: 表紙追加と盤面優先レイアウト
+
+TERU確認で、後半ステージほど盤面が小さく感じる問題が出た。
+
+対応方針:
+
+- タイトル情報は表紙画面へ移動。
+- 表紙背景は `assets/clear/jungle-sumomo-bg-3.jpg` を使用。
+- プレイ画面ではヘッダー、ステータス、説明、操作ボタンを圧縮。
+- プレイ画面のブランド文字は畳み、HOME / BGM / SFX / DIY だけを残す。
+- `PREV` / `UNDO` / `RESET` / `NEXT` は `◀` / `↶` / `⟳` / `▶` へ簡略化。
+- 盤面コンテナを縦に広げ、後半の横長・大きめステージでもセルが小さくなりすぎないよう調整。
+- `index.html` のキャッシュ版数を `game.js?v=box-shift-cover-layout` へ更新。
+
+追加修正:
+
+- START前のキーボード操作が裏の盤面に効かないようにし、Enter / Space で開始できるようにした。
+- プレイ画面のグリッド行を6行構成へ明示し、スマホ幅でステージ移動ボタンが縦に伸びる問題を修正。
+- DIYテストプレイ時はエディタを閉じてから盤面サイズを測るようにし、カスタム面が小さく描画される問題を修正。
+- READMEの操作説明を `↶` / `⟳` 表記へ更新。
+
+ローカル確認:
+
+- `node --check game.js`
+- `git diff --check`
+- CSS/HTML/JS参照アセットの存在確認
+- ローカルHTTP `http://127.0.0.1:8881/` で表紙、START後、390x844スマホ幅をブラウザ確認。
+- 1280x720表示でプレイ画面全体が収まり、盤面コンテナ約449px、下部操作キーまで表示されることを確認。
+- 390x844表示で横スクロールなし、下部操作キーまで表示されることを確認。
+- 30面相当のDIYテストでセル約51px、盤面約607x435pxまで拡大されることを確認。
+- ブラウザコンソールエラーなし。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:

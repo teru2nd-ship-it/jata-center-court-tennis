@@ -38,7 +38,7 @@ body {
 body {
   display: grid;
   place-items: center;
-  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
   position: relative;
   touch-action: manipulation;
   user-select: none;
@@ -85,13 +85,91 @@ button:disabled:active {
   transform: none;
 }
 
+.cover-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  align-items: end;
+  justify-items: start;
+  padding: max(28px, env(safe-area-inset-top)) 18px max(34px, env(safe-area-inset-bottom));
+  background:
+    linear-gradient(180deg, rgba(3, 9, 7, 0.06) 0%, rgba(4, 10, 7, 0.22) 42%, rgba(3, 7, 5, 0.86) 100%),
+    url("./assets/clear/jungle-sumomo-bg-3.jpg") center / cover no-repeat;
+}
+
+.cover-screen.hidden {
+  display: none;
+}
+
+.cover-content {
+  width: min(100%, 760px);
+  display: grid;
+  gap: 12px;
+  color: #fff9dd;
+  text-shadow:
+    0 2px 0 rgba(20, 41, 17, 0.72),
+    0 0 24px rgba(255, 218, 116, 0.38);
+}
+
+.cover-content p {
+  margin: 0;
+  color: #ffdd76;
+  font-size: clamp(14px, 3.6vw, 24px);
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.cover-content h1 {
+  max-width: 720px;
+  font-size: clamp(58px, 15vw, 126px);
+  line-height: 0.86;
+}
+
+.cover-content span {
+  color: #d9ffd6;
+  font-size: clamp(18px, 4.8vw, 34px);
+  font-weight: 950;
+}
+
+.cover-actions {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(110px, 160px);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cover-actions a,
+.cover-actions button {
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 238, 163, 0.5);
+  border-radius: 8px;
+  background: rgba(12, 27, 17, 0.76);
+  color: #fff9df;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 950;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+}
+
+.cover-actions button {
+  background: linear-gradient(180deg, rgba(255, 209, 94, 0.96), rgba(213, 111, 28, 0.92));
+  color: #1b1306;
+  text-shadow: none;
+}
+
 .app {
-  width: min(100%, 560px);
+  width: min(100%, 820px);
+  height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+  min-height: 0;
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-rows: auto auto auto auto auto auto auto;
-  gap: 10px;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+  gap: 6px;
 }
 
 .topbar,
@@ -107,11 +185,15 @@ button:disabled:active {
 
 .topbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 12px;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.brand {
+  display: none;
 }
 
 .eyebrow {
@@ -139,15 +221,15 @@ h1 {
 
 .top-actions {
   display: grid;
-  grid-template-columns: repeat(4, auto);
-  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .top-actions button,
 .home-link {
-  min-height: 38px;
-  padding: 0 10px;
-  font-size: 13px;
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 11px;
 }
 
 .home-link {
@@ -177,29 +259,31 @@ h1 {
 .status {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 8px;
-  border-radius: 12px;
+  gap: 5px;
+  padding: 4px;
+  border-radius: 10px;
 }
 
 .status div {
   min-width: 0;
-  display: grid;
-  gap: 2px;
-  padding: 8px 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 3px 7px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
 }
 
 .status span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 
 .status strong {
-  font-size: clamp(20px, 6vw, 30px);
+  font-size: clamp(17px, 4vw, 22px);
   line-height: 1;
 }
 
@@ -207,25 +291,25 @@ h1 {
   display: grid;
   grid-template-columns: auto minmax(0, auto) minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  border-radius: 12px;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 10px;
 }
 
 .world span {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .world strong {
   color: var(--accent);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .world small {
   min-width: 0;
   overflow: hidden;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -234,14 +318,14 @@ h1 {
 .toolbar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 8px;
-  border-radius: 12px;
+  gap: 5px;
+  padding: 4px;
+  border-radius: 10px;
 }
 
 .toolbar button {
-  min-height: 38px;
-  font-size: 12px;
+  min-height: 30px;
+  font-size: 18px;
 }
 
 .editor {
@@ -302,22 +386,22 @@ h1 {
   display: grid;
   place-items: center;
   width: 100%;
-  min-height: 160px;
-  aspect-ratio: 1 / 0.42;
-  padding: 10px;
-  border-radius: 14px;
+  min-height: 0;
+  height: 100%;
+  padding: 7px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .board {
   display: grid;
-  gap: 3px;
+  gap: 2px;
   width: min(100%, var(--board-width, 520px));
   height: min(100%, var(--board-height, 520px));
   max-width: var(--board-width, 520px);
   max-height: var(--board-height, 520px);
-  padding: 8px;
-  border-radius: 12px;
+  padding: 6px;
+  border-radius: 10px;
   background: rgba(0, 0, 0, 0.25);
 }
 
@@ -667,34 +751,39 @@ h1 {
 .pad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 58px);
-  gap: 8px;
-  padding: 8px;
-  border-radius: 14px;
+  grid-template-rows: repeat(2, 32px);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
 }
 
 .pad button {
   min-height: 0;
-  height: 58px;
-  font-size: 26px;
+  height: 32px;
+  font-size: 18px;
 }
 
 @media (max-width: 430px) {
   body {
-    padding-inline: 8px;
+    padding-inline: 6px;
   }
 
   .app {
-    gap: 7px;
+    gap: 5px;
   }
 
   .topbar {
-    padding: 10px;
+    grid-template-columns: 1fr;
+    padding: 5px;
+  }
+
+  .brand {
+    display: none;
   }
 
   .top-actions {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
   }
 
   .top-actions .mobile-only {
@@ -705,8 +794,12 @@ h1 {
   .home-link,
   .toolbar button,
   .editor-actions button {
-    min-height: 34px;
-    font-size: 11px;
+    min-height: 28px;
+    font-size: 10px;
+  }
+
+  .toolbar button {
+    font-size: 18px;
   }
 
   .editor-actions {
@@ -719,18 +812,33 @@ h1 {
   }
 
   .status {
-    gap: 6px;
-    padding: 6px;
+    gap: 4px;
+    padding: 4px;
   }
 
   .status div {
-    padding: 7px;
+    padding: 4px 6px;
+  }
+
+  .status span {
+    font-size: 9px;
+  }
+
+  .status strong {
+    font-size: 17px;
+  }
+
+  .world {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    padding: 4px 7px;
+  }
+
+  .world small {
+    display: none;
   }
 
   .board-wrap {
-    padding: 7px;
-    min-height: 118px;
-    aspect-ratio: 1 / 0.22;
+    padding: 5px;
   }
 
   .cell {
@@ -738,10 +846,22 @@ h1 {
   }
 
   .pad button {
-    height: 50px;
+    height: 34px;
   }
 
   .pad {
-    grid-template-rows: repeat(2, 50px);
+    grid-template-rows: repeat(2, 34px);
+  }
+
+  .cover-screen {
+    padding-inline: 14px;
+  }
+
+  .cover-content h1 {
+    font-size: clamp(54px, 18vw, 82px);
+  }
+
+  .cover-actions {
+    grid-template-columns: 1fr 0.72fr;
   }
 }

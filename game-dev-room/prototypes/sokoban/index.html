@@ -7,9 +7,21 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <section id="coverScreen" class="cover-screen" aria-label="タイトル画面">
+      <div class="cover-content">
+        <p>JATA PUZZLE M1</p>
+        <h1>JATA BOX SHIFT</h1>
+        <span>Nest Builder</span>
+        <div class="cover-actions">
+          <button id="startBtn" type="button">START</button>
+          <a href="https://www.teru44.net/games" target="_top" rel="noopener">HOME</a>
+        </div>
+      </div>
+    </section>
+
     <main class="app" aria-label="JATA BOX SHIFT">
       <header class="topbar">
-        <div>
+        <div class="brand">
           <p class="eyebrow">JATA PUZZLE M1</p>
           <h1>JATA BOX SHIFT</h1>
           <p class="subtitle">Nest Builder</p>
@@ -44,10 +56,10 @@
       </section>
 
       <section class="toolbar" aria-label="ゲーム操作">
-        <button id="prevBtn" type="button">PREV</button>
-        <button id="undoBtn" type="button">UNDO</button>
-        <button id="resetBtn" type="button">RESET</button>
-        <button id="nextBtn" type="button">NEXT</button>
+        <button id="prevBtn" type="button" aria-label="前のステージ" title="前のステージ">◀</button>
+        <button id="undoBtn" type="button" aria-label="一手戻す" title="一手戻す">↶</button>
+        <button id="resetBtn" type="button" aria-label="やり直し" title="やり直し">⟳</button>
+        <button id="nextBtn" type="button" aria-label="次のステージ" title="次のステージ">▶</button>
       </section>
 
       <section id="editorPanel" class="editor hidden" aria-label="DIYステージエディタ">
@@ -86,7 +98,7 @@
       </section>
     </main>
 
-    <script src="./game.js?v=box-shift-progress-fix"></script>
+    <script src="./game.js?v=box-shift-cover-layout"></script>
     <script>
       (() => {
         "use strict";

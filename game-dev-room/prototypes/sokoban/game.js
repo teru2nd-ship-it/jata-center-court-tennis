@@ -8,6 +8,8 @@ const worldText = document.querySelector("#worldText");
 const worldSub = document.querySelector("#worldSub");
 const overlay = document.querySelector("#clearOverlay");
 const clearText = document.querySelector("#clearText");
+const coverScreen = document.querySelector("#coverScreen");
+const startBtn = document.querySelector("#startBtn");
 const bgmBtn = document.querySelector("#bgmBtn");
 const sfxBtn = document.querySelector("#sfxBtn");
 const editBtn = document.querySelector("#editBtn");
@@ -287,6 +289,7 @@ let sfxOn = localStorage.getItem("jata-box-shift-sfx:v1") !== "off";
 let playerFacing = "right";
 let playerFrame = 0;
 let highestUnlocked = readHighestUnlocked();
+let gameStarted = false;
 
 function readHighestUnlocked() {
   const saved = Number(localStorage.getItem(PROGRESS_KEY));
@@ -315,6 +318,13 @@ function goHome() {
   } catch {
     window.location.href = HOME_URL;
   }
+}
+
+function startGame() {
+  gameStarted = true;
+  document.body.classList.add("game-started");
+  coverScreen.classList.add("hidden");
+  loadLevel(Math.min(highestUnlocked, LEVELS.length - 1));
 }
 
 function initAudio() {
@@ -765,6 +775,11 @@ editBtn.addEventListener("click", () => {
   else closeEditor();
 });
 
+startBtn.addEventListener("click", () => {
+  resumeAudio();
+  startGame();
+});
+
 document.querySelector("#sampleBtn").addEventListener("click", () => {
   levelEditor.value = SAMPLE_LEVEL;
   setEditorStatus("サンプルを入れました");
@@ -788,8 +803,8 @@ document.querySelector("#testBtn").addEventListener("click", () => {
   }
   customLevel = rows;
   localStorage.setItem(CUSTOM_LEVEL_KEY, rows.join("\n"));
-  loadCustomLevel(customLevel);
   closeEditor();
+  loadCustomLevel(customLevel);
 });
 
 document.querySelector("#closeEditorBtn").addEventListener("click", closeEditor);
@@ -822,6 +837,13 @@ document.querySelectorAll("[data-dir]").forEach((button) => {
 
 window.addEventListener("keydown", (event) => {
   resumeAudio();
+  if (!gameStarted) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      startGame();
+    }
+    return;
+  }
   const keyMap = {
     ArrowUp: "up",
     ArrowDown: "down",
@@ -846,6 +868,7 @@ window.addEventListener("resize", () => {
 
 updateSoundButtons();
 loadLevel(0);
+startBtn.textContent = highestUnlocked > 0 ? "CONTINUE" : "START";
 if (bgmOn) {
   window.addEventListener("pointerdown", startBgm, { once: true });
   window.addEventListener("keydown", startBgm, { once: true });
