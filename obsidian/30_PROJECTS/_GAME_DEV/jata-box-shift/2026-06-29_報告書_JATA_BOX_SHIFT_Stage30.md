@@ -271,6 +271,33 @@ inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/HsnnFDkqMf9
 - 公開JSで `returnToTitle` が含まれ、旧 `goHome` が含まれないことを確認。
 - Vercelログは対象デプロイで `No logs found`。
 
+## 2026-06-30 追記: タイトルSTARTは1面固定
+
+TERU確認で、30面クリア後にタイトル画面へ戻ってSTARTすると、解放済み最終面の30面から始まってしまう問題が出た。
+
+原因:
+
+- 表紙追加時の `startGame()` が `highestUnlocked` を見ていた。
+- そのため30面まで解放済みの場合、タイトルのSTARTが30面開始になっていた。
+
+修正内容:
+
+- タイトル画面のSTARTは常に1面から開始するように変更。
+- `highestUnlocked` は引き続き、ゲーム中の `PREV` / `NEXT` による解放済みステージ移動だけに使う。
+- STARTボタン表記も進行度にかかわらず `START` に固定。
+- `index.html` のキャッシュ版数を `game.js?v=box-shift-title-start-1` へ更新。
+
+ローカル確認:
+
+- `node --check game.js`
+- `git diff --check`
+- CSS/HTML/JS参照アセットの存在確認
+- ローカルHTTP `http://127.0.0.1:8883/` でブラウザ確認。
+- 表紙のSTART表記が進行度にかかわらず `START` であることを確認。
+- START直後のステージ表示が `1/30` であることを確認。
+- ゲーム中HOMEでタイトルへ戻ったあと、再STARTしても `1/30` になることを確認。
+- ブラウザコンソールエラーなし。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:

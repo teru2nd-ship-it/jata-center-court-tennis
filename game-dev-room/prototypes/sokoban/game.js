@@ -314,14 +314,14 @@ function updateProgressControls() {
 }
 
 function updateStartButtonText() {
-  startBtn.textContent = highestUnlocked > 0 ? "CONTINUE" : "START";
+  startBtn.textContent = "START";
 }
 
 function startGame() {
   gameStarted = true;
   document.body.classList.add("game-started");
   coverScreen.classList.add("hidden");
-  loadLevel(Math.min(highestUnlocked, LEVELS.length - 1));
+  loadLevel(0);
 }
 
 function returnToTitle() {
