@@ -229,6 +229,30 @@ inspect: https://vercel.com/teru2nd-ship-its-projects/jata-box-shift/EdCst7TmAL1
 - 公開JSで `gameStarted`、`function startGame` を確認。
 - Vercelログは対象デプロイで `No logs found`。
 
+## 2026-06-30 追記: HOME導線の整理
+
+TERU確認で、ゲーム中HOMEの戻り先を変更した。
+
+対応方針:
+
+- ゲーム中ヘッダーの `HOME` は外部Games画面ではなく、タイトル画面へ戻す。
+- 30面クリア後のオーバーレイ `HOME` もタイトル画面へ戻す。
+- 外部Games画面へ出る導線は、上部に出るJATA ARCADE共通メニューの `GAMES` だけに整理。
+- タイトル画面内のHOMEリンクは重複するため削除し、表紙は `START` / `CONTINUE` のみに整理。
+- `index.html` のキャッシュ版数を `game.js?v=box-shift-title-home` へ更新。
+
+ローカル確認:
+
+- `node --check game.js`
+- `git diff --check`
+- CSS/HTML/JS参照アセットの存在確認
+- ローカルHTTP `http://127.0.0.1:8882/` でブラウザ確認。
+- 表紙内の外部HOMEリンクが0件であることを確認。
+- 共通メニューの `GAMES` だけが `https://www.teru44.net/games` を向くことを確認。
+- ゲーム中ヘッダー `HOME` がリンクではなくボタンであることを確認。
+- ゲーム中ヘッダー `HOME` クリック後、URLは変わらず、タイトル画面が再表示されることを確認。
+- ブラウザコンソールエラーなし。
+
 ## 追加10面の検証結果
 
 ソルバー確認値:

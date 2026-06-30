@@ -10,6 +10,7 @@ const overlay = document.querySelector("#clearOverlay");
 const clearText = document.querySelector("#clearText");
 const coverScreen = document.querySelector("#coverScreen");
 const startBtn = document.querySelector("#startBtn");
+const homeBtn = document.querySelector("#homeBtn");
 const bgmBtn = document.querySelector("#bgmBtn");
 const sfxBtn = document.querySelector("#sfxBtn");
 const editBtn = document.querySelector("#editBtn");
@@ -21,7 +22,6 @@ const levelEditor = document.querySelector("#levelEditor");
 const editorStatus = document.querySelector("#editorStatus");
 const clearTitle = overlay.querySelector("strong");
 
-const HOME_URL = "https://www.teru44.net/games";
 const CUSTOM_LEVEL_KEY = "jata-box-shift-custom:v1";
 const PROGRESS_KEY = "jata-box-shift-progress:v1";
 const BACKDROP_IMAGES = [
@@ -303,6 +303,7 @@ function unlockNextLevel() {
   if (nextLevel > highestUnlocked) {
     highestUnlocked = nextLevel;
     localStorage.setItem(PROGRESS_KEY, String(highestUnlocked));
+    updateStartButtonText();
   }
 }
 
@@ -312,12 +313,8 @@ function updateProgressControls() {
   overlayNextBtn.textContent = !customMode && levelIndex === LEVELS.length - 1 && isCleared() ? "HOME" : "次へ";
 }
 
-function goHome() {
-  try {
-    (window.top || window).location.href = HOME_URL;
-  } catch {
-    window.location.href = HOME_URL;
-  }
+function updateStartButtonText() {
+  startBtn.textContent = highestUnlocked > 0 ? "CONTINUE" : "START";
 }
 
 function startGame() {
@@ -325,6 +322,16 @@ function startGame() {
   document.body.classList.add("game-started");
   coverScreen.classList.add("hidden");
   loadLevel(Math.min(highestUnlocked, LEVELS.length - 1));
+}
+
+function returnToTitle() {
+  gameStarted = false;
+  closeEditor();
+  overlay.classList.add("hidden");
+  overlay.classList.remove("is-final-clear");
+  document.body.classList.remove("game-started");
+  updateStartButtonText();
+  coverScreen.classList.remove("hidden");
 }
 
 function initAudio() {
@@ -780,6 +787,11 @@ startBtn.addEventListener("click", () => {
   startGame();
 });
 
+homeBtn.addEventListener("click", () => {
+  resumeAudio();
+  returnToTitle();
+});
+
 document.querySelector("#sampleBtn").addEventListener("click", () => {
   levelEditor.value = SAMPLE_LEVEL;
   setEditorStatus("サンプルを入れました");
@@ -822,7 +834,7 @@ document.querySelector("#againBtn").addEventListener("click", () => {
 });
 overlayNextBtn.addEventListener("click", () => {
   if (!customMode && levelIndex === LEVELS.length - 1 && isCleared()) {
-    goHome();
+    returnToTitle();
     return;
   }
   changeLevel(1);
@@ -868,7 +880,7 @@ window.addEventListener("resize", () => {
 
 updateSoundButtons();
 loadLevel(0);
-startBtn.textContent = highestUnlocked > 0 ? "CONTINUE" : "START";
+updateStartButtonText();
 if (bgmOn) {
   window.addEventListener("pointerdown", startBgm, { once: true });
   window.addEventListener("keydown", startBgm, { once: true });

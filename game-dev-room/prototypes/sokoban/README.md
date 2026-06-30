@@ -17,13 +17,13 @@
 - BGM / SFX
 - Undo / Reset / Prev / Next
 - DIYステージエディタ
-- JATA ARCADE共通メニュー
-- 常時表示のHOME導線
+- JATA ARCADE共通メニュー（外部Games画面への導線）
+- プレイ中HOMEはタイトル画面へ戻る
 - クリア済みステージだけを移動できる進行管理
 - 背景画像を使った表紙画面
 - プレイ中はタイトルを畳み、盤面優先のコンパクトHUD
 - クリア背景画像のランダム薄表示
-- 30面クリア時のエンドカード演出（`game.js?v=box-shift-cover-layout`）
+- 30面クリア時のエンドカード演出（`game.js?v=box-shift-title-home`）
 
 ## 追加背景
 
