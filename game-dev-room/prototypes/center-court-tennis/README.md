@@ -1,4 +1,4 @@
-# CENTER COURT - Tennis
+# JATA OPEN - Center Court Tennis
 
 Kuro-chan generated pseudo-3D tennis prototype, saved locally on 2026-06-28.
 
@@ -88,3 +88,4 @@ python3 -m http.server 8000 --directory game-dev-room/prototypes/center-court-te
 - 2026-06-29: Redeployed the safer emblem to Vercel production.
 - 2026-06-29: Replaced the emblem with TERU's preferred `CENTER COURT / JATA OPEN` custom artwork.
 - 2026-06-29: Redeployed TERU's preferred emblem to Vercel production.
+- 2026-07-08: Switched the visible main title and ongoing operation name to `JATA OPEN`; `Center Court Tennis` remains a subtitle/context label.
