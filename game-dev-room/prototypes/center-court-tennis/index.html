@@ -14,9 +14,11 @@
     --ink:#0c1a2b;
     --hud:#0c1a2bcc;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
   html,body{margin:0;height:100%;background:#08111d;overflow:hidden;
     font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif;color:#eaf2ff;}
+  img{-webkit-user-drag:none;user-drag:none;}
   #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
   canvas{display:block;touch-action:none;width:100%;height:100%;}
 
@@ -185,12 +187,12 @@
     <button class="character-card" data-character="girl" type="button">
       <img id="girlPreview" class="character-preview" src="assets/characters/girl-ready.jpg" alt="Girl tennis player">
       <span class="character-name">GIRL</span>
-      <span class="character-type">ALL-ROUNDER</span>
+      <span class="character-type">POWER SERVE</span>
     </button>
     <button class="character-card" data-character="panda" type="button">
       <img id="pandaPreview" class="character-preview" src="assets/characters/panda-ready.jpg" alt="Panda tennis player">
       <span class="character-name">PANDA</span>
-      <span class="character-type">POWER PLAYER</span>
+      <span class="character-type">BALANCED</span>
     </button>
   </div>
   <button id="characterBackBtn" class="btn alt character-back" type="button">BACK</button>
@@ -323,6 +325,16 @@ const CHARACTER_SOURCES = {
     victory:'assets/characters/panda-victory.jpg',
   },
 };
+const CHARACTER_PROFILES = Object.freeze({
+  panda:{name:'PANDA',speed:1.00,reach:1.00,power:1.00,serve:1.00,control:1.00,drive:true,style:'BALANCED'},
+  girl:{name:'GIRL',speed:1.00,reach:1.00,power:1.00,serve:1.18,control:1.00,drive:true,style:'POWER SERVE'},
+  robot:{name:'ROBOT',speed:1.25,reach:0.96,power:0.96,serve:1.00,control:0.96,drive:true,style:'SPEED'},
+  koala:{name:'KOALA',speed:0.78,reach:1.35,power:0.92,serve:0.94,control:1.05,drive:true,style:'DEFENSE'},
+  kangaroo:{name:'KANGAROO',speed:1.05,reach:1.00,power:1.24,serve:1.10,control:0.72,drive:true,style:'WILD POWER'},
+  ghost:{name:'GHOST',speed:1.02,reach:1.32,power:0.82,serve:0.86,control:1.08,drive:false,style:'FLOAT DEFENSE'},
+  bear:{name:'BEAR',speed:0.78,reach:1.08,power:1.22,serve:1.08,control:0.88,drive:true,style:'HEAVY POWER'},
+});
+window.__jataCharacterProfiles=CHARACTER_PROFILES;
 const CharacterArt = (()=>{
   const sprites = Object.create(null);
   const status = Object.create(null);
@@ -432,7 +444,11 @@ const STATE = { MENU:'menu', SERVE:'serve', RALLY:'rally', POINT:'point', PAUSED
 let state = STATE.MENU;
 let difficulty = 'normal';
 let selectedCharacter = 'girl';
+let opponentCharacter = 'panda';
 let pausedFrom = STATE.MENU;
+
+function playerProfile(){ return CHARACTER_PROFILES[selectedCharacter] || CHARACTER_PROFILES.panda; }
+function opponentProfile(){ return CHARACTER_PROFILES[opponentCharacter] || CHARACTER_PROFILES.panda; }
 
 const player = { x:0, y:0.04 };
 const cpu    = { x:0, y:0.96 };
@@ -475,6 +491,17 @@ let tbStartServer = 'player';
 // =========================================================================
 const keys = {};
 let pointer = { down:false, dragging:false, x:0, y:0, downX:0, downY:0, downTime:0, moved:false };
+
+// Safariの長押し／ドラッグで文字選択や画像ドラッグが始まるのをゲーム領域だけ抑止。
+function isGameUiTarget(target){
+  return target instanceof Element && !!target.closest('#wrap,.overlay,.play-controls,.pause-layer');
+}
+document.addEventListener('selectstart',e=>{ if(isGameUiTarget(e.target)) e.preventDefault(); });
+document.addEventListener('dragstart',e=>{ if(isGameUiTarget(e.target)) e.preventDefault(); });
+document.addEventListener('contextmenu',e=>{ if(isGameUiTarget(e.target) && matchIsLive()) e.preventDefault(); });
+document.addEventListener('selectionchange',()=>{
+  if(matchIsLive() && window.getSelection()?.rangeCount) window.getSelection().removeAllRanges();
+});
 
 function screenToCourt(cx, cy){
   // クライアント座標 → 論理VW/VH → コート(x,y)
@@ -595,6 +622,7 @@ function startToss(){
 // サーブを打つ（打点の高さ z で質が決まる）
 function hitServe(who){
   const side = serveSide();
+  const profile = who==='player' ? playerProfile() : opponentProfile();
   const q = clamp((ball.z-0.45)/0.5, 0, 1);   // 打点が高いほど高品質（ピーク≈1.0）
   let tx, ty;
   if(who==='player'){                          // 相手(奥)のサービスボックスへクロス
@@ -604,10 +632,10 @@ function hitServe(who){
     tx = (side==='deuce') ?  0.40 : -0.40;
     ty = 0.39;
   }
-  const spread = (1-q)*0.45 + (who==='cpu' ? cpuCfg.err*0.3 : 0.05);
+  const spread = ((1-q)*0.45 + (who==='cpu' ? cpuCfg.err*0.3 : 0.05)) / Math.max(0.6,profile.control);
   tx += (Math.random()*2-1)*spread;
   ty += (Math.random()*2-1)*spread*0.35;
-  const fl = CONFIG.serveFlight*(1.15 - q*0.32);  // 高品質ほど速い
+  const fl = CONFIG.serveFlight*(1.15 - q*0.32) / profile.serve;  // キャラのサーブ力を飛行時間へ反映
   ball.isServe = true;
   ball.serveWasReturned = false;
   launch({x:ball.x, y:ball.y, z:Math.max(ball.z,0.30)}, tx, ty, fl*COL.serveScale);
@@ -615,6 +643,9 @@ function hitServe(who){
   if(who==='player'){
     lastPlayerPose='serve';
     flash('player');
+  } else {
+    lastCpuPose='serve';
+    flash('cpu');
   }
   servePhase='ready';
   AudioFX.serve();
@@ -657,12 +688,14 @@ function handleFault(){
 
 // プレイヤーの打ち返し（shot=drive/lob/drop/auto、volley=ノーバウンド）
 function playerHit(shot, volley){
+  const profile=playerProfile();
+  if(shot==='drive' && !profile.drive) shot='lob';
   const offset = ball.x - player.x;                 // 捉えた位置
   let tx, ty, fl;
   if(shot==='lob'){
     tx = clamp(offset*CONFIG.aimGain*0.55 + player.x*0.35, -0.66, 0.66);
     ty = 0.86 + Math.random()*0.10;
-    fl = CONFIG.flight*1.45;
+    fl = CONFIG.flight*1.45/Math.max(0.82,0.75+profile.power*0.25);
     launch({x:ball.x, y:ball.y, z:Math.max(ball.z+0.20, 0.36)}, tx, ty, fl);
   } else if(shot==='drop'){
     tx = clamp(offset*CONFIG.aimGain*0.45 + player.x*0.25, -0.48, 0.48);
@@ -672,8 +705,11 @@ function playerHit(shot, volley){
   } else if(shot==='drive'){
     tx = clamp(offset*CONFIG.aimGain + player.x, -0.74, 0.74);
     ty = 0.76 + Math.random()*0.16;                 // 深い
-    fl = CONFIG.flight;                             // 速い
-    if(volley){ ty = 0.80 + Math.random()*0.14; fl = CONFIG.flight*0.82; } // ボレーは鋭い
+    fl = CONFIG.flight/profile.power;               // 強打力が高いほど速い
+    if(volley){ ty = 0.80 + Math.random()*0.14; fl = CONFIG.flight*0.82/profile.power; } // ボレーは鋭い
+    const miss=Math.max(0,1-profile.control)*0.34;
+    tx += (Math.random()*2-1)*miss;
+    ty += (Math.random()*2-1)*miss*0.28;
     launch({x:ball.x, y:ball.y, z:ball.z}, tx, ty, fl);
   } else {
     tx = clamp(offset*CONFIG.aimGain*0.8 + player.x, -0.66, 0.66);
@@ -691,23 +727,34 @@ function playerHit(shot, volley){
 // CPUの打ち返し
 function cpuHit(){
   const c = cpuCfg;
+  const profile=opponentProfile();
+  const volley=ball.bounces===0;
+  const effectiveErr=c.err/Math.max(0.6,profile.control)+Math.max(0,1-profile.control)*0.18;
   // プレイヤーの逆サイドを狙う + 難易度ブレ
   let tx = (player.x>0 ? -1 : 1) * (0.28 + Math.random()*0.38);
-  tx += (Math.random()*2-1)*c.err;
+  tx += (Math.random()*2-1)*effectiveErr;
   tx = Math.max(-0.74, Math.min(0.74, tx));   // 基本はシングルス内
   let ty = c.depth - Math.random()*0.14;
   ty = Math.max(0.06, Math.min(0.44, ty));
   // たまにアウト（難易度に応じて。弱いほどミスしやすい）
-  if(Math.random() < c.err*0.7){ tx *= 1.35; } // ミス時はアレー外へ
-  launch({x:ball.x, y:ball.y, z:ball.z}, tx, ty, CONFIG.flight);
+  if(Math.random() < effectiveErr*0.7){ tx *= 1.35; } // ミス時はアレー外へ
+  if(profile.drive){
+    launch({x:ball.x, y:ball.y, z:ball.z}, tx, ty, CONFIG.flight/profile.power);
+  } else {
+    // ゴースト系は強打せず、高くふわりとした返球だけを使う。
+    ty=Math.max(0.08,Math.min(0.38,ty));
+    launch({x:ball.x, y:ball.y, z:Math.max(ball.z+0.20,0.36)}, tx, ty, CONFIG.flight*1.42);
+  }
   ball.lastHitter='cpu'; ball.isServe=false; ball.serveWasReturned=true;
   hitCooldown.cpu = 0.25;
+  lastCpuPose=volley ? 'volley' : 'groundstroke';
   flash('cpu');
-  AudioFX.hit('drive', false, false);
+  AudioFX.hit(profile.drive?'drive':'lob', false, false);
 }
 
 let flashFx = { who:null, t:0 };
 let lastPlayerPose = 'groundstroke';
+let lastCpuPose = 'groundstroke';
 function flash(who){ flashFx.who=who; flashFx.t=0.22; }
 
 // =========================================================================
@@ -906,7 +953,7 @@ function triggerShot(kind){
     return;
   }
   if(state===STATE.RALLY){
-    shotIntent = kind;
+    shotIntent = (kind==='drive' && !playerProfile().drive) ? 'lob' : kind;
     swingTimer = CONFIG.swingWindow;
   }
 }
@@ -1218,6 +1265,7 @@ function update(dt){
 }
 
 function movePlayer(dt){
+  const characterSpeed=playerProfile().speed;
   // 入力ターゲット
   let tx = player.x, ty = player.y;
   if(pointer.dragging){
@@ -1232,11 +1280,11 @@ function movePlayer(dt){
     if(keys['ArrowRight']||keys['d']) dx+=1;
     if(keys['ArrowUp']||keys['w']) dy+=1;
     if(keys['ArrowDown']||keys['s']) dy-=1;
-    tx = player.x + dx*CONFIG.player.speed*dt;
-    ty = player.y + dy*CONFIG.player.speed*dt*0.6;
+    tx = player.x + dx*CONFIG.player.speed*characterSpeed*dt;
+    ty = player.y + dy*CONFIG.player.speed*characterSpeed*dt*0.6;
   }
   // 追従（指）/直接（キー）
-  const sp = CONFIG.player.speed*dt*2.4;
+  const sp = CONFIG.player.speed*characterSpeed*dt*2.4;
   player.x += Math.max(-sp, Math.min(sp, tx-player.x));
   player.y += Math.max(-sp, Math.min(sp, ty-player.y));
   if(state===STATE.SERVE && server==='player'){
@@ -1253,10 +1301,11 @@ function movePlayer(dt){
 
 function moveCpu(dt){
   const c = cpuCfg;
+  const characterSpeed=opponentProfile().speed;
   // CPUサーブの構え中は所定のサイドに固定（中央へ流れない）
   if(state===STATE.SERVE && server==='cpu'){
     const sx = (serveSide()==='deuce') ? -0.32 : 0.32;
-    cpu.x += Math.max(-c.speed*dt, Math.min(c.speed*dt, sx-cpu.x));
+    cpu.x += Math.max(-c.speed*characterSpeed*dt, Math.min(c.speed*characterSpeed*dt, sx-cpu.x));
     cpu.y = 1.05;
     return;
   }
@@ -1273,7 +1322,7 @@ function moveCpu(dt){
     targetX = ball.x*0.4; // 中央寄りに戻る
     targetY = 0.95;
   }
-  const sp = c.speed*dt;
+  const sp = c.speed*characterSpeed*dt;
   cpu.x += Math.max(-sp, Math.min(sp, targetX-cpu.x));
   cpu.y += Math.max(-sp, Math.min(sp, targetY-cpu.y));
   cpu.x = Math.max(-1.1, Math.min(1.1, cpu.x));
@@ -1282,19 +1331,21 @@ function moveCpu(dt){
 
 function tryHits(dt){
   const P=CONFIG.player;
+  const playerReach=playerProfile().reach;
+  const cpuReach=opponentProfile().reach;
   playerCanHit=false;
   // プレイヤー（手前）
   if(ball.lastHitter!=='player' && hitCooldown.player<=0 && ball.y<0.5){
     const dx=Math.abs(ball.x-player.x), dy=Math.abs(ball.y-player.y);
     const zOk = ball.z < P.z+0.16;
-    if(dx<P.swingRX && dy<P.swingRY && zOk) playerCanHit=true; // 振りどき(広い圏)
+    if(dx<P.swingRX*playerReach && dy<P.swingRY*playerReach && zOk) playerCanHit=true; // 振りどき(広い圏)
     // タップ強打 / ボレー（広く拾える）
-    if(swingTimer>0 && dx<P.swingRX && dy<P.swingRY && zOk){
+    if(swingTimer>0 && dx<P.swingRX*playerReach && dy<P.swingRY*playerReach && zOk){
       const volley = ball.bounces===0;
       playerHit(shotIntent, volley); swingTimer=0; ballZoneT=0; shotIntent='drive'; return;
     }
     // 自動返球（体に入る狭い圏・着地インのみ。アウト球はスルー）
-    if(dx<P.autoRX && dy<P.autoRY && zOk){
+    if(dx<P.autoRX*playerReach && dy<P.autoRY*playerReach && zOk){
       ballZoneT+=dt;
       if(ballZoneT>=CONFIG.autoDelay){
         const land=predictLanding();
@@ -1308,7 +1359,7 @@ function tryHits(dt){
   }
   // CPU（奥）
   if(ball.lastHitter!=='cpu' && hitCooldown.cpu<=0 && ball.y>0.5){
-    if(Math.abs(ball.x-cpu.x)<0.30 && Math.abs(ball.y-cpu.y)<0.24 && ball.z<P.z+0.16){
+    if(Math.abs(ball.x-cpu.x)<0.30*cpuReach && Math.abs(ball.y-cpu.y)<0.24*cpuReach && ball.z<P.z+0.16){
       cpuHit(); return;
     }
   }
@@ -1750,7 +1801,7 @@ function drawShadow(x,y){
 function drawPerson(x,y,color,near){
   const p=project(x,y,0);
   const s=lerp(1.0,0.62,y);
-  if(near && drawSelectedPlayer(p,s)) return;
+  if(drawCharacterPlayer(p,s,near)) return;
   const isHitter = (near && flashFx.who==='player' && flashFx.t>0) ||
                    (!near && flashFx.who==='cpu' && flashFx.t>0);
   const shirt = near ? '#36c8ee' : '#ff7156';
@@ -1801,12 +1852,15 @@ function drawPerson(x,y,color,near){
   ctx.restore();
 }
 
-function drawSelectedPlayer(p,s){
+function drawCharacterPlayer(p,s,near){
+  const character=near ? selectedCharacter : opponentCharacter;
+  const side=near ? 'player' : 'cpu';
   let pose='ready';
-  if(state===STATE.SERVE && server==='player' && servePhase==='toss') pose='serve';
-  else if(flashFx.who==='player' && flashFx.t>0) pose=lastPlayerPose;
-  const sprite=CharacterArt.get(selectedCharacter,pose) || CharacterArt.get(selectedCharacter,'ready');
-  if(!sprite) return false;
+  if(state===STATE.SERVE && server===side && servePhase==='toss') pose='serve';
+  else if(flashFx.who===side && flashFx.t>0) pose=near ? lastPlayerPose : lastCpuPose;
+  const sprite=CharacterArt.get(character,pose) || CharacterArt.get(character,'ready');
+  // 画像読込中も旧コード図形へ戻さず、キャラクター画像だけで統一する。
+  if(!sprite) return true;
   const height=(pose==='serve' ? 158 : 146)*s;
   const width=height*(sprite.width/sprite.height);
   const bob=state===STATE.RALLY ? Math.sin(performance.now()/105)*1.1*s : 0;
@@ -1878,8 +1932,8 @@ function drawHUD(){
   // ポイント
   const L=ptLabel();
   ctx.fillStyle='#eaf2ff'; ctx.font=(portrait?'900 34px':'800 26px') + ' Trebuchet MS, sans-serif';
-  ctx.fillText(`YOU  ${L.p}`, VW/2-(portrait?150:115), y0+(portrait?32:21));
-  ctx.fillText(`${L.c}  CPU`, VW/2+(portrait?150:115), y0+(portrait?32:21));
+  ctx.fillText(`${playerProfile().name}  ${L.p}`, VW/2-(portrait?150:115), y0+(portrait?32:21));
+  ctx.fillText(`${L.c}  ${opponentProfile().name}`, VW/2+(portrait?150:115), y0+(portrait?32:21));
   // セット＋ゲーム
   ctx.font=(portrait?'800 18px':'700 15px') + ' Trebuchet MS, sans-serif'; ctx.fillStyle='#9fc0e6';
   let mid = `SETS ${score.ps}-${score.cs}   GAMES ${score.pg}-${score.cg}`;
@@ -1956,6 +2010,8 @@ function startMatch(diff,character=selectedCharacter){
   AudioFX.button();
   AudioFX.stopMusic();
   selectedCharacter=CHARACTER_SOURCES[character] ? character : 'girl';
+  opponentCharacter=selectedCharacter==='girl' ? 'panda' : 'girl';
+  window.__jataMatchCharacters={player:selectedCharacter,cpu:opponentCharacter};
   difficulty=diff; cpuCfg=CONFIG.cpu[diff];
   setsNeeded=CONFIG.setsToWin[diff];
   score.p=score.c=score.pg=score.cg=score.ps=score.cs=0;
