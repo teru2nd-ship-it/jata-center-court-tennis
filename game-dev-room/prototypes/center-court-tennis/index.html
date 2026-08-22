@@ -39,8 +39,8 @@
     box-shadow:0 18px 38px rgba(0,0,0,.35);}
   .result-player{display:block;width:min(190px,42vw);max-height:32vh;object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 16px 24px rgba(0,0,0,.34));}
-  .character-grid{display:grid;grid-template-columns:repeat(4,minmax(0,150px));gap:14px;
-    width:min(650px,94vw);}
+  .character-grid{display:grid;grid-template-columns:repeat(5,minmax(0,140px));gap:12px;
+    width:min(748px,96vw);}
   .character-card{appearance:none;position:relative;overflow:hidden;cursor:pointer;min-height:238px;
     padding:12px;border-radius:20px;border:2px solid rgba(255,255,255,.18);color:#eaf2ff;
     background:linear-gradient(180deg,rgba(37,83,132,.92),rgba(10,27,48,.96));
@@ -120,9 +120,10 @@
     .ctl.nav{min-width:104px;height:38px;}
     .ctl.shot{min-width:86px;}
     .character-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-    .character-card{min-height:205px;padding:9px;}
-    .character-preview{height:142px;}
-    .character-name{font-size:18px;}
+    .character-card{min-height:160px;padding:7px;gap:4px;}
+    .character-preview{height:102px;}
+    .character-name{font-size:16px;}
+    .character-type{font-size:9px;}
   }
 </style>
 </head>
@@ -203,6 +204,11 @@
       <img id="koalaPreview" class="character-preview" src="assets/characters/koala-ready.jpg" alt="Koala tennis player">
       <span class="character-name">KOALA</span>
       <span class="character-type">DEFENSE</span>
+    </button>
+    <button class="character-card" data-character="kangaroo" type="button">
+      <img id="kangarooPreview" class="character-preview" src="assets/characters/kangaroo-ready.jpg" alt="Kangaroo tennis player">
+      <span class="character-name">KANGAROO</span>
+      <span class="character-type">WILD POWER</span>
     </button>
   </div>
   <button id="characterBackBtn" class="btn alt character-back" type="button">BACK</button>
@@ -347,6 +353,13 @@ const CHARACTER_SOURCES = {
     groundstroke:'assets/characters/koala-groundstroke.jpg',
     volley:'assets/characters/koala-volley.png',
     victory:'assets/characters/koala-victory.jpg',
+  },
+  kangaroo:{
+    ready:'assets/characters/kangaroo-ready.jpg',
+    serve:'assets/characters/kangaroo-serve-toss.jpg',
+    groundstroke:'assets/characters/kangaroo-groundstroke.png',
+    volley:'assets/characters/kangaroo-volley.jpg',
+    victory:'assets/characters/kangaroo-victory.jpg',
   },
 };
 const CHARACTER_PROFILES = Object.freeze({
