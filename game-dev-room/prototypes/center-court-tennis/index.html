@@ -35,6 +35,8 @@
   .title-emblem{display:block;width:100%;height:auto;border-radius:18px;}
   .result-emblem{display:block;width:min(138px,34vw);height:auto;border-radius:24px;
     box-shadow:0 18px 38px rgba(0,0,0,.35);}
+  .result-player{display:block;width:min(190px,42vw);max-height:32vh;object-fit:contain;
+    image-rendering:pixelated;filter:drop-shadow(0 16px 24px rgba(0,0,0,.34));}
   .title{font-size:clamp(38px,11vw,84px);font-weight:900;letter-spacing:.08em;
     line-height:.92;text-transform:uppercase;}
   .title b{color:var(--ball);}
@@ -159,6 +161,7 @@
 <!-- 勝敗 -->
 <div id="over" class="overlay hidden">
   <img class="result-emblem" src="assets/jata-open-emblem.png" alt="JATA OPEN">
+  <img id="resultPlayer" class="result-player hidden" alt="Winning player">
   <div class="badge">Match Finished</div>
   <div id="resultText" class="result"></div>
   <div id="resultScore" class="sub" style="font-size:18px;"></div>
@@ -263,6 +266,91 @@ function resize(){
 }
 window.addEventListener('resize', resize);
 resize();
+
+// Supplied character art is JPEG. Remove only the connected neutral-color backdrop
+// at load time so the original face, outfit, racket and pixel linework stay untouched.
+const GIRL_SOURCES = {
+  ready:'assets/characters/girl-ready.jpg',
+  serve:'assets/characters/girl-serve-toss.jpg',
+  groundstroke:'assets/characters/girl-groundstroke.jpg',
+  volley:'assets/characters/girl-volley.jpg',
+  victory:'assets/characters/girl-victory.jpg',
+};
+const GirlArt = (()=>{
+  const sprites = Object.create(null);
+  const status = Object.fromEntries(Object.keys(GIRL_SOURCES).map(key=>[key,'loading']));
+
+  function backgroundLike(data, offset){
+    const r=data[offset], g=data[offset+1], b=data[offset+2];
+    const hi=Math.max(r,g,b), lo=Math.min(r,g,b);
+    return lo>=220 && hi-lo<=18;
+  }
+
+  function makeCutout(img){
+    const scaleDown=Math.min(1,720/img.naturalHeight);
+    const w=Math.max(1,Math.round(img.naturalWidth*scaleDown));
+    const h=Math.max(1,Math.round(img.naturalHeight*scaleDown));
+    const source=document.createElement('canvas');
+    source.width=w; source.height=h;
+    const sx=source.getContext('2d',{willReadFrequently:true});
+    sx.drawImage(img,0,0,w,h);
+    const frame=sx.getImageData(0,0,w,h);
+    const data=frame.data, seen=new Uint8Array(w*h), queue=new Int32Array(w*h);
+    let head=0, tail=0;
+    function enqueue(index){
+      if(seen[index] || !backgroundLike(data,index*4)) return;
+      seen[index]=1; queue[tail++]=index;
+    }
+    for(let x=0;x<w;x++){ enqueue(x); enqueue((h-1)*w+x); }
+    for(let y=1;y<h-1;y++){ enqueue(y*w); enqueue(y*w+w-1); }
+    while(head<tail){
+      const index=queue[head++], x=index%w, y=(index/w)|0;
+      data[index*4+3]=0;
+      if(x>0) enqueue(index-1);
+      if(x<w-1) enqueue(index+1);
+      if(y>0) enqueue(index-w);
+      if(y<h-1) enqueue(index+w);
+    }
+    sx.putImageData(frame,0,0);
+
+    let minX=w, minY=h, maxX=-1, maxY=-1;
+    for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+      if(data[(y*w+x)*4+3]===0) continue;
+      minX=Math.min(minX,x); minY=Math.min(minY,y);
+      maxX=Math.max(maxX,x); maxY=Math.max(maxY,y);
+    }
+    if(maxX<minX) return source;
+    const pad=4;
+    minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+    maxX=Math.min(w-1,maxX+pad); maxY=Math.min(h-1,maxY+pad);
+    const cutout=document.createElement('canvas');
+    cutout.width=maxX-minX+1; cutout.height=maxY-minY+1;
+    cutout.getContext('2d').drawImage(source,minX,minY,cutout.width,cutout.height,0,0,cutout.width,cutout.height);
+    return cutout;
+  }
+
+  Object.entries(GIRL_SOURCES).forEach(([key,src])=>{
+    const img=new Image();
+    img.decoding='async';
+    img.onload=()=>{
+      try{
+        sprites[key]=makeCutout(img);
+        status[key]='ready';
+        if(key==='victory'){
+          const resultPlayer=document.getElementById('resultPlayer');
+          resultPlayer.src=sprites[key].toDataURL('image/png');
+        }
+      }catch(error){
+        status[key]='error';
+        console.warn(`Girl sprite ${key} could not be prepared`,error);
+      }
+    };
+    img.onerror=()=>{ status[key]='error'; };
+    img.src=src;
+  });
+  return { get:key=>sprites[key]||null, status };
+})();
+window.__jataGirlArt=GirlArt;
 
 // =========================================================================
 // コート投影（論理座標 → 画面ピクセル）
@@ -472,6 +560,10 @@ function hitServe(who){
   ball.serveWasReturned = false;
   launch({x:ball.x, y:ball.y, z:Math.max(ball.z,0.30)}, tx, ty, fl*COL.serveScale);
   ball.lastHitter = who;
+  if(who==='player'){
+    lastPlayerPose='serve';
+    flash('player');
+  }
   servePhase='ready';
   AudioFX.serve();
   setMsg('');
@@ -539,6 +631,7 @@ function playerHit(shot, volley){
   }
   ball.lastHitter='player'; ball.isServe=false; ball.serveWasReturned=true;
   hitCooldown.player = 0.25;
+  lastPlayerPose=volley ? 'volley' : 'groundstroke';
   flash('player');
   AudioFX.hit(shot, volley, true);
 }
@@ -562,6 +655,7 @@ function cpuHit(){
 }
 
 let flashFx = { who:null, t:0 };
+let lastPlayerPose = 'groundstroke';
 function flash(who){ flashFx.who=who; flashFx.t=0.22; }
 
 // =========================================================================
@@ -946,6 +1040,8 @@ function matchOver(winner){
   const hist = score.setHistory.map(s=>`${s.p}-${s.c}`).join('  ');
   document.getElementById('resultScore').textContent =
     `SETS ${score.ps} - ${score.cs}  (${hist})`;
+  const resultPlayer=document.getElementById('resultPlayer');
+  resultPlayer.classList.toggle('hidden',winner!=='player' || !GirlArt.get('victory'));
   ov.classList.remove('hidden');
   if(winner==='player') AudioFX.victory();
   else AudioFX.stopMusic();
@@ -1599,6 +1695,7 @@ function drawShadow(x,y){
 function drawPerson(x,y,color,near){
   const p=project(x,y,0);
   const s=lerp(1.0,0.62,y);
+  if(near && drawGirlPlayer(p,s)) return;
   const isHitter = (near && flashFx.who==='player' && flashFx.t>0) ||
                    (!near && flashFx.who==='cpu' && flashFx.t>0);
   const shirt = near ? '#36c8ee' : '#ff7156';
@@ -1647,6 +1744,23 @@ function drawPerson(x,y,color,near){
   for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(-8*s,i*4*s); ctx.lineTo(8*s,i*4*s); ctx.stroke(); }
   ctx.restore();
   ctx.restore();
+}
+
+function drawGirlPlayer(p,s){
+  let pose='ready';
+  if(state===STATE.SERVE && server==='player' && servePhase==='toss') pose='serve';
+  else if(flashFx.who==='player' && flashFx.t>0) pose=lastPlayerPose;
+  const sprite=GirlArt.get(pose) || GirlArt.get('ready');
+  if(!sprite) return false;
+  const height=(pose==='serve' ? 158 : 146)*s;
+  const width=height*(sprite.width/sprite.height);
+  const bob=state===STATE.RALLY ? Math.sin(performance.now()/105)*1.1*s : 0;
+  ctx.save();
+  ctx.translate(p.x,p.ground+bob);
+  ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(sprite,-width/2,-height,width,height);
+  ctx.restore();
+  return true;
 }
 
 function drawBallShadow(){
