@@ -39,8 +39,8 @@
     box-shadow:0 18px 38px rgba(0,0,0,.35);}
   .result-player{display:block;width:min(190px,42vw);max-height:32vh;object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 16px 24px rgba(0,0,0,.34));}
-  .character-grid{display:grid;grid-template-columns:repeat(3,minmax(0,170px));gap:14px;
-    width:min(550px,94vw);}
+  .character-grid{display:grid;grid-template-columns:repeat(4,minmax(0,150px));gap:14px;
+    width:min(650px,94vw);}
   .character-card{appearance:none;position:relative;overflow:hidden;cursor:pointer;min-height:238px;
     padding:12px;border-radius:20px;border:2px solid rgba(255,255,255,.18);color:#eaf2ff;
     background:linear-gradient(180deg,rgba(37,83,132,.92),rgba(10,27,48,.96));
@@ -199,6 +199,11 @@
       <span class="character-name">ROBOT</span>
       <span class="character-type">SPEED</span>
     </button>
+    <button class="character-card" data-character="koala" type="button">
+      <img id="koalaPreview" class="character-preview" src="assets/characters/koala-ready.jpg" alt="Koala tennis player">
+      <span class="character-name">KOALA</span>
+      <span class="character-type">DEFENSE</span>
+    </button>
   </div>
   <button id="characterBackBtn" class="btn alt character-back" type="button">BACK</button>
 </div>
@@ -335,6 +340,13 @@ const CHARACTER_SOURCES = {
     groundstroke:'assets/characters/robot-groundstroke.jpg',
     volley:'assets/characters/robot-volley.jpg',
     victory:'assets/characters/robot-victory.jpg',
+  },
+  koala:{
+    ready:'assets/characters/koala-ready.jpg',
+    serve:'assets/characters/koala-serve-toss.jpg',
+    groundstroke:'assets/characters/koala-groundstroke.jpg',
+    volley:'assets/characters/koala-volley.png',
+    victory:'assets/characters/koala-victory.jpg',
   },
 };
 const CHARACTER_PROFILES = Object.freeze({
