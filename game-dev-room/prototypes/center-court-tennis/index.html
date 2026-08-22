@@ -54,6 +54,13 @@
   .character-name{font-size:21px;font-weight:900;letter-spacing:.08em;}
   .character-card[data-character="kangaroo"] .character-name{font-size:15px;letter-spacing:.035em;}
   .character-type{font-size:11px;letter-spacing:.15em;color:#a9c9e9;}
+  .character-detail{position:absolute;left:7px;right:7px;bottom:7px;z-index:2;min-height:58px;
+    padding:8px 7px;border-radius:12px;border:1px solid rgba(216,242,58,.48);
+    background:rgba(5,16,30,.96);color:#f4f8ff;font-size:11px;font-weight:800;line-height:1.42;
+    letter-spacing:.025em;display:flex;align-items:center;justify-content:center;text-align:center;
+    opacity:0;transform:translateY(8px);transition:opacity .14s,transform .14s;pointer-events:none;}
+  .character-card:hover .character-detail,.character-card:focus-visible .character-detail{
+    opacity:1;transform:translateY(0);}
   .character-back{width:min(240px,70vw);}
   .title{font-size:clamp(38px,11vw,84px);font-weight:900;letter-spacing:.08em;
     line-height:.92;text-transform:uppercase;}
@@ -126,6 +133,7 @@
     .character-preview{height:74px;}
     .character-name{font-size:16px;}
     .character-type{font-size:9px;}
+    .character-detail{font-size:10px;min-height:48px;padding:6px;}
   }
   @media(max-height:600px) and (orientation:landscape){
     #characterSelect{gap:6px;padding:10px;}
@@ -137,6 +145,7 @@
     .character-type{font-size:7px;letter-spacing:.08em;}
     .character-back{padding:8px 12px;font-size:14px;}
   }
+  @media(hover:none){.character-detail{display:none;}}
 </style>
 </head>
 <body>
@@ -197,45 +206,53 @@
   <div class="badge">PLAYER SELECT</div>
   <div class="title" style="font-size:clamp(30px,8vw,54px);">CHOOSE<br><b>YOUR PLAYER</b></div>
   <div class="character-grid" aria-label="Character selection">
-    <button class="character-card" data-character="girl" type="button">
+    <button class="character-card" data-character="girl" type="button" aria-label="GIRL、パワーサーブ。長身サーブ18パーセント強化、標準フットワーク">
       <img id="girlPreview" class="character-preview" src="assets/characters/girl-ready.jpg" alt="Girl tennis player">
       <span class="character-name">GIRL</span>
       <span class="character-type">POWER SERVE</span>
+      <span class="character-detail">長身サーブ ＋18%<br>標準フットワーク</span>
     </button>
-    <button class="character-card" data-character="panda" type="button">
+    <button class="character-card" data-character="panda" type="button" aria-label="PANDA、バランス。全能力が標準の万能型">
       <img id="pandaPreview" class="character-preview" src="assets/characters/panda-ready.jpg" alt="Panda tennis player">
       <span class="character-name">PANDA</span>
       <span class="character-type">BALANCED</span>
+      <span class="character-detail">全能力が標準<br>クセのない万能型</span>
     </button>
-    <button class="character-card" data-character="robot" type="button">
+    <button class="character-card" data-character="robot" type="button" aria-label="ROBOT、スピード。移動25パーセント強化、打球と守備は少し控えめ">
       <img id="robotPreview" class="character-preview" src="assets/characters/robot-ready.jpg" alt="Robot tennis player">
       <span class="character-name">ROBOT</span>
       <span class="character-type">SPEED</span>
+      <span class="character-detail">移動 ＋25%<br>打球・守備は少し控えめ</span>
     </button>
-    <button class="character-card" data-character="koala" type="button">
+    <button class="character-card" data-character="koala" type="button" aria-label="KOALA、ディフェンス。守備範囲35パーセント強化、移動22パーセント低下">
       <img id="koalaPreview" class="character-preview" src="assets/characters/koala-ready.jpg" alt="Koala tennis player">
       <span class="character-name">KOALA</span>
       <span class="character-type">DEFENSE</span>
+      <span class="character-detail">守備範囲 ＋35%<br>移動 －22%</span>
     </button>
-    <button class="character-card" data-character="kangaroo" type="button">
+    <button class="character-card" data-character="kangaroo" type="button" aria-label="KANGAROO、ワイルドパワー。強打24パーセント強化、制球が不安定">
       <img id="kangarooPreview" class="character-preview" src="assets/characters/kangaroo-ready.jpg" alt="Kangaroo tennis player">
       <span class="character-name">KANGAROO</span>
       <span class="character-type">WILD POWER</span>
+      <span class="character-detail">強打 ＋24%<br>制球が不安定</span>
     </button>
-    <button class="character-card" data-character="ghost" type="button">
+    <button class="character-card" data-character="ghost" type="button" aria-label="GHOST、フロートディフェンス。守備範囲32パーセント強化、強打不可のふわり返球">
       <img id="ghostPreview" class="character-preview" src="assets/characters/ghost-ready.jpg" alt="Ghost tennis player">
       <span class="character-name">GHOST</span>
       <span class="character-type">FLOAT DEFENSE</span>
+      <span class="character-detail">守備範囲 ＋32%<br>強打不可・ふわり返球</span>
     </button>
-    <button class="character-card" data-character="bear" type="button">
+    <button class="character-card" data-character="bear" type="button" aria-label="BEAR、ヘビーパワー。強打22パーセント強化、移動22パーセント低下">
       <img id="bearPreview" class="character-preview" src="assets/characters/bear-ready.jpg" alt="Bear tennis player">
       <span class="character-name">BEAR</span>
       <span class="character-type">HEAVY POWER</span>
+      <span class="character-detail">強打 ＋22%<br>移動 －22%</span>
     </button>
-    <button class="character-card" data-character="classic" type="button">
+    <button class="character-card" data-character="classic" type="button" aria-label="CLASSIC、オールラウンダー。制球5パーセント強化、安定した標準性能">
       <canvas id="classicPreview" class="character-preview" width="240" height="170" aria-label="Classic code-drawn tennis player"></canvas>
       <span class="character-name">CLASSIC</span>
       <span class="character-type">ALL-ROUNDER</span>
+      <span class="character-detail">制球 ＋5%<br>安定した標準性能</span>
     </button>
   </div>
   <button id="characterBackBtn" class="btn alt character-back" type="button">BACK</button>
@@ -415,10 +432,14 @@ const CHARACTER_PROFILES = Object.freeze({
   classic:{name:'CLASSIC',speed:1.04,reach:1.00,power:1.00,serve:1.00,control:1.05,drive:true,style:'ALL-ROUNDER'},
 });
 // A tall racket/toss silhouette can make the character body look smaller when the
-// whole cutout is fitted to one height. Keep the ghost's body size consistent
-// across ready, volley and serve without altering the supplied/generated art.
+// whole cutout is fitted to one height. Pose-specific visual compensation keeps
+// each character's apparent body size consistent without altering the source art.
 const CHARACTER_POSE_SCALE = Object.freeze({
-  ghost:Object.freeze({serve:1.17}),
+  robot:Object.freeze({serve:1.14}),
+  koala:Object.freeze({serve:1.14}),
+  kangaroo:Object.freeze({serve:1.15}),
+  ghost:Object.freeze({ready:.97,groundstroke:.97,volley:.97,victory:.97,serve:1.17}),
+  bear:Object.freeze({serve:1.18}),
 });
 window.__jataCharacterProfiles=CHARACTER_PROFILES;
 window.__jataCharacterRoster=CHARACTER_ROSTER;
