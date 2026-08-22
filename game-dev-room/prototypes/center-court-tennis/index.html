@@ -383,6 +383,12 @@ const CHARACTER_PROFILES = Object.freeze({
   ghost:{name:'GHOST',speed:1.02,reach:1.32,power:0.82,serve:0.86,control:1.08,drive:false,style:'FLOAT DEFENSE'},
   bear:{name:'BEAR',speed:0.78,reach:1.08,power:1.22,serve:1.08,control:0.88,drive:true,style:'HEAVY POWER'},
 });
+// A tall racket/toss silhouette can make the character body look smaller when the
+// whole cutout is fitted to one height. Keep the ghost's body size consistent
+// across ready, volley and serve without altering the supplied/generated art.
+const CHARACTER_POSE_SCALE = Object.freeze({
+  ghost:Object.freeze({serve:1.17}),
+});
 window.__jataCharacterProfiles=CHARACTER_PROFILES;
 const CharacterArt = (()=>{
   const sprites = Object.create(null);
@@ -1910,7 +1916,8 @@ function drawCharacterPlayer(p,s,near){
   const sprite=CharacterArt.get(character,pose) || CharacterArt.get(character,'ready');
   // 画像読込中も旧コード図形へ戻さず、キャラクター画像だけで統一する。
   if(!sprite) return true;
-  const height=(pose==='serve' ? 158 : 146)*s;
+  const poseScale=CHARACTER_POSE_SCALE[character]?.[pose] || 1;
+  const height=(pose==='serve' ? 158 : 146)*s*poseScale;
   const width=height*(sprite.width/sprite.height);
   const bob=state===STATE.RALLY ? Math.sin(performance.now()/105)*1.1*s : 0;
   ctx.save();
