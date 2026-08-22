@@ -39,9 +39,9 @@
     box-shadow:0 18px 38px rgba(0,0,0,.35);}
   .result-player{display:block;width:min(190px,42vw);max-height:32vh;object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 16px 24px rgba(0,0,0,.34));}
-  .character-grid{display:grid;grid-template-columns:repeat(6,minmax(0,140px));gap:10px;
-    width:min(890px,96vw);}
-  .character-card{appearance:none;position:relative;overflow:hidden;cursor:pointer;min-height:238px;
+  .character-grid{display:grid;grid-template-columns:repeat(4,minmax(0,140px));gap:10px;
+    width:min(590px,96vw);}
+  .character-card{appearance:none;position:relative;overflow:hidden;cursor:pointer;min-height:202px;
     padding:12px;border-radius:20px;border:2px solid rgba(255,255,255,.18);color:#eaf2ff;
     background:linear-gradient(180deg,rgba(37,83,132,.92),rgba(10,27,48,.96));
     box-shadow:0 16px 34px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;
@@ -49,9 +49,10 @@
   .character-card:hover,.character-card:focus-visible{transform:translateY(-3px);border-color:var(--ball);
     box-shadow:0 18px 38px rgba(0,0,0,.36),0 0 0 3px rgba(216,242,58,.15);outline:0;}
   .character-card:active{transform:translateY(1px);}
-  .character-preview{width:100%;height:170px;object-fit:contain;image-rendering:pixelated;
+  .character-preview{width:100%;height:136px;object-fit:contain;image-rendering:pixelated;
     filter:drop-shadow(0 12px 13px rgba(0,0,0,.32));}
   .character-name{font-size:21px;font-weight:900;letter-spacing:.08em;}
+  .character-card[data-character="kangaroo"] .character-name{font-size:15px;letter-spacing:.035em;}
   .character-type{font-size:11px;letter-spacing:.15em;color:#a9c9e9;}
   .character-back{width:min(240px,70vw);}
   .title{font-size:clamp(38px,11vw,84px);font-weight:900;letter-spacing:.08em;
@@ -119,11 +120,22 @@
     .ctl{min-width:70px;height:40px;font-size:12px;}
     .ctl.nav{min-width:104px;height:38px;}
     .ctl.shot{min-width:86px;}
-    .character-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-    .character-card{min-height:160px;padding:7px;gap:4px;}
-    .character-preview{height:102px;}
+    #characterSelect{gap:10px;padding:14px 18px;}
+    .character-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 8px;}
+    .character-card{min-height:124px;padding:5px;gap:2px;border-radius:15px;}
+    .character-preview{height:74px;}
     .character-name{font-size:16px;}
     .character-type{font-size:9px;}
+  }
+  @media(max-height:600px) and (orientation:landscape){
+    #characterSelect{gap:6px;padding:10px;}
+    #characterSelect>.title{font-size:28px!important;line-height:.88;}
+    .character-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;width:min(1000px,98vw);}
+    .character-card{min-height:138px;padding:4px;gap:2px;border-radius:13px;}
+    .character-preview{height:88px;}
+    .character-name{font-size:13px;}
+    .character-type{font-size:7px;letter-spacing:.08em;}
+    .character-back{padding:8px 12px;font-size:14px;}
   }
 </style>
 </head>
@@ -214,6 +226,16 @@
       <img id="ghostPreview" class="character-preview" src="assets/characters/ghost-ready.jpg" alt="Ghost tennis player">
       <span class="character-name">GHOST</span>
       <span class="character-type">FLOAT DEFENSE</span>
+    </button>
+    <button class="character-card" data-character="bear" type="button">
+      <img id="bearPreview" class="character-preview" src="assets/characters/bear-ready.jpg" alt="Bear tennis player">
+      <span class="character-name">BEAR</span>
+      <span class="character-type">HEAVY POWER</span>
+    </button>
+    <button class="character-card" data-character="classic" type="button">
+      <canvas id="classicPreview" class="character-preview" width="240" height="170" aria-label="Classic code-drawn tennis player"></canvas>
+      <span class="character-name">CLASSIC</span>
+      <span class="character-type">ALL-ROUNDER</span>
     </button>
   </div>
   <button id="characterBackBtn" class="btn alt character-back" type="button">BACK</button>
@@ -373,7 +395,15 @@ const CHARACTER_SOURCES = {
     volley:'assets/characters/ghost-volley.jpg',
     victory:'assets/characters/ghost-victory.jpg',
   },
+  bear:{
+    ready:'assets/characters/bear-ready.jpg',
+    serve:'assets/characters/bear-serve-toss.jpg',
+    groundstroke:'assets/characters/bear-groundstroke.jpg',
+    volley:'assets/characters/bear-volley.png',
+    victory:'assets/characters/bear-victory.jpg',
+  },
 };
+const CHARACTER_ROSTER = Object.freeze([...Object.keys(CHARACTER_SOURCES),'classic']);
 const CHARACTER_PROFILES = Object.freeze({
   panda:{name:'PANDA',speed:1.00,reach:1.00,power:1.00,serve:1.00,control:1.00,drive:true,style:'BALANCED'},
   girl:{name:'GIRL',speed:1.00,reach:1.00,power:1.00,serve:1.18,control:1.00,drive:true,style:'POWER SERVE'},
@@ -382,6 +412,7 @@ const CHARACTER_PROFILES = Object.freeze({
   kangaroo:{name:'KANGAROO',speed:1.05,reach:1.00,power:1.24,serve:1.10,control:0.72,drive:true,style:'WILD POWER'},
   ghost:{name:'GHOST',speed:1.02,reach:1.32,power:0.82,serve:0.86,control:1.08,drive:false,style:'FLOAT DEFENSE'},
   bear:{name:'BEAR',speed:0.78,reach:1.08,power:1.22,serve:1.08,control:0.88,drive:true,style:'HEAVY POWER'},
+  classic:{name:'CLASSIC',speed:1.04,reach:1.00,power:1.00,serve:1.00,control:1.05,drive:true,style:'ALL-ROUNDER'},
 });
 // A tall racket/toss silhouette can make the character body look smaller when the
 // whole cutout is fitted to one height. Keep the ghost's body size consistent
@@ -390,6 +421,7 @@ const CHARACTER_POSE_SCALE = Object.freeze({
   ghost:Object.freeze({serve:1.17}),
 });
 window.__jataCharacterProfiles=CHARACTER_PROFILES;
+window.__jataCharacterRoster=CHARACTER_ROSTER;
 const CharacterArt = (()=>{
   const sprites = Object.create(null);
   const status = Object.create(null);
@@ -469,6 +501,25 @@ const CharacterArt = (()=>{
   return { get:(character,key)=>sprites[character]?.[key]||null, status };
 })();
 window.__jataCharacterArt=CharacterArt;
+
+function drawClassicPreview(){
+  const preview=document.getElementById('classicPreview');
+  if(!preview) return;
+  const pctx=preview.getContext('2d');
+  pctx.clearRect(0,0,preview.width,preview.height);
+  pctx.save(); pctx.translate(120,148);
+  pctx.strokeStyle='#10233b'; pctx.lineCap='round'; pctx.lineWidth=10;
+  pctx.beginPath(); pctx.moveTo(-16,-42); pctx.lineTo(-28,0); pctx.moveTo(16,-42); pctx.lineTo(28,0); pctx.stroke();
+  pctx.fillStyle='#10233b'; pctx.fillRect(-27,-65,54,28);
+  pctx.fillStyle='#36c8ee'; pctx.fillRect(-31,-112,62,55);
+  pctx.fillStyle='#f4d9b8'; pctx.beginPath(); pctx.arc(0,-127,18,0,Math.PI*2); pctx.fill();
+  pctx.fillStyle='#1a3652'; pctx.beginPath(); pctx.arc(0,-133,18,Math.PI,Math.PI*2); pctx.fill();
+  pctx.strokeStyle='#18283e'; pctx.lineWidth=8; pctx.beginPath(); pctx.moveTo(24,-88); pctx.lineTo(63,-114); pctx.stroke();
+  pctx.fillStyle='rgba(220,235,255,.55)'; pctx.strokeStyle='#d8f23a'; pctx.lineWidth=6;
+  pctx.beginPath(); pctx.ellipse(72,-123,22,31,.45,0,Math.PI*2); pctx.fill(); pctx.stroke();
+  pctx.restore();
+}
+drawClassicPreview();
 
 // =========================================================================
 // コート投影（論理座標 → 画面ピクセル）
@@ -1909,6 +1960,7 @@ function drawPerson(x,y,color,near){
 
 function drawCharacterPlayer(p,s,near){
   const character=near ? selectedCharacter : opponentCharacter;
+  if(character==='classic') return false;
   const side=near ? 'player' : 'cpu';
   let pose='ready';
   if(state===STATE.SERVE && server===side && servePhase==='toss') pose='serve';
@@ -2063,7 +2115,7 @@ function showCharacterSelect(diff){
 }
 
 function chooseOpponent(character){
-  const roster=Object.keys(CHARACTER_SOURCES);
+  const roster=CHARACTER_ROSTER;
   const index=Math.max(0,roster.indexOf(character));
   return roster.length>1 ? roster[(index+1)%roster.length] : character;
 }
@@ -2071,7 +2123,7 @@ function chooseOpponent(character){
 function startMatch(diff,character=selectedCharacter){
   AudioFX.button();
   AudioFX.stopMusic();
-  selectedCharacter=CHARACTER_SOURCES[character] ? character : 'girl';
+  selectedCharacter=CHARACTER_ROSTER.includes(character) ? character : 'girl';
   opponentCharacter=chooseOpponent(selectedCharacter);
   window.__jataMatchCharacters={player:selectedCharacter,cpu:opponentCharacter};
   difficulty=diff; cpuCfg=CONFIG.cpu[diff];
