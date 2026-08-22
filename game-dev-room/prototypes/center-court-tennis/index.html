@@ -37,6 +37,21 @@
     box-shadow:0 18px 38px rgba(0,0,0,.35);}
   .result-player{display:block;width:min(190px,42vw);max-height:32vh;object-fit:contain;
     image-rendering:pixelated;filter:drop-shadow(0 16px 24px rgba(0,0,0,.34));}
+  .character-grid{display:grid;grid-template-columns:repeat(2,minmax(0,190px));gap:14px;
+    width:min(420px,92vw);}
+  .character-card{appearance:none;position:relative;overflow:hidden;cursor:pointer;min-height:238px;
+    padding:12px;border-radius:20px;border:2px solid rgba(255,255,255,.18);color:#eaf2ff;
+    background:linear-gradient(180deg,rgba(37,83,132,.92),rgba(10,27,48,.96));
+    box-shadow:0 16px 34px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;
+    justify-content:flex-end;gap:7px;transition:transform .12s,border-color .12s,box-shadow .12s;}
+  .character-card:hover,.character-card:focus-visible{transform:translateY(-3px);border-color:var(--ball);
+    box-shadow:0 18px 38px rgba(0,0,0,.36),0 0 0 3px rgba(216,242,58,.15);outline:0;}
+  .character-card:active{transform:translateY(1px);}
+  .character-preview{width:100%;height:170px;object-fit:contain;image-rendering:pixelated;
+    filter:drop-shadow(0 12px 13px rgba(0,0,0,.32));}
+  .character-name{font-size:21px;font-weight:900;letter-spacing:.08em;}
+  .character-type{font-size:11px;letter-spacing:.15em;color:#a9c9e9;}
+  .character-back{width:min(240px,70vw);}
   .title{font-size:clamp(38px,11vw,84px);font-weight:900;letter-spacing:.08em;
     line-height:.92;text-transform:uppercase;}
   .title b{color:var(--ball);}
@@ -102,6 +117,10 @@
     .ctl{min-width:70px;height:40px;font-size:12px;}
     .ctl.nav{min-width:104px;height:38px;}
     .ctl.shot{min-width:86px;}
+    .character-grid{gap:10px;}
+    .character-card{min-height:205px;padding:9px;}
+    .character-preview{height:142px;}
+    .character-name{font-size:18px;}
   }
 </style>
 </head>
@@ -156,6 +175,25 @@
     <b>Rally:</b> Move into the ball for auto returns. Use <b>VOLLEY / LOB / DROP</b> for shot choice.<br>
     <b>Serve:</b> Drag to set your stance → <b>VOLLEY</b> to toss → <b>VOLLEY</b> again to serve.
   </div>
+</div>
+
+<!-- キャラクター選択 -->
+<div id="characterSelect" class="overlay hidden">
+  <div class="badge">PLAYER SELECT</div>
+  <div class="title" style="font-size:clamp(30px,8vw,54px);">CHOOSE<br><b>YOUR PLAYER</b></div>
+  <div class="character-grid" aria-label="Character selection">
+    <button class="character-card" data-character="girl" type="button">
+      <img id="girlPreview" class="character-preview" src="assets/characters/girl-ready.jpg" alt="Girl tennis player">
+      <span class="character-name">GIRL</span>
+      <span class="character-type">ALL-ROUNDER</span>
+    </button>
+    <button class="character-card" data-character="panda" type="button">
+      <img id="pandaPreview" class="character-preview" src="assets/characters/panda-ready.jpg" alt="Panda tennis player">
+      <span class="character-name">PANDA</span>
+      <span class="character-type">POWER PLAYER</span>
+    </button>
+  </div>
+  <button id="characterBackBtn" class="btn alt character-back" type="button">BACK</button>
 </div>
 
 <!-- 勝敗 -->
@@ -269,16 +307,25 @@ resize();
 
 // Supplied character art is JPEG. Remove only the connected neutral-color backdrop
 // at load time so the original face, outfit, racket and pixel linework stay untouched.
-const GIRL_SOURCES = {
-  ready:'assets/characters/girl-ready.jpg',
-  serve:'assets/characters/girl-serve-toss.jpg',
-  groundstroke:'assets/characters/girl-groundstroke.jpg',
-  volley:'assets/characters/girl-volley.jpg',
-  victory:'assets/characters/girl-victory.jpg',
+const CHARACTER_SOURCES = {
+  girl:{
+    ready:'assets/characters/girl-ready.jpg',
+    serve:'assets/characters/girl-serve-toss.jpg',
+    groundstroke:'assets/characters/girl-groundstroke.jpg',
+    volley:'assets/characters/girl-volley.jpg',
+    victory:'assets/characters/girl-victory.jpg',
+  },
+  panda:{
+    ready:'assets/characters/panda-ready.jpg',
+    serve:'assets/characters/panda-serve-toss.jpg',
+    groundstroke:'assets/characters/panda-groundstroke.jpg',
+    volley:'assets/characters/panda-volley.jpg',
+    victory:'assets/characters/panda-victory.jpg',
+  },
 };
-const GirlArt = (()=>{
+const CharacterArt = (()=>{
   const sprites = Object.create(null);
-  const status = Object.fromEntries(Object.keys(GIRL_SOURCES).map(key=>[key,'loading']));
+  const status = Object.create(null);
 
   function backgroundLike(data, offset){
     const r=data[offset], g=data[offset+1], b=data[offset+2];
@@ -329,28 +376,32 @@ const GirlArt = (()=>{
     return cutout;
   }
 
-  Object.entries(GIRL_SOURCES).forEach(([key,src])=>{
-    const img=new Image();
-    img.decoding='async';
-    img.onload=()=>{
-      try{
-        sprites[key]=makeCutout(img);
-        status[key]='ready';
-        if(key==='victory'){
-          const resultPlayer=document.getElementById('resultPlayer');
-          resultPlayer.src=sprites[key].toDataURL('image/png');
+  Object.entries(CHARACTER_SOURCES).forEach(([character,poses])=>{
+    sprites[character]=Object.create(null);
+    status[character]=Object.fromEntries(Object.keys(poses).map(key=>[key,'loading']));
+    Object.entries(poses).forEach(([key,src])=>{
+      const img=new Image();
+      img.decoding='async';
+      img.onload=()=>{
+        try{
+          sprites[character][key]=makeCutout(img);
+          status[character][key]='ready';
+          if(key==='ready'){
+            const preview=document.getElementById(`${character}Preview`);
+            if(preview) preview.src=sprites[character][key].toDataURL('image/png');
+          }
+        }catch(error){
+          status[character][key]='error';
+          console.warn(`${character} sprite ${key} could not be prepared`,error);
         }
-      }catch(error){
-        status[key]='error';
-        console.warn(`Girl sprite ${key} could not be prepared`,error);
-      }
-    };
-    img.onerror=()=>{ status[key]='error'; };
-    img.src=src;
+      };
+      img.onerror=()=>{ status[character][key]='error'; };
+      img.src=src;
+    });
   });
-  return { get:key=>sprites[key]||null, status };
+  return { get:(character,key)=>sprites[character]?.[key]||null, status };
 })();
-window.__jataGirlArt=GirlArt;
+window.__jataCharacterArt=CharacterArt;
 
 // =========================================================================
 // コート投影（論理座標 → 画面ピクセル）
@@ -380,6 +431,7 @@ function project(x,y,z){
 const STATE = { MENU:'menu', SERVE:'serve', RALLY:'rally', POINT:'point', PAUSED:'paused', OVER:'over' };
 let state = STATE.MENU;
 let difficulty = 'normal';
+let selectedCharacter = 'girl';
 let pausedFrom = STATE.MENU;
 
 const player = { x:0, y:0.04 };
@@ -880,6 +932,7 @@ function returnToTennisHome(){
   servePhase='ready';
   pointer.down=false; pointer.dragging=false;
   document.getElementById('over').classList.add('hidden');
+  document.getElementById('characterSelect').classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden');
   state=STATE.MENU;
   AudioFX.startTitle();
@@ -1041,7 +1094,9 @@ function matchOver(winner){
   document.getElementById('resultScore').textContent =
     `SETS ${score.ps} - ${score.cs}  (${hist})`;
   const resultPlayer=document.getElementById('resultPlayer');
-  resultPlayer.classList.toggle('hidden',winner!=='player' || !GirlArt.get('victory'));
+  const victorySprite=CharacterArt.get(selectedCharacter,'victory');
+  if(victorySprite) resultPlayer.src=victorySprite.toDataURL('image/png');
+  resultPlayer.classList.toggle('hidden',winner!=='player' || !victorySprite);
   ov.classList.remove('hidden');
   if(winner==='player') AudioFX.victory();
   else AudioFX.stopMusic();
@@ -1695,7 +1750,7 @@ function drawShadow(x,y){
 function drawPerson(x,y,color,near){
   const p=project(x,y,0);
   const s=lerp(1.0,0.62,y);
-  if(near && drawGirlPlayer(p,s)) return;
+  if(near && drawSelectedPlayer(p,s)) return;
   const isHitter = (near && flashFx.who==='player' && flashFx.t>0) ||
                    (!near && flashFx.who==='cpu' && flashFx.t>0);
   const shirt = near ? '#36c8ee' : '#ff7156';
@@ -1746,11 +1801,11 @@ function drawPerson(x,y,color,near){
   ctx.restore();
 }
 
-function drawGirlPlayer(p,s){
+function drawSelectedPlayer(p,s){
   let pose='ready';
   if(state===STATE.SERVE && server==='player' && servePhase==='toss') pose='serve';
   else if(flashFx.who==='player' && flashFx.t>0) pose=lastPlayerPose;
-  const sprite=GirlArt.get(pose) || GirlArt.get('ready');
+  const sprite=CharacterArt.get(selectedCharacter,pose) || CharacterArt.get(selectedCharacter,'ready');
   if(!sprite) return false;
   const height=(pose==='serve' ? 158 : 146)*s;
   const width=height*(sprite.width/sprite.height);
@@ -1890,9 +1945,17 @@ function setSurface(key){
   });
 }
 
-function startMatch(diff){
+function showCharacterSelect(diff){
+  AudioFX.button();
+  difficulty=diff;
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('characterSelect').classList.remove('hidden');
+}
+
+function startMatch(diff,character=selectedCharacter){
   AudioFX.button();
   AudioFX.stopMusic();
+  selectedCharacter=CHARACTER_SOURCES[character] ? character : 'girl';
   difficulty=diff; cpuCfg=CONFIG.cpu[diff];
   setsNeeded=CONFIG.setsToWin[diff];
   score.p=score.c=score.pg=score.cg=score.ps=score.cs=0;
@@ -1900,6 +1963,7 @@ function startMatch(diff){
   player.x=0; player.y=0.04; cpu.x=0; cpu.y=0.96;
   server='player';
   document.getElementById('menu').classList.add('hidden');
+  document.getElementById('characterSelect').classList.add('hidden');
   document.getElementById('over').classList.add('hidden');
   startNextPoint();
   syncControlButtons();
@@ -1931,9 +1995,17 @@ document.querySelectorAll('[data-surface]').forEach(b=>{
   b.addEventListener('click', ()=> setSurface(b.dataset.surface));
 });
 document.querySelectorAll('#menu .btn').forEach(b=>{
-  b.addEventListener('click', ()=> startMatch(b.dataset.diff));
+  b.addEventListener('click', ()=> showCharacterSelect(b.dataset.diff));
+});
+document.querySelectorAll('[data-character]').forEach(b=>{
+  b.addEventListener('click', ()=> startMatch(difficulty,b.dataset.character));
 });
 document.getElementById('againBtn').addEventListener('click', ()=> startMatch(difficulty));
+document.getElementById('characterBackBtn').addEventListener('click', ()=>{
+  AudioFX.button();
+  document.getElementById('characterSelect').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+});
 document.getElementById('menuBtn').addEventListener('click', ()=>{
   returnToTennisHome();
 });
