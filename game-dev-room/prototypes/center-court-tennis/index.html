@@ -104,6 +104,8 @@
     border-radius:13px;background:rgba(20,38,62,.92);color:#eaf2ff;font-weight:900;
     letter-spacing:.04em;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.24);cursor:pointer;}
   .ctl.nav{min-width:112px;height:40px;}
+  .ctl.timeout{min-width:220px;height:48px;border-color:rgba(216,242,58,.5);
+    background:rgba(29,79,138,.96);font-size:15px;letter-spacing:.12em;}
   .ctl.shot{min-width:88px;}
   .ctl.primary{background:var(--ball);color:#0c1a2b;border-color:rgba(255,255,255,.38);}
   .ctl:active{transform:translateY(2px) scale(.98);}
@@ -115,6 +117,12 @@
     padding:26px 20px;display:flex;flex-direction:column;gap:14px;align-items:center;}
   .pause-card strong{font-size:34px;letter-spacing:.12em;}
   .pause-card span{font-size:13px;color:#9fc0e6;}
+  .pause-actions,.confirm-actions{width:100%;display:flex;flex-direction:column;gap:12px;}
+  .pause-actions .btn,.confirm-actions .btn{width:100%;}
+  .confirm-panel{width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .confirm-panel.hidden,.pause-actions.hidden{display:none!important;}
+  .confirm-panel strong{font-size:20px;line-height:1.35;letter-spacing:.05em;}
+  .confirm-actions{display:grid;grid-template-columns:1fr 1fr;}
   @media(max-width:720px){
     .brand-block{gap:10px;}
     .brand-copy{text-align:left;}
@@ -126,7 +134,8 @@
     .control-row + .control-row{margin-top:4px;}
     .ctl{min-width:70px;height:40px;font-size:12px;}
     .ctl.nav{min-width:104px;height:38px;}
-    .ctl.shot{min-width:86px;}
+    .ctl.timeout{min-width:250px;height:50px;font-size:15px;}
+    .ctl.shot{min-width:90px;height:44px;}
     #characterSelect{gap:10px;padding:14px 18px;}
     .character-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 8px;}
     .character-card{min-height:124px;padding:5px;gap:2px;border-radius:15px;}
@@ -152,8 +161,7 @@
 <div id="wrap"><canvas id="c"></canvas></div>
 <div id="playControls" class="play-controls hidden" aria-label="Game controls">
   <div class="control-row">
-    <button id="tennisHomeBtn" class="ctl nav" type="button" aria-label="Tennis menu">HOME</button>
-    <button id="pauseBtn" class="ctl nav" type="button" aria-label="Pause">PAUSE</button>
+    <button id="pauseBtn" class="ctl nav timeout" type="button" aria-label="Time out">TIME OUT</button>
   </div>
   <div class="control-row">
     <button id="volleyBtn" class="ctl shot primary" type="button" aria-label="Volley">VOLLEY</button>
@@ -163,9 +171,20 @@
 </div>
 <div id="pauseLayer" class="pause-layer hidden">
   <div class="pause-card">
-    <strong>PAUSED</strong>
-    <span>Match paused</span>
-    <button id="resumeBtn" class="btn" type="button">RESUME</button>
+    <strong>TIME OUT</strong>
+    <span id="pauseMessage">Match paused</span>
+    <div id="pauseActions" class="pause-actions">
+      <button id="resumeBtn" class="btn" type="button">RESUME</button>
+      <button id="pauseTitleBtn" class="btn alt" type="button">TITLE</button>
+    </div>
+    <div id="titleConfirm" class="confirm-panel hidden" role="group" aria-label="Return to title confirmation">
+      <strong>END MATCH AND<br>RETURN TO TITLE?</strong>
+      <span>The current match will be cancelled.</span>
+      <div class="confirm-actions">
+        <button id="cancelTitleBtn" class="btn alt" type="button">NO</button>
+        <button id="confirmTitleBtn" class="btn" type="button">YES</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -340,13 +359,17 @@ const VW = 1000, VH = 640;
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const playControls = document.getElementById('playControls');
-const tennisHomeBtn = document.getElementById('tennisHomeBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const volleyBtn = document.getElementById('volleyBtn');
 const lobBtn = document.getElementById('lobBtn');
 const dropBtn = document.getElementById('dropBtn');
 const pauseLayer = document.getElementById('pauseLayer');
 const resumeBtn = document.getElementById('resumeBtn');
+const pauseActions = document.getElementById('pauseActions');
+const titleConfirm = document.getElementById('titleConfirm');
+const pauseTitleBtn = document.getElementById('pauseTitleBtn');
+const cancelTitleBtn = document.getElementById('cancelTitleBtn');
+const confirmTitleBtn = document.getElementById('confirmTitleBtn');
 let scale = 1, scaleY = 1, offX = 0, offY = 0, DPR = 1;
 
 function resize(){
@@ -1063,9 +1086,9 @@ function matchIsLive(){
 }
 
 function syncControlButtons(){
-  playControls.classList.toggle('hidden', !matchIsLive());
+  playControls.classList.toggle('hidden', !matchIsLive() || state===STATE.PAUSED);
   pauseLayer.classList.toggle('hidden', state!==STATE.PAUSED);
-  pauseBtn.textContent = state===STATE.PAUSED ? 'PLAY' : 'PAUSE';
+  pauseBtn.textContent = 'TIME OUT';
   pauseBtn.disabled = !(state===STATE.SERVE || state===STATE.RALLY || state===STATE.POINT || state===STATE.PAUSED);
   const shotEnabled = state===STATE.RALLY || (state===STATE.SERVE && server==='player');
   volleyBtn.disabled = !shotEnabled;
@@ -1087,6 +1110,7 @@ function triggerShot(kind){
 
 function togglePause(){
   if(state===STATE.PAUSED){
+    resetPauseDialog();
     state = pausedFrom;
     if(state===STATE.MENU || state===STATE.OVER) state = STATE.SERVE;
     syncControlButtons();
@@ -1100,7 +1124,24 @@ function togglePause(){
   }
 }
 
+function resetPauseDialog(){
+  pauseActions.classList.remove('hidden');
+  titleConfirm.classList.add('hidden');
+}
+
+function requestTitleReturn(){
+  if(state!==STATE.PAUSED) return;
+  pauseActions.classList.add('hidden');
+  titleConfirm.classList.remove('hidden');
+}
+
+function cancelTitleReturn(){
+  if(state!==STATE.PAUSED) return;
+  resetPauseDialog();
+}
+
 function returnToTennisHome(){
+  resetPauseDialog();
   ball.alive=false;
   ball.visualT=0;
   servePhase='ready';
@@ -2175,9 +2216,11 @@ function runControlAction(e, fn){
   fn();
 }
 
-tennisHomeBtn.addEventListener('pointerup', e=>runControlAction(e, returnToTennisHome));
 pauseBtn.addEventListener('pointerup', e=>runControlAction(e, togglePause));
 resumeBtn.addEventListener('pointerup', e=>runControlAction(e, togglePause));
+pauseTitleBtn.addEventListener('pointerup', e=>runControlAction(e, requestTitleReturn));
+cancelTitleBtn.addEventListener('pointerup', e=>runControlAction(e, cancelTitleReturn));
+confirmTitleBtn.addEventListener('pointerup', e=>runControlAction(e, returnToTennisHome));
 volleyBtn.addEventListener('pointerdown', e=>runControlAction(e, ()=>triggerShot('drive')));
 lobBtn.addEventListener('pointerdown', e=>runControlAction(e, ()=>triggerShot('lob')));
 dropBtn.addEventListener('pointerdown', e=>runControlAction(e, ()=>triggerShot('drop')));
