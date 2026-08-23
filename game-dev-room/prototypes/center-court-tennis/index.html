@@ -476,7 +476,13 @@ const CharacterArt = (()=>{
     return lo>=220 && hi-lo<=18;
   }
 
-  function makeCutout(img){
+  const enclosedBackgroundSeeds = Object.freeze({
+    // The victory pose traps one backdrop island between the raised arm and torso.
+    // Seed only that pocket; the racket strings and all white costume areas stay opaque.
+    girl:Object.freeze({victory:Object.freeze([[.621,.313]])}),
+  });
+
+  function makeCutout(img,character,pose){
     const scaleDown=Math.min(1,720/img.naturalHeight);
     const w=Math.max(1,Math.round(img.naturalWidth*scaleDown));
     const h=Math.max(1,Math.round(img.naturalHeight*scaleDown));
@@ -493,6 +499,12 @@ const CharacterArt = (()=>{
     }
     for(let x=0;x<w;x++){ enqueue(x); enqueue((h-1)*w+x); }
     for(let y=1;y<h-1;y++){ enqueue(y*w); enqueue(y*w+w-1); }
+    const enclosedSeeds=enclosedBackgroundSeeds[character]?.[pose] || [];
+    enclosedSeeds.forEach(([nx,ny])=>{
+      const x=Math.max(0,Math.min(w-1,Math.round(nx*(w-1))));
+      const y=Math.max(0,Math.min(h-1,Math.round(ny*(h-1))));
+      enqueue(y*w+x);
+    });
     while(head<tail){
       const index=queue[head++], x=index%w, y=(index/w)|0;
       data[index*4+3]=0;
@@ -527,7 +539,7 @@ const CharacterArt = (()=>{
       img.decoding='async';
       img.onload=()=>{
         try{
-          sprites[character][key]=makeCutout(img);
+          sprites[character][key]=makeCutout(img,character,key);
           status[character][key]='ready';
           if(key==='ready'){
             const preview=document.getElementById(`${character}Preview`);
