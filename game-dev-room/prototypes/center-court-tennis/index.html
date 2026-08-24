@@ -315,7 +315,7 @@
   </div>
 </div>
 
-<!-- 女の子トーナメント優勝動画 -->
+<!-- キャラクター別トーナメント優勝動画 -->
 <div id="championVideoLayer" class="champion-video-layer hidden">
   <video id="championVideo" playsinline muted preload="metadata" src="assets/girl-tournament-champion.mp4"></video>
   <button id="championVideoPlay" class="btn video-play hidden" type="button">PLAY VICTORY MOVIE</button>
@@ -659,6 +659,11 @@ let resultAction = 'replay';
 let tournament = null;
 const TOURNAMENT_SAVE_KEY = 'jata-open-tournament-v1';
 const TOURNAMENT_ROUND_NAMES = ['QUARTERFINAL','SEMIFINAL','FINAL'];
+const TOURNAMENT_CHAMPION_VIDEOS = {
+  girl:'assets/girl-tournament-champion.mp4',
+  panda:'assets/panda-tournament-champion.mp4',
+  robot:'assets/robot-tournament-champion.mp4'
+};
 
 function playerProfile(){ return CHARACTER_PROFILES[selectedCharacter] || CHARACTER_PROFILES.panda; }
 function opponentProfile(){ return CHARACTER_PROFILES[opponentCharacter] || CHARACTER_PROFILES.panda; }
@@ -2473,7 +2478,7 @@ function handleTournamentMatchOver(winner){
   tournament.champion=tournament.player;
   saveTournamentData();
   resultAction='new-tournament';
-  if(tournament.player==='girl') playChampionVideo();
+  if(TOURNAMENT_CHAMPION_VIDEOS[tournament.player]) playChampionVideo();
   else showTournamentChampionResult();
 }
 
@@ -2483,8 +2488,14 @@ function playChampionVideo(){
   const layer=document.getElementById('championVideoLayer');
   const video=document.getElementById('championVideo');
   const playButton=document.getElementById('championVideoPlay');
+  const source=TOURNAMENT_CHAMPION_VIDEOS[tournament.player];
+  if(!source){ showTournamentChampionResult(); return; }
   layer.classList.remove('hidden');
   playButton.classList.add('hidden');
+  if(video.getAttribute('src')!==source){
+    video.setAttribute('src',source);
+    video.load();
+  }
   video.currentTime=0;
   video.muted=true;
   video.play().catch(()=>playButton.classList.remove('hidden'));
