@@ -21,3 +21,4 @@ deploy-work/
 # Large exported media can be managed separately if needed
 *.mov
 *.mp4
+!game-dev-room/prototypes/center-court-tennis/assets/girl-tournament-champion.mp4

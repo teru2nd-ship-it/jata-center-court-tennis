@@ -93,6 +93,26 @@
   .result{font-size:clamp(28px,8vw,52px);font-weight:900;}
   .badge{display:inline-block;font-size:12px;letter-spacing:.18em;
     text-transform:uppercase;opacity:.6;}
+  .tournament-entry{border:1px solid rgba(216,242,58,.52);background:linear-gradient(180deg,#315f9b,#1d4f8a)!important;
+    color:#fff!important;box-shadow:0 6px 0 #123459!important;}
+  .resume-tournament{border:1px solid rgba(255,255,255,.24);}
+  .tournament-overlay{gap:12px;padding:18px 14px;overflow:auto;justify-content:flex-start;}
+  .tournament-title{font-size:clamp(30px,8vw,52px);font-weight:900;letter-spacing:.08em;line-height:.95;margin-top:18px;}
+  .tournament-round{color:var(--ball);font-size:15px;font-weight:900;letter-spacing:.16em;}
+  .bracket{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:10px;width:min(760px,96vw);align-items:start;}
+  .bracket-column{display:flex;flex-direction:column;gap:8px;min-width:0;}
+  .bracket-heading{font-size:11px;color:#9fc0e6;letter-spacing:.15em;font-weight:900;}
+  .bracket-match{border:1px solid rgba(255,255,255,.16);border-radius:11px;padding:7px;background:rgba(12,28,48,.88);font-size:11px;line-height:1.55;text-align:left;}
+  .bracket-player{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 4px;border-radius:5px;}
+  .bracket-player.user{color:var(--ball);font-weight:900;}
+  .bracket-player.winner{background:rgba(124,252,138,.14);color:#7cfc8a;}
+  .bracket-player.pending{opacity:.38;}
+  .tournament-actions{display:flex;flex-direction:column;gap:10px;width:min(340px,86vw);padding-bottom:20px;}
+  .save-note{font-size:12px;color:#9fc0e6;}
+  .champion-video-layer{position:fixed;inset:0;z-index:30;background:#030812;display:flex;align-items:center;justify-content:center;}
+  .champion-video-layer video{width:100%;height:100%;object-fit:contain;background:#030812;}
+  .video-skip{position:absolute;right:14px;top:max(28px,env(safe-area-inset-top));z-index:2;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:10px 16px;background:rgba(5,16,30,.78);color:#fff;font-weight:900;}
+  .video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:min(300px,80vw);}
   .play-controls{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
     transform:translateX(-50%);z-index:18;display:flex;flex-direction:column;gap:16px;align-items:center;
     justify-content:center;padding:12px;border-radius:20px;background:rgba(8,17,29,.72);
@@ -143,6 +163,9 @@
     .character-name{font-size:16px;}
     .character-type{font-size:9px;}
     .character-detail{font-size:10px;min-height:48px;padding:6px;}
+    .bracket{grid-template-columns:1fr;width:min(360px,94vw);}
+    .tournament-overlay{overflow:auto;justify-content:flex-start;}
+    .tournament-title{margin-top:10px;}
   }
   @media(max-height:600px) and (orientation:landscape){
     #characterSelect{gap:6px;padding:10px;}
@@ -209,9 +232,11 @@
   </div>
   <div class="panel">
     <div class="sub">Choose difficulty</div>
-    <button class="btn" data-diff="easy">EASY  One Set</button>
-    <button class="btn alt" data-diff="normal">NORMAL  Best of 3</button>
-    <button class="btn alt" data-diff="hard">HARD  Best of 5</button>
+    <button class="btn" data-diff="easy" data-mode="exhibition">EASY  One Set</button>
+    <button class="btn alt" data-diff="normal" data-mode="exhibition">NORMAL  Best of 3</button>
+    <button class="btn alt" data-diff="hard" data-mode="exhibition">HARD  Best of 5</button>
+    <button class="btn tournament-entry" id="tournamentBtn" type="button">TOURNAMENT  Best of 5</button>
+    <button class="btn alt resume-tournament hidden" id="resumeTournamentBtn" type="button">RESUME TOURNAMENT</button>
   </div>
   <div class="help">
     <b>Move:</b> Drag / mouse / arrow keys. Step in to attack the net.<br>
@@ -222,7 +247,7 @@
 
 <!-- キャラクター選択 -->
 <div id="characterSelect" class="overlay hidden">
-  <div class="badge">PLAYER SELECT</div>
+  <div class="badge" id="playerSelectBadge">PLAYER SELECT</div>
   <div class="title" style="font-size:clamp(30px,8vw,54px);">CHOOSE<br><b>YOUR PLAYER</b></div>
   <div class="character-grid" aria-label="Character selection">
     <button class="character-card" data-character="girl" type="button" aria-label="GIRL、パワーサーブ。長身サーブ18パーセント強化、標準フットワーク">
@@ -275,6 +300,26 @@
     </button>
   </div>
   <button id="characterBackBtn" class="btn alt character-back" type="button">BACK</button>
+</div>
+
+<!-- トーナメント表 -->
+<div id="tournamentLayer" class="overlay tournament-overlay hidden">
+  <div class="badge">8 PLAYER CHAMPIONSHIP</div>
+  <div class="tournament-title">JATA <b style="color:var(--ball)">OPEN CUP</b></div>
+  <div id="tournamentRound" class="tournament-round"></div>
+  <div id="tournamentBracket" class="bracket" aria-label="Tournament bracket"></div>
+  <div class="tournament-actions">
+    <button class="btn" id="tournamentContinueBtn" type="button">PLAY MATCH</button>
+    <button class="btn alt" id="tournamentTitleBtn" type="button">SAVE &amp; TITLE</button>
+    <div class="save-note">Progress and match score are saved automatically on this device.</div>
+  </div>
+</div>
+
+<!-- 女の子トーナメント優勝動画 -->
+<div id="championVideoLayer" class="champion-video-layer hidden">
+  <video id="championVideo" playsinline muted preload="metadata" src="assets/girl-tournament-champion.mp4"></video>
+  <button id="championVideoPlay" class="btn video-play hidden" type="button">PLAY VICTORY MOVIE</button>
+  <button id="championVideoSkip" class="video-skip" type="button">SKIP</button>
 </div>
 
 <!-- 勝敗 -->
@@ -608,6 +653,12 @@ let difficulty = 'normal';
 let selectedCharacter = 'girl';
 let opponentCharacter = 'panda';
 let pausedFrom = STATE.MENU;
+let gameMode = 'exhibition';
+let selectionMode = 'exhibition';
+let resultAction = 'replay';
+let tournament = null;
+const TOURNAMENT_SAVE_KEY = 'jata-open-tournament-v1';
+const TOURNAMENT_ROUND_NAMES = ['QUARTERFINAL','SEMIFINAL','FINAL'];
 
 function playerProfile(){ return CHARACTER_PROFILES[selectedCharacter] || CHARACTER_PROFILES.panda; }
 function opponentProfile(){ return CHARACTER_PROFILES[opponentCharacter] || CHARACTER_PROFILES.panda; }
@@ -1153,6 +1204,7 @@ function cancelTitleReturn(){
 }
 
 function returnToTennisHome(){
+  persistTournamentProgress();
   resetPauseDialog();
   ball.alive=false;
   ball.visualT=0;
@@ -1160,9 +1212,13 @@ function returnToTennisHome(){
   pointer.down=false; pointer.dragging=false;
   document.getElementById('over').classList.add('hidden');
   document.getElementById('characterSelect').classList.add('hidden');
+  document.getElementById('tournamentLayer').classList.add('hidden');
+  document.getElementById('championVideoLayer').classList.add('hidden');
+  document.getElementById('championVideo').pause();
   document.getElementById('menu').classList.remove('hidden');
   state=STATE.MENU;
   AudioFX.startTitle();
+  updateTournamentResumeButton();
   syncControlButtons();
 }
 
@@ -1214,6 +1270,7 @@ function awardPoint(winner, reason){
   if(reason === 'ACE!') AudioFX.ace(gained);
   else AudioFX.point(gained);
   resolvePoint();
+  persistTournamentProgress();
 }
 
 function pointName(n){ return ['0','15','30','40'][n] ?? '40'; }
@@ -1314,20 +1371,35 @@ function winSet(who){
 let pointTimer = 0;
 function matchOver(winner){
   state = STATE.OVER;
-  const ov = document.getElementById('over');
-  document.getElementById('resultText').textContent =
-    winner==='player' ? 'YOU WIN' : 'YOU LOSE';
-  const hist = score.setHistory.map(s=>`${s.p}-${s.c}`).join('  ');
-  document.getElementById('resultScore').textContent =
-    `SETS ${score.ps} - ${score.cs}  (${hist})`;
-  const resultPlayer=document.getElementById('resultPlayer');
-  const victorySprite=CharacterArt.get(selectedCharacter,'victory');
-  if(victorySprite) resultPlayer.src=victorySprite.toDataURL('image/png');
-  resultPlayer.classList.toggle('hidden',winner!=='player' || !victorySprite);
-  ov.classList.remove('hidden');
+  if(gameMode==='tournament' && tournament){
+    handleTournamentMatchOver(winner);
+    syncControlButtons();
+    return;
+  }
+  resultAction='replay';
+  showResultScreen(
+    winner==='player' ? 'YOU WIN' : 'YOU LOSE',
+    `SETS ${score.ps} - ${score.cs}  (${score.setHistory.map(s=>`${s.p}-${s.c}`).join('  ')})`,
+    winner==='player',
+    'PLAY AGAIN',
+    'CHANGE SETTINGS'
+  );
   if(winner==='player') AudioFX.victory();
   else AudioFX.stopMusic();
   syncControlButtons();
+}
+
+function showResultScreen(title,scoreText,showPlayer,primaryLabel,secondaryLabel){
+  const ov = document.getElementById('over');
+  document.getElementById('resultText').textContent=title;
+  document.getElementById('resultScore').textContent=scoreText;
+  document.getElementById('againBtn').textContent=primaryLabel;
+  document.getElementById('menuBtn').textContent=secondaryLabel;
+  const resultPlayer=document.getElementById('resultPlayer');
+  const victorySprite=CharacterArt.get(selectedCharacter,'victory');
+  if(victorySprite) resultPlayer.src=victorySprite.toDataURL('image/png');
+  resultPlayer.classList.toggle('hidden',!showPlayer || !victorySprite);
+  ov.classList.remove('hidden');
 }
 
 // =========================================================================
@@ -2167,6 +2239,266 @@ function drawMessage(){
 // =========================================================================
 // 起動・メニュー
 // =========================================================================
+function readTournamentSave(){
+  try{
+    const data=JSON.parse(localStorage.getItem(TOURNAMENT_SAVE_KEY)||'null');
+    if(!data || data.version!==1 || !CHARACTER_ROSTER.includes(data.player)) return null;
+    if(!Array.isArray(data.rounds) || data.rounds.length!==3) return null;
+    return data;
+  }catch(error){ return null; }
+}
+
+function saveTournamentData(){
+  if(!tournament) return;
+  tournament.surface=surfaceKey;
+  try{ localStorage.setItem(TOURNAMENT_SAVE_KEY,JSON.stringify(tournament)); }
+  catch(error){ console.warn('Tournament progress could not be saved',error); }
+  updateTournamentResumeButton();
+}
+
+function clearTournamentSave(){
+  try{ localStorage.removeItem(TOURNAMENT_SAVE_KEY); }catch(error){}
+  tournament=null;
+  updateTournamentResumeButton();
+}
+
+function updateTournamentResumeButton(){
+  const saved=readTournamentSave();
+  const resumable=saved && (saved.status==='playing' || saved.status==='between');
+  document.getElementById('resumeTournamentBtn').classList.toggle('hidden',!resumable);
+}
+
+function shuffledCharacters(playerCharacter){
+  const others=CHARACTER_ROSTER.filter(character=>character!==playerCharacter);
+  for(let i=others.length-1;i>0;i--){
+    const random=new Uint32Array(1);
+    crypto.getRandomValues(random);
+    const j=random[0]%(i+1);
+    [others[i],others[j]]=[others[j],others[i]];
+  }
+  return [playerCharacter,...others];
+}
+
+function createTournament(playerCharacter){
+  const entrants=shuffledCharacters(playerCharacter);
+  const quarterfinals=[];
+  for(let i=0;i<entrants.length;i+=2){
+    quarterfinals.push({a:entrants[i],b:entrants[i+1],winner:null,score:''});
+  }
+  tournament={
+    version:1,
+    player:playerCharacter,
+    round:0,
+    status:'between',
+    champion:null,
+    surface:surfaceKey,
+    rounds:[
+      quarterfinals,
+      [{a:null,b:null,winner:null,score:''},{a:null,b:null,winner:null,score:''}],
+      [{a:null,b:null,winner:null,score:''}],
+    ],
+    match:null,
+  };
+  selectedCharacter=playerCharacter;
+  gameMode='tournament';
+  saveTournamentData();
+  showTournamentBracket();
+}
+
+function tournamentMatchSnapshot(){
+  return {
+    p:score.p,c:score.c,pg:score.pg,cg:score.cg,ps:score.ps,cs:score.cs,
+    setHistory:score.setHistory.map(set=>({p:set.p,c:set.c})),
+    tiebreak:score.tiebreak,server,isSecondServe,tbStartServer,
+  };
+}
+
+function persistTournamentProgress(){
+  if(gameMode!=='tournament' || !tournament || tournament.status!=='playing') return;
+  tournament.match=tournamentMatchSnapshot();
+  saveTournamentData();
+}
+
+function restoreTournamentScore(saved){
+  score.p=Number(saved?.p)||0; score.c=Number(saved?.c)||0;
+  score.pg=Number(saved?.pg)||0; score.cg=Number(saved?.cg)||0;
+  score.ps=Number(saved?.ps)||0; score.cs=Number(saved?.cs)||0;
+  score.setHistory=Array.isArray(saved?.setHistory)
+    ? saved.setHistory.map(set=>({p:Number(set.p)||0,c:Number(set.c)||0})) : [];
+  score.tiebreak=!!saved?.tiebreak;
+  server=saved?.server==='cpu'?'cpu':'player';
+  isSecondServe=!!saved?.isSecondServe;
+  tbStartServer=saved?.tbStartServer==='cpu'?'cpu':'player';
+}
+
+function characterName(character){
+  return CHARACTER_PROFILES[character]?.name || 'TBD';
+}
+
+function bracketPlayer(character,match){
+  const name=character ? characterName(character) : 'TBD';
+  const classes=['bracket-player'];
+  if(!character) classes.push('pending');
+  if(character===tournament?.player) classes.push('user');
+  if(character && match?.winner===character) classes.push('winner');
+  return `<span class="${classes.join(' ')}">${name}</span>`;
+}
+
+function renderTournamentBracket(){
+  if(!tournament) return;
+  const bracket=document.getElementById('tournamentBracket');
+  bracket.innerHTML=tournament.rounds.map((matches,roundIndex)=>{
+    const cards=matches.map(match=>
+      `<div class="bracket-match">${bracketPlayer(match.a,match)}${bracketPlayer(match.b,match)}${match.score?`<span class="bracket-player">${match.score}</span>`:''}</div>`
+    ).join('');
+    return `<div class="bracket-column"><div class="bracket-heading">${TOURNAMENT_ROUND_NAMES[roundIndex]}</div>${cards}</div>`;
+  }).join('');
+  const roundName=TOURNAMENT_ROUND_NAMES[Math.min(tournament.round,2)];
+  document.getElementById('tournamentRound').textContent=`${roundName} · BEST OF 5`;
+  const continueButton=document.getElementById('tournamentContinueBtn');
+  continueButton.textContent=tournament.status==='playing'?'RESUME MATCH':`PLAY ${roundName}`;
+  continueButton.classList.toggle('hidden',!['playing','between'].includes(tournament.status));
+}
+
+function showTournamentBracket(){
+  if(!tournament) return;
+  gameMode='tournament';
+  selectedCharacter=tournament.player;
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('characterSelect').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  document.getElementById('championVideoLayer').classList.add('hidden');
+  document.getElementById('tournamentLayer').classList.remove('hidden');
+  state=STATE.MENU;
+  renderTournamentBracket();
+  syncControlButtons();
+}
+
+function startTournamentSelection(){
+  const saved=readTournamentSave();
+  if(saved && ['playing','between'].includes(saved.status)
+    && !window.confirm('Start a new tournament? Saved progress will be replaced.')) return;
+  selectionMode='tournament';
+  difficulty='normal';
+  document.getElementById('playerSelectBadge').textContent='TOURNAMENT PLAYER SELECT';
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('characterSelect').classList.remove('hidden');
+}
+
+function resumeTournament(){
+  const saved=readTournamentSave();
+  if(!saved){ updateTournamentResumeButton(); return; }
+  tournament=saved;
+  selectedCharacter=saved.player;
+  gameMode='tournament';
+  setSurface(saved.surface||'hard');
+  if(saved.status==='playing' && saved.match) startTournamentMatch();
+  else showTournamentBracket();
+}
+
+function startTournamentMatch(){
+  if(!tournament || !['playing','between'].includes(tournament.status)) return;
+  const match=tournament.rounds[tournament.round]?.[0];
+  if(!match?.a || !match?.b) return;
+  const restored=tournament.status==='playing' ? tournament.match : null;
+  tournament.status='playing';
+  selectedCharacter=tournament.player;
+  startMatch('normal',tournament.player,match.b,restored);
+}
+
+function tournamentRating(character){
+  const profile=CHARACTER_PROFILES[character]||CHARACTER_PROFILES.panda;
+  return profile.speed+profile.reach+profile.power+profile.serve+profile.control+(profile.drive?.08:0);
+}
+
+function simulateTournamentWinner(a,b){
+  const ar=tournamentRating(a), br=tournamentRating(b);
+  return Math.random()<(ar/(ar+br))?a:b;
+}
+
+function finishOtherRoundMatches(roundIndex){
+  const matches=tournament.rounds[roundIndex];
+  for(let i=1;i<matches.length;i++){
+    const match=matches[i];
+    if(!match.winner){
+      match.winner=simulateTournamentWinner(match.a,match.b);
+      match.score='CPU SIM';
+    }
+  }
+}
+
+function buildNextTournamentRound(roundIndex){
+  const current=tournament.rounds[roundIndex];
+  if(roundIndex===0){
+    tournament.rounds[1][0].a=current[0].winner;
+    tournament.rounds[1][0].b=current[1].winner;
+    tournament.rounds[1][1].a=current[2].winner;
+    tournament.rounds[1][1].b=current[3].winner;
+  }else if(roundIndex===1){
+    tournament.rounds[2][0].a=current[0].winner;
+    tournament.rounds[2][0].b=current[1].winner;
+  }
+}
+
+function handleTournamentMatchOver(winner){
+  const roundIndex=tournament.round;
+  const match=tournament.rounds[roundIndex][0];
+  const playerWon=winner==='player';
+  match.winner=playerWon?tournament.player:opponentCharacter;
+  match.score=`${score.ps}-${score.cs}`;
+  tournament.match=null;
+  AudioFX.stopMusic();
+
+  if(!playerWon){
+    tournament.status='eliminated';
+    saveTournamentData();
+    resultAction='new-tournament';
+    showResultScreen('ELIMINATED',`${TOURNAMENT_ROUND_NAMES[roundIndex]} · SETS ${score.ps}-${score.cs}`,false,'NEW TOURNAMENT','TITLE');
+    return;
+  }
+
+  finishOtherRoundMatches(roundIndex);
+  if(roundIndex<2){
+    buildNextTournamentRound(roundIndex);
+    tournament.round=roundIndex+1;
+    tournament.status='between';
+    saveTournamentData();
+    resultAction='bracket';
+    showResultScreen('ROUND WON',`NEXT · ${TOURNAMENT_ROUND_NAMES[tournament.round]}`,true,'VIEW BRACKET','SAVE & TITLE');
+    AudioFX.victory();
+    return;
+  }
+
+  tournament.status='champion';
+  tournament.champion=tournament.player;
+  saveTournamentData();
+  resultAction='new-tournament';
+  if(tournament.player==='girl') playChampionVideo();
+  else showTournamentChampionResult();
+}
+
+function playChampionVideo(){
+  document.getElementById('over').classList.add('hidden');
+  document.getElementById('tournamentLayer').classList.add('hidden');
+  const layer=document.getElementById('championVideoLayer');
+  const video=document.getElementById('championVideo');
+  const playButton=document.getElementById('championVideoPlay');
+  layer.classList.remove('hidden');
+  playButton.classList.add('hidden');
+  video.currentTime=0;
+  video.muted=true;
+  video.play().catch(()=>playButton.classList.remove('hidden'));
+}
+
+function showTournamentChampionResult(){
+  const video=document.getElementById('championVideo');
+  video.pause();
+  document.getElementById('championVideoPlay').classList.add('hidden');
+  document.getElementById('championVideoLayer').classList.add('hidden');
+  showResultScreen('CHAMPION!', 'JATA OPEN CUP · 3 MATCHES UNDEFEATED',true,'NEW TOURNAMENT','TITLE');
+  AudioFX.victory();
+}
+
 function setSurface(key){
   surfaceKey = SURFACES[key] ? key : 'hard';
   COL = SURFACES[surfaceKey];
@@ -2183,7 +2515,10 @@ function setSurface(key){
 
 function showCharacterSelect(diff){
   AudioFX.button();
+  selectionMode='exhibition';
+  gameMode='exhibition';
   difficulty=diff;
+  document.getElementById('playerSelectBadge').textContent='PLAYER SELECT';
   document.getElementById('menu').classList.add('hidden');
   document.getElementById('characterSelect').classList.remove('hidden');
 }
@@ -2194,22 +2529,33 @@ function chooseOpponent(character){
   return roster.length>1 ? roster[(index+1)%roster.length] : character;
 }
 
-function startMatch(diff,character=selectedCharacter){
+function startMatch(diff,character=selectedCharacter,forcedOpponent=null,restoredScore=null){
   AudioFX.button();
   AudioFX.stopMusic();
   selectedCharacter=CHARACTER_ROSTER.includes(character) ? character : 'girl';
-  opponentCharacter=chooseOpponent(selectedCharacter);
+  opponentCharacter=CHARACTER_ROSTER.includes(forcedOpponent) && forcedOpponent!==selectedCharacter
+    ? forcedOpponent : chooseOpponent(selectedCharacter);
   window.__jataMatchCharacters={player:selectedCharacter,cpu:opponentCharacter};
-  difficulty=diff; cpuCfg=CONFIG.cpu[diff];
-  setsNeeded=CONFIG.setsToWin[diff];
-  score.p=score.c=score.pg=score.cg=score.ps=score.cs=0;
-  score.setHistory=[]; score.tiebreak=false; score.message='';
+  difficulty=CONFIG.cpu[diff]?diff:'normal'; cpuCfg=CONFIG.cpu[difficulty];
+  setsNeeded=gameMode==='tournament'?3:CONFIG.setsToWin[difficulty];
+  if(restoredScore) restoreTournamentScore(restoredScore);
+  else{
+    score.p=score.c=score.pg=score.cg=score.ps=score.cs=0;
+    score.setHistory=[]; score.tiebreak=false;
+    server='player';
+  }
+  score.message='';
   player.x=0; player.y=0.04; cpu.x=0; cpu.y=0.96;
-  server='player';
   document.getElementById('menu').classList.add('hidden');
   document.getElementById('characterSelect').classList.add('hidden');
+  document.getElementById('tournamentLayer').classList.add('hidden');
   document.getElementById('over').classList.add('hidden');
   startNextPoint();
+  if(gameMode==='tournament' && tournament){
+    tournament.status='playing';
+    tournament.match=tournamentMatchSnapshot();
+    saveTournamentData();
+  }
   syncControlButtons();
 }
 
@@ -2240,23 +2586,53 @@ dropBtn.addEventListener('pointerdown', e=>runControlAction(e, ()=>triggerShot('
 document.querySelectorAll('[data-surface]').forEach(b=>{
   b.addEventListener('click', ()=> setSurface(b.dataset.surface));
 });
-document.querySelectorAll('#menu .btn').forEach(b=>{
+document.querySelectorAll('#menu .btn[data-mode="exhibition"]').forEach(b=>{
   b.addEventListener('click', ()=> showCharacterSelect(b.dataset.diff));
 });
+document.getElementById('tournamentBtn').addEventListener('click', startTournamentSelection);
+document.getElementById('resumeTournamentBtn').addEventListener('click', resumeTournament);
 document.querySelectorAll('[data-character]').forEach(b=>{
-  b.addEventListener('click', ()=> startMatch(difficulty,b.dataset.character));
+  b.addEventListener('click', ()=>{
+    if(selectionMode==='tournament') createTournament(b.dataset.character);
+    else{
+      gameMode='exhibition';
+      startMatch(difficulty,b.dataset.character);
+    }
+  });
 });
-document.getElementById('againBtn').addEventListener('click', ()=> startMatch(difficulty));
+document.getElementById('againBtn').addEventListener('click', ()=>{
+  if(resultAction==='bracket') showTournamentBracket();
+  else if(resultAction==='new-tournament'){
+    clearTournamentSave();
+    startTournamentSelection();
+  }else{
+    gameMode='exhibition';
+    startMatch(difficulty);
+  }
+});
 document.getElementById('characterBackBtn').addEventListener('click', ()=>{
   AudioFX.button();
+  selectionMode='exhibition';
+  document.getElementById('playerSelectBadge').textContent='PLAYER SELECT';
   document.getElementById('characterSelect').classList.add('hidden');
   document.getElementById('menu').classList.remove('hidden');
+  updateTournamentResumeButton();
 });
 document.getElementById('menuBtn').addEventListener('click', ()=>{
   returnToTennisHome();
 });
+document.getElementById('tournamentContinueBtn').addEventListener('click', startTournamentMatch);
+document.getElementById('tournamentTitleBtn').addEventListener('click', returnToTennisHome);
+document.getElementById('championVideo').addEventListener('ended', showTournamentChampionResult);
+document.getElementById('championVideoPlay').addEventListener('click', ()=>{
+  const video=document.getElementById('championVideo');
+  video.play().then(()=>document.getElementById('championVideoPlay').classList.add('hidden'))
+    .catch(()=>{});
+});
+document.getElementById('championVideoSkip').addEventListener('click', showTournamentChampionResult);
 
 setSurface('hard');
+updateTournamentResumeButton();
 syncControlButtons();
 requestAnimationFrame(loop);
 </script>
