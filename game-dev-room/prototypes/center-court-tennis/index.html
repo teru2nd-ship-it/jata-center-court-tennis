@@ -113,6 +113,44 @@
   .champion-video-layer video{width:100%;height:100%;object-fit:contain;background:#030812;}
   .video-skip{position:absolute;right:14px;top:max(28px,env(safe-area-inset-top));z-index:2;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:10px 16px;background:rgba(5,16,30,.78);color:#fff;font-weight:900;}
   .video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:min(300px,80vw);}
+  .champion-celebration{position:fixed;inset:0;z-index:34;pointer-events:none;overflow:hidden;
+    display:flex;align-items:flex-start;justify-content:center;padding-top:max(28px,env(safe-area-inset-top));}
+  .champion-crown{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
+    padding:10px 22px 12px;border-radius:18px;border:1px solid rgba(255,236,139,.62);
+    background:linear-gradient(180deg,rgba(8,18,34,.9),rgba(16,35,60,.76));
+    box-shadow:0 10px 36px rgba(0,0,0,.42),0 0 35px rgba(255,211,74,.2);animation:championCrownIn .65s cubic-bezier(.2,.8,.2,1) both;}
+  .champion-trophy{font-size:clamp(34px,9vw,58px);line-height:1;filter:drop-shadow(0 5px 8px rgba(0,0,0,.4));}
+  .champion-kicker{font-size:clamp(10px,2.8vw,14px);font-weight:900;letter-spacing:.28em;color:#ffe57a;margin-top:5px;}
+  .champion-word{font-size:clamp(25px,7vw,50px);font-weight:1000;line-height:1;letter-spacing:.1em;
+    background:linear-gradient(180deg,#fffbd3 8%,#ffd34a 52%,#f28a17 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 5px 22px rgba(255,189,38,.2);}
+  .confetti-piece{position:absolute;top:-12vh;width:10px;height:18px;border-radius:2px;opacity:.95;
+    animation:confettiFall var(--fall) linear var(--delay) infinite,confettiSpin .75s ease-in-out infinite alternate;}
+  @keyframes championCrownIn{from{opacity:0;transform:translateY(-28px) scale(.78)}to{opacity:1;transform:none}}
+  @keyframes confettiFall{to{transform:translate3d(var(--drift),118vh,0) rotate(850deg)}}
+  @keyframes confettiSpin{to{border-radius:50%;filter:brightness(1.25)}}
+  .classic-secret{position:fixed;inset:0;z-index:33;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(circle at 50% 42%,#244a72 0%,#081522 46%,#030812 100%);}
+  .classic-secret-card{position:relative;width:min(540px,94vw);height:min(650px,88vh);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:10px;text-align:center;}
+  .secret-label{font-size:12px;font-weight:900;letter-spacing:.28em;color:#d8f23a;animation:secretFade .6s .2s both;}
+  .secret-title{font-size:clamp(25px,7vw,46px);font-weight:1000;letter-spacing:.07em;animation:secretFade .6s 2.45s both;}
+  .secret-copy{font-size:clamp(12px,3.2vw,16px);color:#a9c9e9;letter-spacing:.12em;animation:secretFade .6s 2.75s both;}
+  .classic-reveal{position:relative;width:min(330px,78vw);height:min(360px,54vh);display:flex;align-items:center;justify-content:center;}
+  .classic-shell-half{position:absolute;top:12%;width:50%;height:76%;overflow:hidden;border:5px solid #d8f23a;
+    background:repeating-linear-gradient(0deg,#153657 0 13px,#1d4f7a 13px 26px);box-shadow:0 0 35px rgba(78,204,255,.3);z-index:2;}
+  .classic-shell-half::after{content:'< />';position:absolute;top:42%;font:1000 34px/1 ui-monospace,monospace;color:#d8f23a;}
+  .classic-shell-left{left:0;border-radius:180px 0 0 180px;transform-origin:right center;animation:openShellLeft .8s 1.35s cubic-bezier(.2,.8,.2,1) forwards;}
+  .classic-shell-left::after{right:18px;}
+  .classic-shell-right{right:0;border-radius:0 180px 180px 0;transform-origin:left center;animation:openShellRight .8s 1.35s cubic-bezier(.2,.8,.2,1) forwards;}
+  .classic-shell-right::after{left:18px;}
+  .pixel-dev{width:58%;height:auto;image-rendering:pixelated;filter:drop-shadow(0 16px 18px rgba(0,0,0,.45));
+    opacity:0;transform:translateY(28px) scale(.65);animation:devReveal .75s 1.85s cubic-bezier(.18,.9,.25,1.2) forwards;}
+  .secret-skip{position:absolute;right:8px;top:auto;bottom:8px;pointer-events:auto;}
+  @keyframes openShellLeft{to{transform:translateX(-76%) rotate(-17deg);opacity:.68}}
+  @keyframes openShellRight{to{transform:translateX(76%) rotate(17deg);opacity:.68}}
+  @keyframes devReveal{to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes secretFade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   .play-controls{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));
     transform:translateX(-50%);z-index:18;display:flex;flex-direction:column;gap:16px;align-items:center;
     justify-content:center;padding:12px;border-radius:20px;background:rgba(8,17,29,.72);
@@ -166,6 +204,16 @@
     .bracket{grid-template-columns:1fr;width:min(360px,94vw);}
     .tournament-overlay{overflow:auto;justify-content:flex-start;}
     .tournament-title{margin-top:10px;}
+    .champion-crown{padding:8px 15px 10px;}
+    .classic-secret-card{height:82vh;}
+    .secret-title{font-size:22px;letter-spacing:.035em;max-width:94vw;}
+    .secret-copy{font-size:12px;letter-spacing:.07em;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .confetti-piece{animation-duration:7s!important;}
+    .classic-shell-left{animation-delay:.15s;animation-duration:.01s;}
+    .classic-shell-right{animation-delay:.15s;animation-duration:.01s;}
+    .pixel-dev,.secret-title,.secret-copy{animation-delay:.25s;animation-duration:.01s;}
   }
   @media(max-height:600px) and (orientation:landscape){
     #characterSelect{gap:6px;padding:10px;}
@@ -320,6 +368,44 @@
   <video id="championVideo" playsinline muted preload="metadata" src="assets/girl-tournament-champion.mp4"></video>
   <button id="championVideoPlay" class="btn video-play hidden" type="button">PLAY VICTORY MOVIE</button>
   <button id="championVideoSkip" class="video-skip" type="button">SKIP</button>
+</div>
+
+<!-- 全キャラ共通のコード生成・優勝演出 -->
+<div id="championCelebration" class="champion-celebration hidden" aria-hidden="true">
+  <div class="champion-crown">
+    <div class="champion-trophy">🏆</div>
+    <div class="champion-kicker">JATA OPEN CUP · 優勝</div>
+    <div class="champion-word">CHAMPION</div>
+  </div>
+</div>
+
+<!-- CLASSIC限定：図形外装の中から開発者が現れる隠しエンディング -->
+<div id="classicSecretLayer" class="classic-secret hidden">
+  <div class="classic-secret-card">
+    <div class="secret-label">SECRET ENDING UNLOCKED</div>
+    <div class="classic-reveal" aria-label="The classic character opens and reveals its developer">
+      <div class="classic-shell-half classic-shell-left"></div>
+      <div class="classic-shell-half classic-shell-right"></div>
+      <svg class="pixel-dev" viewBox="0 0 160 220" role="img" aria-label="Pixel art developer">
+        <g shape-rendering="crispEdges">
+          <rect x="40" y="24" width="80" height="12" fill="#d6d9dd"/><rect x="28" y="36" width="104" height="20" fill="#eef0f2"/>
+          <rect x="40" y="52" width="80" height="64" fill="#e2ad79"/><rect x="32" y="64" width="8" height="32" fill="#e2ad79"/><rect x="120" y="64" width="8" height="32" fill="#e2ad79"/>
+          <rect x="48" y="52" width="16" height="12" fill="#70757d"/><rect x="96" y="52" width="16" height="12" fill="#70757d"/>
+          <rect x="52" y="72" width="12" height="12" fill="#13233a"/><rect x="96" y="72" width="12" height="12" fill="#13233a"/>
+          <rect x="68" y="90" width="24" height="8" fill="#9b5d3b"/><rect x="56" y="98" width="48" height="10" fill="#5a3828"/>
+          <rect x="68" y="108" width="24" height="8" fill="#f2d0ad"/>
+          <rect x="44" y="116" width="72" height="16" fill="#e2ad79"/><rect x="28" y="132" width="104" height="64" fill="#2d72c8"/>
+          <rect x="16" y="140" width="20" height="52" fill="#2d72c8"/><rect x="124" y="140" width="20" height="52" fill="#2d72c8"/>
+          <rect x="52" y="136" width="56" height="12" fill="#d8f23a"/><rect x="68" y="150" width="24" height="30" fill="#0c1a2b"/>
+          <rect x="36" y="196" width="36" height="20" fill="#162a42"/><rect x="88" y="196" width="36" height="20" fill="#162a42"/>
+          <rect x="20" y="184" width="16" height="12" fill="#e2ad79"/><rect x="124" y="184" width="16" height="12" fill="#e2ad79"/>
+        </g>
+      </svg>
+    </div>
+    <div class="secret-title">THE CODE WAS HUMAN.</div>
+    <div class="secret-copy">CLASSICの中の人、ついに優勝。</div>
+    <button id="classicSecretSkip" class="video-skip secret-skip" type="button">CONTINUE</button>
+  </div>
 </div>
 
 <!-- 勝敗 -->
@@ -657,6 +743,8 @@ let gameMode = 'exhibition';
 let selectionMode = 'exhibition';
 let resultAction = 'replay';
 let tournament = null;
+let championCelebrating = false;
+let classicSecretTimer = 0;
 const TOURNAMENT_SAVE_KEY = 'jata-open-tournament-v1';
 const TOURNAMENT_ROUND_NAMES = ['QUARTERFINAL','SEMIFINAL','FINAL'];
 const TOURNAMENT_CHAMPION_VIDEOS = {
@@ -985,7 +1073,7 @@ function flash(who){ flashFx.who=who; flashFx.t=0.22; }
 const AudioFX = (()=>{
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   let ctx=null, master=null, sfxBus=null, musicBus=null, crowdBus=null;
-  let noiseBuf=null, musicTimer=null, musicKind='', musicStep=0, unlocked=false;
+  let noiseBuf=null, musicTimer=null, musicKind='', musicStep=0, unlocked=false, championTimers=[];
   const titleNotes = [392,494,587,494,440,523,659,523];
   const victoryNotes = [523,659,784,1047,988,784,880,1047,1175,1319];
 
@@ -1066,6 +1154,8 @@ const AudioFX = (()=>{
 
   function stopMusic(){
     if(musicTimer) clearInterval(musicTimer);
+    championTimers.forEach(timer=>clearTimeout(timer));
+    championTimers=[];
     musicTimer = null;
     musicKind = '';
     musicStep = 0;
@@ -1106,11 +1196,21 @@ const AudioFX = (()=>{
     }
   }
 
+  function champion(){
+    startMusic('victory');
+    crowd('big');
+    championTimers.push(setTimeout(()=>crowd('big'),900));
+    championTimers.push(setTimeout(()=>crowd('big'),2100));
+    [523,659,784,1047].forEach((note,index)=>tone(note,.32,'triangle',.052,index*.12,sfxBus));
+    tone(1319,.65,'sine',.045,.48,sfxBus);
+  }
+
   return {
     unlock,
     startTitle(){ if(state === STATE.MENU) startMusic('title'); },
     stopMusic,
     victory(){ startMusic('victory'); crowd('big'); },
+    champion,
     button(){ tone(760,0.06,'triangle',0.025,0,sfxBus); tone(1040,0.05,'sine',0.014,0.035,sfxBus); },
     toss(){ tone(520,0.09,'sine',0.018,0,sfxBus,1.35); },
     serve(){ tone(160,0.08,'square',0.04,0,sfxBus,0.72); noise(0.08,0.035,1500,1.1,0,sfxBus); },
@@ -1223,6 +1323,8 @@ function returnToTennisHome(){
   document.getElementById('characterSelect').classList.add('hidden');
   document.getElementById('tournamentLayer').classList.add('hidden');
   document.getElementById('championVideoLayer').classList.add('hidden');
+  stopChampionCelebration();
+  closeClassicSecretEnding();
   document.getElementById('championVideo').pause();
   document.getElementById('menu').classList.remove('hidden');
   state=STATE.MENU;
@@ -2384,6 +2486,8 @@ function showTournamentBracket(){
 }
 
 function startTournamentSelection(){
+  stopChampionCelebration();
+  closeClassicSecretEnding();
   const saved=readTournamentSave();
   if(saved && ['playing','between'].includes(saved.status)
     && !window.confirm('Start a new tournament? Saved progress will be replaced.')) return;
@@ -2482,8 +2586,56 @@ function handleTournamentMatchOver(winner){
   tournament.champion=tournament.player;
   saveTournamentData();
   resultAction='new-tournament';
-  if(TOURNAMENT_CHAMPION_VIDEOS[tournament.player]) playChampionVideo();
+  startChampionCelebration();
+  if(tournament.player==='classic') playClassicSecretEnding();
+  else if(TOURNAMENT_CHAMPION_VIDEOS[tournament.player]) playChampionVideo();
   else showTournamentChampionResult();
+}
+
+function startChampionCelebration(){
+  const layer=document.getElementById('championCelebration');
+  layer.querySelectorAll('.confetti-piece').forEach(piece=>piece.remove());
+  const colors=['#d8f23a','#ffd34a','#ff6b6b','#5ee7ff','#9d7cff','#ffffff','#58e087'];
+  for(let i=0;i<72;i++){
+    const piece=document.createElement('i');
+    piece.className='confetti-piece';
+    piece.style.left=`${(i*37)%101}%`;
+    piece.style.background=colors[i%colors.length];
+    piece.style.setProperty('--fall',`${4.2+(i%17)*.13}s`);
+    piece.style.setProperty('--delay',`${-(i%23)*.21}s`);
+    piece.style.setProperty('--drift',`${((i*29)%180)-90}px`);
+    piece.style.width=`${7+(i%4)*2}px`;
+    piece.style.height=`${10+(i%5)*3}px`;
+    layer.appendChild(piece);
+  }
+  layer.classList.remove('hidden');
+  if(!championCelebrating){
+    championCelebrating=true;
+    AudioFX.champion();
+  }
+}
+
+function stopChampionCelebration(){
+  championCelebrating=false;
+  const layer=document.getElementById('championCelebration');
+  layer.classList.add('hidden');
+  layer.querySelectorAll('.confetti-piece').forEach(piece=>piece.remove());
+}
+
+function closeClassicSecretEnding(){
+  if(classicSecretTimer){ clearTimeout(classicSecretTimer); classicSecretTimer=0; }
+  document.getElementById('classicSecretLayer').classList.add('hidden');
+}
+
+function playClassicSecretEnding(){
+  document.getElementById('over').classList.add('hidden');
+  document.getElementById('tournamentLayer').classList.add('hidden');
+  const layer=document.getElementById('classicSecretLayer');
+  // Restart every CSS animation when the ending is replayed.
+  layer.classList.add('hidden');
+  void layer.offsetWidth;
+  layer.classList.remove('hidden');
+  classicSecretTimer=setTimeout(showTournamentChampionResult,6200);
 }
 
 function playChampionVideo(){
@@ -2506,12 +2658,13 @@ function playChampionVideo(){
 }
 
 function showTournamentChampionResult(){
+  closeClassicSecretEnding();
   const video=document.getElementById('championVideo');
   video.pause();
   document.getElementById('championVideoPlay').classList.add('hidden');
   document.getElementById('championVideoLayer').classList.add('hidden');
   showResultScreen('CHAMPION!', 'JATA OPEN CUP · 3 MATCHES UNDEFEATED',true,'NEW TOURNAMENT','TITLE');
-  AudioFX.victory();
+  if(!championCelebrating) startChampionCelebration();
 }
 
 function setSurface(key){
@@ -2645,6 +2798,7 @@ document.getElementById('championVideoPlay').addEventListener('click', ()=>{
     .catch(()=>{});
 });
 document.getElementById('championVideoSkip').addEventListener('click', showTournamentChampionResult);
+document.getElementById('classicSecretSkip').addEventListener('click', showTournamentChampionResult);
 
 setSurface('hard');
 updateTournamentResumeButton();
